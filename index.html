@@ -5,6 +5,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#eef1f2">
+       <link rel="manifest" href="/manifest.webmanifest">
+     <link rel="icon" type="image/png" href="/icons/icon-192.png">
+     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
   <title>Acervo do CIDJEI · seus filmes, catalogados</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1199,6 +1202,7 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
 </head>
 
 <body>
+       <script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}))</script>
   <header>
     <div class="wrap">
       <a class="brand" href="#"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor"

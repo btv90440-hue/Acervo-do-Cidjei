@@ -1077,7 +1077,7 @@ h1:after {
     const J = (k, d) => { try { return JSON.parse(L[k]) ?? d } catch { return d } };
     let lib = J('cine.lib', []), pos = J('cine.pos', {}), FILES = new Map(), view = [], gf = '', cur = null, urls = [], busy = false, tto, ls = 0;
     const themeSwitch = $('#theme-switch');
-    function setTheme(theme) { document.documentElement.dataset.theme = theme; L.setItem('cine.theme',theme); themeSwitch.setAttribute('aria-pressed',String(theme==='matrix'));document.querySelector('meta[name=theme-color]').content=theme==='matrix'?'#12161a':'#eef1f2';themeSwitch.setAttribute('aria-label',theme==='matrix'?'Ativar modo claro':'Ativar modo Tribunal');$('#theme-label').textContent=theme==='matrix'?'MODO CLARO':'MODO TRIBUNAL'; }
+    function setTheme(theme) { document.documentElement.dataset.theme = theme; L.setItem('cine.theme',theme); themeSwitch.setAttribute('aria-pressed',String(theme==='matrix'));document.querySelector('meta[name=theme-color]').content=theme==='matrix'?'#12161a':'#eef1f2';themeSwitch.setAttribute('aria-label',theme==='matrix'?'Ativar modo escuro':'Ativar modo claro');$('#theme-label').textContent=theme==='matrix'?'MODO CLARO':'MODO TRIBUNAL'; }
     themeSwitch.onclick=()=>setTheme(document.documentElement.dataset.theme==='matrix'?'light':'matrix');
     setTheme(L.getItem('cine.theme')==='matrix'?'matrix':'light');
     const ffQuote = n => '"'+n.replace(/"/g,'\\"')+'"';

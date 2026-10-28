@@ -1680,6 +1680,7 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     vd.onerror = async () => {
       if (cur?.source === 'drive' && vd.getAttribute('src') && driveMode === 'direct' && Date.now() < driveExp - 30000) {
         driveMode = 'proxy'; const t = vd.currentTime;
+        toast('Leitura direta do Drive indisponível. Usando a ponte do servidor, que é mais lenta.');
         try { await prepareDrivePlayback() } catch { driveMode = 'direct'; $('#pe').textContent = PE_DRIVE; $('#pe').hidden = false; $('#drive-renew').hidden = false; return }
         resumeAt = t > 1 ? t : null; vd.src = driveUrl(cur); spin(true); vd.play().catch(() => { }); return
       }
@@ -1727,7 +1728,7 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     handleDriveRedirect();
     render(); idAll();
   </script>
-  <script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}))</script>
+  <script>if('serviceWorker' in navigator)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});if(window.caches)caches.keys().then(ks=>ks.forEach(k=>caches.delete(k))).catch(()=>{})</script>
 </body>
 
 </html>

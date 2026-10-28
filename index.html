@@ -888,7 +888,14 @@ html[data-theme="matrix"] .pause-actions button+button{background:#1d1d1d;color:
 html[data-theme="matrix"] .pause-actions button:hover{box-shadow:0 0 22px #ffffff40}
 
 .pc{background:#161d24;border:1px solid #283440}.pc #pp{background:#d94141;color:#ffffff}
-html[data-theme="matrix"] .pc{background:#121212;border-color:#262626}.pc #pp{background:#ffffff;color:#000000}
+html[data-theme="matrix"] .pc{background:#121212;border-color:#262626}
+
+/* Correção do botão de play no modo escuro (La Haine): fundo escuro estruturado com ícone branco bem visível */
+html[data-theme="matrix"] .pc #pp {
+  background: #1d1d1d !important;
+  color: #ffffff !important;
+  border: 1px solid #3d3d3d !important;
+}
 
 #media-help{color:#fce4c2;background:#362819;padding:10px 16px;border-radius:8px;font:12px/1.5 var(--mono)}
 #media-help code{display:block;overflow-wrap:anywhere;user-select:all;margin-top:7px}
@@ -1022,7 +1029,7 @@ h1 {
           <path d="M8 3v18M16 3v18M3 8h5M3 16h5M16 8h5M16 16h5" />
         </svg>Acervo do Cidjei</a>
       <nav><a href="#">Início</a><a href="#lib">Biblioteca</a></nav>
-      <button class="theme-switch" id="theme-switch" type="button" aria-label="Ativar tema La Haine Escuro" aria-pressed="false"><span class="theme-symbol" aria-hidden="true">◐</span><span class="theme-label" id="theme-label">MODO ESCURO</span><span class="theme-track"><span class="theme-knob"></span></span></button>
+      <button class="theme-switch" id="theme-switch" type="button" aria-label="Ativar tema La Haine Escuro" aria-pressed="false"><span class="theme-symbol" aria-hidden="true">◐</span><span class="theme-label" id="theme-label">MODO LA HAINE</span><span class="theme-track"><span class="theme-knob"></span></span></button>
       <button class="pill me" id="add1"><i>+</i>Adicionar pasta</button>
       <button class="pill" id="drive1" type="button">☁ Drive</button>
       <button class="pill" id="key1">TMDB</button>
@@ -1119,7 +1126,7 @@ h1 {
       themeSwitch.setAttribute('aria-pressed',String(theme==='matrix'));
       document.querySelector('meta[name=theme-color]').content=theme==='matrix'?'#080808':'#eef1f2';
       themeSwitch.setAttribute('aria-label',theme==='matrix'?'Ativar modo claro':'Ativar modo escuro (La Haine)');
-      $('#theme-label').textContent=theme==='matrix'?'MODO LA HAINE':'MODO CLARO'; 
+      $('#theme-label').textContent=theme==='matrix'?'MODO ESCURO':'MODO CLARO'; 
     }
     themeSwitch.onclick=()=>setTheme(document.documentElement.dataset.theme==='matrix'?'light':'matrix');
     setTheme(L.getItem('cine.theme')==='matrix'?'matrix':'light');
@@ -1478,4 +1485,3 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
 </body>
 
 </html>
-```eof

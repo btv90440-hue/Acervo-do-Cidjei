@@ -1,2 +1,2 @@
 # Acervo-do-Cidjei
-Acervo de filmes para compartilhamento 🏴‍☠️
+Biblioteca e player de filmes armazenados localmente ou no drive.

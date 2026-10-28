@@ -1,0 +1,14 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "CJFilms",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "CJFilms",
+  "start_url": "/https://acervo-do-cidjei.vercel.app/",
+  "theme_color": "#ffffff",
+  "lang": "pt",
+  "description": "biblioteca de filmes",
+  "id": "CJF"
+}

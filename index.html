@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#eef1f2">
   <title>Acervo do CIDJEI · seus filmes, catalogados</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,80 +21,61 @@
       --line: #cfd8dc;
       --grn: #a82b2b; /* Vermelho Daniel (Anatomy of a Fall) */
       --grn-blue: #2b4c7e; /* Azul Tribunal / Gendarmeria */
-      --soft: #e2e8eb;
-      --glow: #a82b2b;
       --sans: 'Space Grotesk', system-ui, sans-serif;
       --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
       --display-font: Georgia, 'Times New Roman', serif;
       --timer-font: 'JetBrains Mono', monospace;
-      color-scheme: light;
+      color-scheme: light
     }
 
     * {
       box-sizing: border-box;
-      margin: 0;
+      margin: 0
     }
 
     [hidden] {
-      display: none !important;
-    }
-
-    html {
-      scroll-behavior: smooth;
+      display: none !important
     }
 
     body {
       background: var(--bg);
       color: var(--ink);
       font: 400 17px/1.5 var(--sans);
-      -webkit-font-smoothing: antialiased;
-      min-height: 100vh;
-      transition: background .45s, color .35s;
-    }
-
-    body:before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: -1;
-      background: radial-gradient(ellipse at 86% 4%, color-mix(in srgb, var(--glow) 10%, transparent), transparent 48%), linear-gradient(90deg, transparent 97%, color-mix(in srgb, var(--grn) 5%, transparent) 98%);
-      background-size: auto, 40px 40px;
+      -webkit-font-smoothing: antialiased
     }
 
     button,
     input,
     select {
       font: inherit;
-      color: inherit;
-      touch-action: manipulation;
+      color: inherit
     }
 
     button {
-      cursor: pointer;
+      cursor: pointer
     }
 
     :focus-visible {
       outline: 2px solid var(--ink);
-      outline-offset: 3px;
+      outline-offset: 3px
     }
 
     .lbl {
       font: 400 12px var(--timer-font);
       letter-spacing: .22em;
       text-transform: uppercase;
-      color: var(--mut);
+      color: var(--mut)
     }
 
     .sm {
       font: 400 12px/1.6 var(--mono);
-      color: var(--mut);
+      color: var(--mut)
     }
 
     .wrap {
       max-width: 1320px;
       margin: auto;
-      padding: 0 28px;
+      padding: 0 28px
     }
 
     header {
@@ -103,14 +84,14 @@
       z-index: 5;
       background: color-mix(in srgb, var(--bg) 92%, transparent);
       backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--line);
+      border-bottom: 1px solid var(--line)
     }
 
     header .wrap {
       display: flex;
       align-items: center;
       gap: 14px;
-      height: 94px;
+      height: 94px
     }
 
     .brand {
@@ -122,39 +103,28 @@
       letter-spacing: -.02em;
       margin-right: auto;
       color: inherit;
-      text-decoration: none;
+      text-decoration: none
     }
 
-    .brand svg {
-      color: var(--grn);
-    }
-
-    .brand:after {
-      content: "/ ANATOMIE D'UNE CHUTE";
-      font: 10px var(--mono);
-      letter-spacing: .14em;
-      color: var(--grn);
-      align-self: end;
-      margin-bottom: 4px;
+    .brand small {
+      font: 500 11px var(--mono);
+      letter-spacing: .2em;
+      color: var(--mut);
+      align-self: flex-end;
+      margin-bottom: 6px
     }
 
     nav {
       display: flex;
       gap: 6px;
-      margin-right: 12px;
+      margin-right: 12px
     }
 
     nav a {
-      color: var(--mut);
+      color: inherit;
       text-decoration: none;
       padding: 8px 12px;
-      font-size: 16px;
-      border-radius: 8px;
-    }
-
-    nav a:hover {
-      background: var(--soft);
-      color: var(--ink);
+      font-size: 16px
     }
 
     .pill {
@@ -168,30 +138,36 @@
       height: 48px;
       font-weight: 500;
       font-size: 16px;
-      white-space: nowrap;
+      white-space: nowrap
     }
 
     .pill.me {
-      padding: 0 22px 0 6px;
+      padding: 0 22px 0 6px
     }
 
     .pill i {
       width: 36px;
       height: 36px;
       border-radius: 6px;
-      background: var(--grn);
+      background: var(--ink);
       color: #fff;
       display: grid;
       place-items: center;
       font-style: normal;
-      font-size: 20px;
+      font-size: 20px
     }
 
     .pill.k,
     .btn.k {
       background: var(--grn);
       color: #fff;
-      border-color: var(--grn);
+      border-color: var(--grn)
+    }
+
+    .pill.big {
+      height: 60px;
+      padding: 0 34px;
+      font-size: 18px
     }
 
     .btn {
@@ -201,81 +177,50 @@
       font-weight: 500;
       border-radius: 8px;
       border: 1px solid var(--line);
-      background: var(--card);
+      background: var(--card)
     }
 
     .hero {
       display: grid;
-      grid-template-columns: 1.25fr .75fr;
+      grid-template-columns: 1.2fr 1fr;
       gap: 64px;
       align-items: center;
-      padding: 90px 0 92px;
-      position: relative;
-    }
-
-    .hero:before {
-      content: "DOSSIER FORENSE / VOL. 2023";
-      position: absolute;
-      top: 38px;
-      font: 11px var(--mono);
-      letter-spacing: .24em;
-      color: var(--grn);
+      padding: 84px 0 72px
     }
 
     h1 {
-      font-size: clamp(42px, 6.2vw, 72px);
-      line-height: 1.02;
-      letter-spacing: -.04em;
+      font-size: clamp(42px, 6vw, 76px);
+      line-height: 1.05;
+      letter-spacing: -.045em;
       font-weight: 700;
-      font-style: italic;
-      margin: 12px 0 28px;
-      max-width: 780px;
-    }
-
-    h1:after {
-      content: " ◆";
-      font-size: .4em;
-      color: var(--grn);
-      vertical-align: middle;
+      margin: 26px 0 30px
     }
 
     .intro {
-      font-size: 19px;
+      font-size: 21px;
       color: var(--mut);
-      max-width: 520px;
-      margin-bottom: 38px;
+      max-width: 600px;
+      margin-bottom: 38px
     }
 
     .acts {
       display: flex;
       gap: 16px;
-      flex-wrap: wrap;
+      flex-wrap: wrap
     }
 
     .card {
       background: var(--card);
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 12px
     }
 
     .stat {
-      padding: 34px 36px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 24px 60px #00000008;
-    }
-
-    .stat:before {
-      content: "◆ EVIDÊNCIAS NO ACERVO";
-      display: block;
-      font: 11px var(--mono);
-      color: var(--grn);
-      letter-spacing: .2em;
-      margin-bottom: 18px;
+      padding: 34px 36px
     }
 
     .stat .lbl {
-      margin-bottom: 12px;
+      margin-bottom: 12px
     }
 
     .stat p {
@@ -284,16 +229,11 @@
       align-items: center;
       padding: 18px 0;
       border-bottom: 1px solid var(--line);
-      font-size: 19px;
-    }
-
-    .stat p:last-of-type {
-      border-bottom: 0;
+      font-size: 19px
     }
 
     .stat b {
-      font: 500 24px var(--mono);
-      color: var(--grn);
+      font: 500 20px var(--mono)
     }
 
     .lnk {
@@ -304,36 +244,29 @@
       padding: 0;
       font: 400 14px var(--mono);
       letter-spacing: .04em;
-      color: var(--grn);
+      color: inherit;
       text-decoration: none;
-      cursor: pointer;
+      cursor: pointer
     }
 
     .stat .lnk {
       display: inline-block;
-      margin-top: 22px;
+      margin-top: 22px
     }
 
     h2.big {
-      font: 600 22px var(--sans);
-      letter-spacing: -.03em;
+      font-size: 17px;
+      letter-spacing: .16em;
       color: var(--ink);
-      margin-bottom: 25px;
-      scroll-margin-top: 110px;
-    }
-
-    h2.big:before {
-      content: "◆ ";
-      font: 12px var(--mono);
-      color: var(--grn);
-      letter-spacing: .14em;
+      margin-bottom: 22px;
+      scroll-margin-top: 110px
     }
 
     .tools {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
-      margin-bottom: 18px;
+      margin-bottom: 18px
     }
 
     .tools input,
@@ -343,28 +276,27 @@
       border: 1px solid var(--line);
       background: var(--card);
       padding: 0 22px;
-      outline: 0;
+      outline: 0
     }
 
     .tools input {
       flex: 1;
-      min-width: 220px;
+      min-width: 220px
     }
 
     .tools input:focus,
     .tools select:focus {
-      border-color: var(--grn);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--grn) 15%, transparent);
+      border-color: var(--grn)
     }
 
     .chips {
       display: flex;
       gap: 8px;
-      flex-wrap: wrap;
+      flex-wrap: wrap
     }
 
     #gc {
-      margin-bottom: 28px;
+      margin-bottom: 28px
     }
 
     .chip {
@@ -373,57 +305,58 @@
       height: 36px;
       padding: 0 16px;
       border-radius: 6px;
-      background: var(--soft);
-      font: 400 12px var(--mono);
+      background: color-mix(in srgb, var(--line) 40%, transparent);
+      font: 400 14px var(--mono);
       letter-spacing: .04em;
-      border: 1px solid transparent;
+      border: 1px solid transparent
     }
 
     .chip.g {
       background: var(--card);
-      border-color: var(--line);
-      color: var(--grn);
+      border-color: var(--grn);
+      color: var(--grn)
+    }
+
+    .chip.s {
+      height: 26px;
+      padding: 0 10px;
+      font-size: 12px
     }
 
     button.chip.on {
       background: var(--grn);
-      color: #fff;
+      color: #fff
     }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 19px;
-      padding-bottom: 90px;
+      gap: 22px;
+      padding-bottom: 90px
     }
 
     .mv {
       overflow: hidden;
       cursor: pointer;
-      border-radius: 8px;
-      box-shadow: 0 12px 32px #00000006;
-      border: 1px solid var(--line);
-      background: var(--card);
-      transition: transform .2s, border-color .2s, box-shadow .2s;
+      transition: transform .2s, border-color .2s
     }
 
     .mv:hover {
-      transform: translateY(-6px);
-      border-color: var(--grn);
-      box-shadow: 0 18px 36px color-mix(in srgb, var(--grn) 14%, transparent);
+      transform: translateY(-4px);
+      border-color: var(--grn)
     }
 
     .po {
       position: relative;
       aspect-ratio: 2/3;
-      background: var(--soft);
+      background: color-mix(in srgb, var(--line) 50%, transparent);
       display: grid;
       place-items: center;
       padding: 18px;
       text-align: center;
       font: 400 12px var(--mono);
       color: var(--mut);
-      word-break: break-word;
+      word-break: break-word
     }
 
     .po img {
@@ -431,42 +364,15 @@
       inset: 0;
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      transition: transform .65s cubic-bezier(.2,.8,.2,1), filter .4s;
-    }
-
-    .mv:hover img {
-      transform: scale(1.05);
-    }
-
-    .po:after {
-      content: "ABRIR FICHA  ↗";
-      position: absolute;
-      inset: auto 12px 12px;
-      background: color-mix(in srgb, var(--bg) 90%, transparent);
-      color: var(--grn);
-      padding: 10px 12px;
-      border-radius: 6px;
-      font: 600 11px var(--mono);
-      letter-spacing: .1em;
-      opacity: 0;
-      transform: translateY(8px);
-      transition: .3s;
-      backdrop-filter: blur(8px);
-    }
-
-    .mv:hover .po:after,
-    .mv:focus-visible .po:after {
-      opacity: 1;
-      transform: none;
+      object-fit: cover
     }
 
     .mb {
-      padding: 16px 18px 18px;
+      padding: 16px 18px 18px
     }
 
     .mb h3 {
-      font-size: 16px;
+      font-size: 18px;
       line-height: 1.2;
       letter-spacing: -.02em;
       font-weight: 600;
@@ -474,7 +380,7 @@
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
-      overflow: hidden;
+      overflow: hidden
     }
 
     .mb div {
@@ -483,7 +389,7 @@
       align-items: center;
       gap: 8px;
       font: 400 12px var(--mono);
-      color: var(--mut);
+      color: var(--mut)
     }
 
     .empty {
@@ -493,14 +399,14 @@
       justify-content: space-between;
       gap: 24px;
       flex-wrap: wrap;
-      padding: 32px;
+      padding: 32px
     }
 
     .empty h3 {
       font-size: 34px;
       letter-spacing: -.03em;
       margin: 14px 0 8px;
-      line-height: 1.1;
+      line-height: 1.1
     }
 
     dialog {
@@ -511,38 +417,32 @@
       width: min(980px, 94vw);
       max-height: 92vh;
       color: var(--ink);
-      box-shadow: 0 32px 100px #0009;
-      overflow: auto;
-      animation: dialogIn .38s cubic-bezier(.2,.8,.2,1);
-    }
-
-    @keyframes dialogIn {
-      from { opacity: 0; transform: translateY(22px) scale(.98); }
-      to { opacity: 1; transform: none; }
+      box-shadow: 0 30px 90px #0004;
+      overflow: auto
     }
 
     dialog::backdrop {
-      background: #0d131abc;
-      backdrop-filter: blur(13px);
+      background: #0d131a77;
+      backdrop-filter: blur(6px)
     }
 
     #cfg {
-      width: min(560px, 94vw);
+      width: min(560px, 94vw)
     }
 
     #cfg .in {
-      padding: 36px;
+      padding: 36px
     }
 
     #cfg h2 {
       font-size: 34px;
       letter-spacing: -.03em;
-      margin: 12px 0;
+      margin: 12px 0
     }
 
     #cfg p {
       color: var(--mut);
-      margin-bottom: 18px;
+      margin-bottom: 18px
     }
 
     #cfg input {
@@ -552,22 +452,20 @@
       border-radius: 8px;
       padding: 0 22px;
       margin-bottom: 18px;
-      font: 400 14px var(--mono);
-      background: var(--bg);
-      color: var(--ink);
+      font: 400 14px var(--mono)
     }
 
     .bd {
       height: 280px;
       background: color-mix(in srgb, var(--line) 50%, transparent) center/cover;
-      position: relative;
+      position: relative
     }
 
     .bd:after {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(transparent 30%, var(--card));
+      background: linear-gradient(transparent 35%, var(--card))
     }
 
     .dh {
@@ -577,7 +475,7 @@
       padding: 0 44px 44px;
       margin-top: -120px;
       position: relative;
-      z-index: 1;
+      z-index: 1
     }
 
     .dh img {
@@ -586,25 +484,24 @@
       object-fit: cover;
       border-radius: 10px;
       border: 1px solid var(--line);
-      background: var(--soft);
+      background: color-mix(in srgb, var(--line) 50%, transparent)
     }
 
     .dh h2 {
       font-size: clamp(32px, 4.4vw, 54px);
       line-height: 1;
       letter-spacing: -.04em;
-      margin: 12px 0 0;
-      font-family: var(--display-font);
+      margin: 12px 0 0
     }
 
     .dh .chips {
-      margin: 18px 0 0;
+      margin: 18px 0 0
     }
 
     .tag {
       color: var(--mut);
       font-style: italic;
-      margin-top: 12px;
+      margin-top: 12px
     }
 
     .ov {
@@ -612,19 +509,19 @@
       line-height: 1.6;
       color: var(--ink);
       margin: 18px 0 24px;
-      max-width: 78ch;
+      max-width: 70ch
     }
 
     .dh h4 {
       margin: 34px 0 14px;
-      font-weight: 400;
+      font-weight: 400
     }
 
     .cast {
       display: flex;
       gap: 18px;
       overflow-x: auto;
-      padding-bottom: 8px;
+      padding-bottom: 8px
     }
 
     .cm {
@@ -632,7 +529,7 @@
       flex: none;
       text-align: center;
       font-size: 13px;
-      line-height: 1.25;
+      line-height: 1.25
     }
 
     .cm img,
@@ -642,15 +539,15 @@
       height: 72px;
       border-radius: 50%;
       object-fit: cover;
-      background: var(--soft);
-      margin: 0 auto 8px;
+      background: color-mix(in srgb, var(--line) 50%, transparent);
+      margin: 0 auto 8px
     }
 
     .cm small {
       display: block;
       font: 400 11px var(--mono);
       color: var(--mut);
-      margin-top: 3px;
+      margin-top: 3px
     }
 
     .fx p {
@@ -659,333 +556,67 @@
       gap: 24px;
       padding: 14px 0;
       border-bottom: 1px solid var(--line);
-      font-size: 16px;
+      font-size: 16px
     }
 
     .fx b {
       font: 500 13px var(--mono);
-      text-align: right;
+      text-align: right
     }
 
-    /* Tema Matrix / La Haine (Modo Escuro) */
-    html[data-theme="matrix"] {
-      --bg: #080808;
-      --card: #121212;
-      --ink: #f0f0f0;
-      --mut: #8c8c8c;
-      --line: #262626;
-      --grn: #ffffff;
-      --soft: #1d1d1d;
-      --glow: #ffffff;
-      --display-font: 'Syne', sans-serif;
-      --timer-font: 'Share Tech Mono', monospace;
-      color-scheme: dark;
-    }
-
-    html[data-theme="matrix"] body:before {
-      background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 80%), repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 2px);
-      background-size: 100% 100%, 100% 4px;
-    }
-
-    html[data-theme="matrix"] .brand:after {
-      content: "/ LA HAINE (10:00:00)";
-      font-family: var(--timer-font);
-      letter-spacing: .18em;
-      color: var(--ink);
-    }
-
-    html[data-theme="matrix"] .hero:before {
-      content: "JUSQU'ICI TOUT VA BIEN...";
-      font-family: var(--timer-font);
-      letter-spacing: .28em;
-      color: var(--mut);
-    }
-
-    html[data-theme="matrix"] h1 {
-      font-family: var(--display-font);
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: -.02em;
-      font-style: normal;
-      line-height: 1.05;
-    }
-
-    html[data-theme="matrix"] h1:after {
-      content: " [1995]";
-      font-family: var(--timer-font);
-      font-size: .25em;
-      color: var(--ink);
-      vertical-align: super;
-    }
-
-    html[data-theme="matrix"] .stat:before {
-      content: "10:00:00 ◆ HORÁRIO DE CRÓNICA";
-      font-family: var(--timer-font);
-      color: var(--ink);
-    }
-
-    html[data-theme="matrix"] .stat b {
-      color: var(--ink);
-      font-family: var(--timer-font);
-    }
-
-    html[data-theme="matrix"] .pill.k,
-    html[data-theme="matrix"] .btn.k,
-    html[data-theme="matrix"] button.chip.on {
-      background: #ffffff !important;
-      border-color: #ffffff !important;
-      color: #000000 !important;
-      font-weight: 700;
-    }
-
-    html[data-theme="matrix"] .pill i {
-      background: #ffffff;
-      color: #000000;
-      font-weight: bold;
-    }
-
-    html[data-theme="matrix"] .chip.g,
-    html[data-theme="matrix"] .lnk {
-      color: var(--ink);
-      border-color: var(--ink);
-    }
-
-    html[data-theme="matrix"] dialog::backdrop {
-      background: #000000cc;
-      backdrop-filter: blur(16px);
-    }
-
-    /* Switch de Tema */
-    .theme-switch {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--card);
-      padding: 7px 11px 7px 15px;
-      font: 11px var(--mono);
-      letter-spacing: .07em;
-      white-space: nowrap;
-    }
-
-    html[data-theme="matrix"] .theme-switch {
-      font-family: var(--timer-font);
-    }
-
-    .theme-track {
-      width: 40px;
-      height: 23px;
-      background: var(--soft);
-      border: 1px solid var(--line);
-      border-radius: 4px;
-      padding: 3px;
-      display: flex;
-      align-items: center;
-    }
-
-    .theme-knob {
-      width: 15px;
-      height: 15px;
-      border-radius: 2px;
-      background: var(--grn);
-      transition: transform .36s cubic-bezier(.2,1.6,.3,1);
-    }
-
-    [data-theme="matrix"] .theme-knob {
-      transform: translateX(17px);
-      background: #ffffff;
-    }
-
-    /* Player e Video */
     #pl {
       position: fixed;
       inset: 0;
       z-index: 50;
-      background: #0b0f14;
-      color: #eaeff3;
+      background: #0f141a;
+      color: #fff;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      padding: 14px 22px;
-      height: 100dvh;
-      min-height: 0;
-      overflow: hidden;
-    }
-
-    html[data-theme="matrix"] #pl {
-      background: #050505;
-      color: #f0f0f0;
+      gap: 16px;
+      padding: 22px 28px
     }
 
     .pt {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 20px;
+      gap: 20px
     }
 
     .pt b {
       font-size: 22px;
       font-weight: 600;
-      letter-spacing: -.02em;
+      letter-spacing: -.02em
     }
 
     .pill.ghost {
       background: none;
       color: #fff;
-      border-color: #ffffff40;
-    }
-
-    #stage {
-      flex: 1;
-      min-height: 0;
-      position: relative;
-      display: flex;
-      overflow: hidden;
-      border-radius: 12px;
-      background: black;
+      border-color: #ffffff40
     }
 
     #vd {
       flex: 1;
       min-height: 0;
       width: 100%;
-      height: 100%;
-      border-radius: 12px;
-      object-fit: contain;
+      background: #000;
+      border-radius: 12px
     }
 
-    #pause-info {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      overflow: auto;
-      padding: clamp(20px, 6vw, 85px);
-      background: linear-gradient(90deg, #0a0f14f2 0%, #111922de 45%, #0007 78%, #0004 100%);
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transform: scale(1.015);
-      transition: opacity .35s, visibility .35s, transform .45s;
-    }
-
-    html[data-theme="matrix"] #pause-info {
-      background: linear-gradient(90deg, #000000f5 0%, #111111ee 50%, #00000099 100%);
-    }
-
-    #stage.is-paused #pause-info {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-      transform: none;
-    }
-
-    .pause-panel {
-      max-width: 620px;
-      animation: dialogIn .4s both;
-    }
-
-    .pause-overline {
-      font: 11px var(--mono);
-      color: #f28b8b;
-      letter-spacing: .2em;
-    }
-
-    html[data-theme="matrix"] .pause-overline {
-      font-family: var(--timer-font);
-      color: #ffffff;
-      letter-spacing: .25em;
-    }
-
-    .pause-panel h2 {
-      font-size: clamp(32px, 4.8vw, 72px);
-      line-height: 1.02;
-      letter-spacing: -.055em;
-      margin: 17px 0;
-      font-family: var(--display-font);
-      font-style: italic;
-    }
-
-    html[data-theme="matrix"] .pause-panel h2 {
-      font-style: normal;
-      text-transform: uppercase;
-    }
-
-    .pause-meta {
-      display: block;
-      color: #b0c4de;
-      font: 12px var(--mono);
-    }
-
-    .pause-meta::first-letter {
-      color: #ff7575;
-    }
-
-    html[data-theme="matrix"] .pause-meta::first-letter {
-      color: #ffffff;
-    }
-
-    .pause-panel p {
-      line-height: 1.65;
-      color: #c8d8cf;
-      margin: 20px 0;
-      max-width: 57ch;
-      font-size: clamp(13px, 1.35vw, 17px);
-    }
-
-    .pause-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .pause-actions button {
-      border: 1px solid var(--grn);
-      padding: 13px 22px;
-      border-radius: 6px;
-      background: var(--grn);
-      color: #ffffff;
-      font: 600 13px var(--sans);
-      cursor: pointer;
-      transition: .25s;
-    }
-
-    html[data-theme="matrix"] .pause-actions button {
-      background: #ffffff;
-      color: #000000;
-      border-color: #ffffff;
-      font-weight: 700;
-    }
-
-    .pause-actions button+button {
-      background: #222c36;
-      color: #eee;
-      border-color: #435463;
-    }
-
-    html[data-theme="matrix"] .pause-actions button+button {
-      background: #1d1d1d;
-      color: #ffffff;
-      border-color: #333333;
+    #pe {
+      color: #ffb4a8;
+      font: 13px/1.6 var(--mono);
+      text-align: center
     }
 
     .pc {
       display: flex;
       align-items: center;
       gap: 14px;
-      background: #182028;
-      border: 1px solid #313e4b;
+      background: #ffffff14;
       border-radius: 8px;
       padding: 10px 16px;
-      font: 400 13px var(--mono);
-    }
-
-    html[data-theme="matrix"] .pc {
-      background: #121212;
-      border-color: #262626;
+      font: 400 13px var(--mono)
     }
 
     .pc button {
@@ -997,43 +628,36 @@
       min-width: 48px;
       padding: 0 14px;
       font: 500 12px var(--mono);
-      letter-spacing: .08em;
+      letter-spacing: .08em
     }
 
     .pc #pp {
       width: 48px;
       height: 48px;
-      background: var(--grn);
-      color: #ffffff;
+      background: #fff;
+      color: var(--ink);
       border: 0;
       padding: 0;
       display: grid;
-      place-items: center;
-    }
-
-    html[data-theme="matrix"] .pc #pp {
-      background: #1d1d1d !important;
-      color: #ffffff !important;
-      border: 1px solid #3d3d3d !important;
+      place-items: center
     }
 
     #sk {
       flex: 1;
-      min-width: 60px;
+      min-width: 60px
     }
 
     #vo {
-      width: 84px;
+      width: 84px
     }
 
     input[type=range] {
-      accent-color: var(--grn);
+      accent-color: #fff
     }
 
-    #pe {
-      color: #f28b8b;
-      font: 13px/1.6 var(--mono);
-      text-align: center;
+    video::cue {
+      font: 600 22px var(--sans);
+      background: #000b
     }
 
     #tt {
@@ -1041,397 +665,371 @@
       margin: 0;
       transform: translateX(-50%);
       background: var(--ink);
-      color: var(--bg);
+      color: #fff;
       border: 0;
       padding: 14px 24px;
       border-radius: 8px;
       font: 13px var(--mono);
-      max-width: 90vw;
+      max-width: 90vw
     }
 
-    #media-help {
-      color: #fce4c2;
-      background: #362819;
-      padding: 10px 16px;
-      border-radius: 8px;
-      font: 12px/1.5 var(--mono);
-    }
+    @media(max-width:860px) {
+      .hero {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        padding: 48px 0
+      }
 
-    #media-help code {
-      display: block;
-      overflow-wrap: anywhere;
-      user-select: all;
-      margin-top: 7px;
-    }
-
-    #media-help button {
-      padding: 7px 12px;
-      border: 1px solid currentColor;
-      background: transparent;
-      color: inherit;
-      border-radius: 6px;
-      margin-top: 7px;
-      cursor: pointer;
-    }
-
-    /* ==========================================================================
-       ADAPTAÇÕES DE ERGONOMIA E LAYOUT MÓVEL — MODO CLARO & ESCURO EM SMARTPHONES
-       ========================================================================== */
-    @media (max-width: 680px) {
-      button, input, select {
-        min-height: 44px;
-        font-size: 16px !important;
+      nav {
+        display: none
       }
 
       header .wrap {
-        height: 64px;
-        padding: 0 14px;
-        gap: 10px;
+        height: 76px
       }
 
-      #add1, #drive1, #key1 {
-        display: none;
+      .btn {
+        height: 60px;
+        padding: 0 30px;
+        font-size: 17px
       }
 
-      .brand {
-        font-size: 17px;
-        gap: 10px;
-        white-space: nowrap;
-        min-width: 0;
-        flex-shrink: 1;
+      .dh {
+        grid-template-columns: 1fr;
+        gap: 0;
+        padding: 0 24px 32px;
+        margin-top: -80px
       }
 
-      .brand svg {
-        width: 30px;
-        height: 30px;
-        flex: none;
+      .dh img {
+        width: 140px;
+        margin-bottom: 18px
+      }
+    }
+
+    @media(max-width:700px) {
+      .pc {
+        flex-wrap: wrap;
+        border-radius: 12px
       }
 
-      .brand:after {
-        display: none;
-      }
-
-      .theme-switch {
-        height: 44px;
-        min-width: 64px;
-        padding: 0 9px;
-        margin-left: auto;
-        justify-content: center;
-      }
-
-      .theme-track {
-        width: 46px;
-        height: 26px;
-      }
-
-      .theme-knob {
-        width: 18px;
-        height: 18px;
-      }
-
-      [data-theme="matrix"] .theme-knob {
-        transform: translateX(20px);
-      }
-
-      .hero {
-        padding: 32px 0 28px;
-        gap: 24px;
-      }
-
-      h1 {
-        font-size: clamp(36px, 10vw, 58px) !important;
-        line-height: 1.08;
-        margin: 12px 0 16px;
-      }
-
-      .intro {
-        font-size: 16px;
-        line-height: 1.45;
-        margin-bottom: 24px;
-      }
-
-      .hero .acts {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-
-      .hero .acts .btn {
-        width: 100%;
-        height: 52px;
-        font-size: 15px;
-        padding: 0 12px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-      }
-
-      .hero .acts .btn.k {
-        grid-column: 1 / -1;
-      }
-
-      .stat {
-        padding: 20px;
-      }
-
-      .stat p {
-        padding: 12px 0;
-        font-size: 16px;
-      }
-
-      .stat b {
-        font-size: 18px;
-      }
-
-      .tools {
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .tools input,
-      .tools select {
-        width: 100%;
-        height: 48px;
-      }
-
-      .grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 12px !important;
-        padding-bottom: 48px;
-      }
-
-      .mb {
-        padding: 10px 12px 12px;
-      }
-
-      .mb h3 {
-        font-size: 14px;
-        line-height: 1.25;
-        margin-bottom: 6px;
-      }
-
-      .mb div {
-        font-size: 11px;
-      }
-
-      dialog#det {
-        width: 100vw;
-        height: 92dvh;
-        max-height: 92dvh;
-        border-radius: 20px 20px 0 0;
-        margin-top: auto;
-        margin-bottom: 0;
-      }
-
-      #det .bd {
-        height: 200px;
-      }
-
-      #det .dh {
-        grid-template-columns: 110px 1fr !important;
-        gap: 16px !important;
-        padding: 0 18px 32px !important;
-        margin-top: -60px !important;
-      }
-
-      #det .dh img {
-        width: 110px !important;
-        border-radius: 8px;
-      }
-
-      #det .dh h2 {
-        font-size: 24px !important;
-        line-height: 1.1;
-      }
-
-      #det .ov {
-        font-size: 15px;
-        line-height: 1.5;
-        margin: 14px 0;
-      }
-
-      #det .acts .btn {
-        width: 100%;
-        height: 52px;
-        font-size: 16px;
+      #vo {
+        display: none
       }
 
       #pl {
-        padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
-      }
-
-      .pt b {
-        font-size: 16px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 180px;
-      }
-
-      .pc {
-        padding: 8px 12px;
-        gap: 8px;
-      }
-
-      #pe {
-        font-size: 11px;
+        padding: 14px
       }
     }
 
-    @media (max-width: 570px) {
-      .brand {
-        font-size: 0;
-      }
-      .brand svg {
-        width: 32px;
-      }
-      header .wrap {
-        padding: 0 14px;
-      }
-      .theme-switch {
-        padding: 7px;
-      }
-      .theme-switch .theme-symbol {
-        display: none;
-      }
-      .wrap {
-        padding: 0 18px;
-      }
-      .pause-panel p {
-        display: -webkit-box;
-        -webkit-line-clamp: 4;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-      #pause-info {
-        padding: 20px;
-      }
-      .pause-panel h2 {
-        font-size: 31px;
-      }
-      .pause-actions button {
-        padding: 10px 14px;
+    @media(prefers-reduced-motion:reduce) {
+      * {
+        transition: none !important
       }
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      *, *:before, *:after {
-        animation: none !important;
-        transition: none !important;
-        scroll-behavior: auto !important;
-      }
-    }
+/* CINEMA OS — estática alpina & forense baseada em ANATOMY OF A FALL (2023) - MODO CLARO */
+:root { 
+  --bg: #eef1f2; 
+  --card: #f8fafb; 
+  --ink: #182026; 
+  --mut: #596a75; 
+  --line: #cfd8dc; 
+  --grn: #a82b2b; 
+  --soft: #e2e8eb; 
+  --glow: #a82b2b; 
+  --display-font: Georgia, 'Times New Roman', serif;
+  --timer-font: 'JetBrains Mono', monospace;
+  color-scheme: light 
+}
 
-    #det {
-      width: 100vw;
-      max-width: none;
-      height: 100dvh;
-      max-height: none;
-      margin: 0;
-      border-radius: 0;
-      overscroll-behavior: contain;
-    }
+/* ==========================================================================
+   TEMA MODO ESCURO — LA HAINE (1995) / MATHIEU KASSOVITZ
+   Brutalismo P&B, grão cinematográfico, relógio regressivo e estética banlieue
+   ========================================================================== */
+html[data-theme="matrix"] {
+  --bg: #080808;
+  --card: #121212;
+  --ink: #f0f0f0;
+  --mut: #8c8c8c;
+  --line: #262626;
+  --grn: #ffffff;
+  --soft: #1d1d1d;
+  --glow: #ffffff;
+  --display-font: 'Syne', sans-serif;
+  --timer-font: 'Share Tech Mono', monospace;
+  color-scheme: dark;
+}
 
-    #det .detail-top {
-      position: sticky;
-      top: 0;
-      z-index: 5;
-      display: flex;
-      justify-content: flex-end;
-      padding: 14px 22px;
-      margin-bottom: -78px;
-      pointer-events: none;
-    }
+html {scroll-behavior:smooth} 
+body {background:var(--bg);color:var(--ink);min-height:100vh;transition:background .45s,color .35s}
+body:before {content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(ellipse at 86% 4%,color-mix(in srgb,var(--glow) 10%,transparent),transparent 48%),linear-gradient(90deg,transparent 97%,color-mix(in srgb,var(--grn) 5%,transparent) 98%);background-size:auto,40px 40px}
 
-    #det .detail-top button {
-      pointer-events: auto;
-      box-shadow: 0 3px 18px #0007;
-    }
+/* Granulação no Modo Escuro */
+html[data-theme="matrix"] body:before {
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 80%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 2px);
+  background-size: 100% 100%, 100% 4px;
+}
 
-    /* Player Tela Cheia */
-    #pl:fullscreen {
-      width: 100vw;
-      height: 100dvh;
-      padding: 0;
-      gap: 0;
-      border-radius: 0;
-      background: #000;
-      position: relative;
-    }
+header {background:color-mix(in srgb,var(--bg) 92%,transparent);border-color:var(--line);backdrop-filter:blur(22px)} 
+header .wrap{height:82px}
+.brand{font-size:19px;letter-spacing:-.05em}.brand svg{color:var(--grn)}.brand:after{content:"/ ANATOMIE D'UNE CHUTE";font:10px var(--mono);letter-spacing:.14em;color:var(--grn);align-self:end;margin-bottom:4px} 
+html[data-theme="matrix"] .brand:after{content:"/ LA HAINE (10:00:00)";font-family:var(--timer-font);letter-spacing:.18em;color:var(--ink)}
 
-    #pl:fullscreen #stage,
-    #pl:fullscreen #stage #vd {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border-radius: 0;
-    }
+nav a{font-size:14px;color:var(--mut);border-radius:8px} nav a:hover{background:var(--soft);color:var(--ink)}
 
-    #pl:fullscreen .pt,
-    #pl:fullscreen .pc {
-      position: absolute;
-      z-index: 12;
-      left: 0;
-      right: 0;
-      border: 0;
-      border-radius: 0;
-      transition: opacity .3s ease, transform .3s ease, visibility .3s;
-    }
+.hero{grid-template-columns:1.25fr .75fr;padding:90px 0 92px;position:relative}
+.hero:before{content:"DOSSIER FORENSE / VOL. 2023";position:absolute;top:38px;font:11px var(--mono);letter-spacing:.24em;color:var(--grn)}
+html[data-theme="matrix"] .hero:before{content:"JUSQU'ICI TOUT VA BIEN...";font-family:var(--timer-font);letter-spacing:.28em;color:var(--mut)}
 
-    #pl:fullscreen .pt {
-      top: 0;
-      padding: 24px max(24px, env(safe-area-inset-right)) 55px max(24px, env(safe-area-inset-left));
-      background: linear-gradient(#000c, transparent);
-    }
+h1{font-size:clamp(42px, 6.2vw, 72px);letter-spacing:-.04em;margin:12px 0 28px;line-height:1.02;max-width:780px}
+h1:after{content:" ◆";font-size:.4em;color:var(--grn);vertical-align:middle}
+html[data-theme="matrix"] h1{font-family:var(--display-font);font-weight:800;text-transform:uppercase;letter-spacing:-.02em;font-style:normal;line-height:1.05}
+html[data-theme="matrix"] h1:after{content:" [1995]";font-family:var(--timer-font);font-size:.25em;color:var(--ink);vertical-align:super}
 
-    #pl:fullscreen .pc {
-      bottom: 0;
-      margin: 0;
-      padding: 44px max(24px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
-      background: linear-gradient(transparent, #000e);
-      flex-wrap: nowrap;
-    }
+.intro,.ov{color:var(--mut)}.intro{font-size:19px;max-width:520px}.lbl{color:var(--mut)} 
+.stat{position:relative;overflow:hidden;box-shadow:0 24px 60px #00000008}
+.stat:before{content:"◆ ANÁLISE DE EVIDÊNCIAS";display:block;font:11px var(--mono);color:var(--grn);letter-spacing:.2em;margin-bottom:18px}
+html[data-theme="matrix"] .stat:before{content:"10:00:00 ◆ HORÁRIO DE CRÓNICA";font-family:var(--timer-font);color:var(--ink)}
 
-    #pl:fullscreen.controls-hidden {
-      cursor: none;
-    }
+.stat p:last-of-type{border-bottom:0}.stat b{color:var(--grn);font-size:24px}
+html[data-theme="matrix"] .stat b{color:var(--ink);font-family:var(--timer-font)}
 
-    #pl:fullscreen.controls-hidden .pt {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transform: translateY(-18px);
-    }
+.card,.pill,.btn,.tools input,.tools select,.chip,dialog{background:var(--card);border-color:var(--line);color:var(--ink)}
+.pill.k,.btn.k,button.chip.on{background:var(--grn);border-color:var(--grn);color:#fff}
+html[data-theme="matrix"] .pill.k,
+html[data-theme="matrix"] .btn.k,
+html[data-theme="matrix"] button.chip.on {
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+  color: #000000 !important;
+  font-weight: 700;
+}
 
-    #pl:fullscreen.controls-hidden .pc {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transform: translateY(18px);
-    }
+.pill i{background:var(--grn);color:#fff}.chip{background:var(--soft);font-size:12px}
+html[data-theme="matrix"] .pill i{background:#ffffff;color:#000000;font-weight:bold}
+
+.chip.g{background:var(--soft);color:var(--grn);border-color:var(--line)}.lnk{color:var(--grn)}
+html[data-theme="matrix"] .chip.g{color:var(--ink);border-color:var(--ink)}
+html[data-theme="matrix"] .lnk{color:var(--ink)}
+
+.tools input,.tools select{background:var(--card);outline:0}
+.tools input:focus,.tools select:focus{border-color:var(--grn);box-shadow:0 0 0 3px color-mix(in srgb,var(--grn) 15%,transparent)}
+.po,.cm i,.dh img{background:var(--soft)}
+.mv{border-radius:12px;box-shadow:0 12px 32px #00000006}
+.mv:hover{transform:translateY(-6px);border-color:var(--grn);box-shadow:0 18px 36px color-mix(in srgb,var(--grn) 14%,transparent)}
+.mv .po img{transition:transform .65s cubic-bezier(.2,.8,.2,1),filter .4s}
+.mv:hover img{transform:scale(1.05)}
+.mv .po:after{content:"ABRIR FICHA  ↗";position:absolute;inset:auto 12px 12px;background:color-mix(in srgb,var(--bg) 90%,transparent);color:var(--grn);padding:10px 12px;border-radius:6px;font:600 11px var(--mono);letter-spacing:.1em;opacity:0;transform:translateY(8px);transition:.3s;backdrop-filter:blur(8px)}
+html[data-theme="matrix"] .mv .po:after{color:var(--ink);font-family:var(--timer-font);border:1px solid var(--line)}
+
+.mv:hover .po:after,.mv:focus-visible .po:after{opacity:1;transform:none}
+.mb h3{font-size:16px}.grid{gap:19px}.big#lib{font:600 22px var(--sans);letter-spacing:-.03em;margin-bottom:25px}
+.big#lib:before{content:"◆ ";font:12px var(--mono);color:var(--grn);letter-spacing:.14em}
+html[data-theme="matrix"] .big#lib{font-family:var(--display-font);text-transform:uppercase;letter-spacing:0}
+html[data-theme="matrix"] .big#lib:before{content:"10:00:00 ";font-family:var(--timer-font);color:var(--mut)}
+
+.pill,.btn,.chip,nav a,.lnk,.pc button,.theme-switch{transition:background .28s,color .28s,border-color .28s,box-shadow .28s,transform .28s}
+.pill:hover,.btn:hover,.pc button:hover{transform:translateY(-2px);box-shadow:0 7px 22px color-mix(in srgb,var(--grn) 20%,transparent);border-color:var(--grn)}
+button:active,.mv:active{transform:scale(.97)}
+.chip:hover{border-color:var(--grn);color:var(--grn)}
+dialog{box-shadow:0 32px 100px #0009;animation:dialogIn .38s cubic-bezier(.2,.8,.2,1)}
+@keyframes dialogIn{from{opacity:0;transform:translateY(22px) scale(.98)}to{opacity:1;transform:none}}
+dialog::backdrop{background:#0d131abc;backdrop-filter:blur(13px)}
+html[data-theme="matrix"] dialog::backdrop{background:#000000cc;backdrop-filter:blur(16px)}
+
+.bd:after{background:linear-gradient(transparent 30%,var(--card))}.tag{color:var(--mut)}
+
+#det{width:100vw;max-width:none;height:100dvh;max-height:none;margin:0;border-radius:0;overscroll-behavior:contain}
+#det .bd{height:clamp(260px,40vh,550px)}
+#det .dh{grid-template-columns:minmax(150px,220px) minmax(0,1fr);max-width:1350px;margin-left:auto;margin-right:auto;gap:38px}
+#det .dh img{width:100%;height:auto}#det .dh>div{min-width:0}#det .ov{max-width:78ch}
+#det .detail-top{position:sticky;top:0;z-index:5;display:flex;justify-content:flex-end;padding:14px 22px;margin-bottom:-78px;pointer-events:none}
+#det .detail-top button{pointer-events:auto;box-shadow:0 3px 18px #0007}
+
+.theme-switch{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:7px 11px 7px 15px;font:11px var(--mono);letter-spacing:.07em;white-space:nowrap}
+html[data-theme="matrix"] .theme-switch{font-family:var(--timer-font)}
+
+.theme-track{width:40px;height:23px;background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:3px;display:flex;align-items:center}
+.theme-knob{width:15px;height:15px;border-radius:3px;background:var(--grn);transition:transform .36s cubic-bezier(.2,1.6,.3,1)}
+[data-theme="matrix"] .theme-knob{transform:translateX(17px);background:#ffffff}
+
+#pl{background:#0b0f14;color:#eaeff3;gap:10px;padding:14px 22px}
+html[data-theme="matrix"] #pl{background:#050505;color:#f0f0f0}
+
+#vd{border-radius:12px}
+#stage{flex:1;min-height:0;position:relative;display:flex;overflow:hidden;border-radius:12px;background:black}
+#stage #vd{flex:1;min-height:0;width:100%;height:100%;border-radius:12px;object-fit:contain}
+#pause-info{position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-start;overflow:auto;padding:clamp(20px,6vw,85px);background:linear-gradient(90deg,#0a0f14f2 0%,#111922de 45%,#0007 78%,#0004 100%);opacity:0;visibility:hidden;pointer-events:none;transform:scale(1.015);transition:opacity .35s,visibility .35s,transform .45s}
+html[data-theme="matrix"] #pause-info{background:linear-gradient(90deg,#000000f5 0%,#111111ee 50%,#00000099 100%)}
+
+#stage.is-paused #pause-info{opacity:1;visibility:visible;pointer-events:auto;transform:none}
+.pause-panel{max-width:620px;animation:dialogIn .4s both}
+.pause-overline{font:11px var(--mono);color:#ff7575;letter-spacing:.2em}
+html[data-theme="matrix"] .pause-overline{font-family:var(--timer-font);color:#ffffff;letter-spacing:.25em}
+
+.pause-panel h2{font-size:clamp(32px,4.8vw,72px);line-height:1.02;letter-spacing:-.055em;margin:17px 0;font-family:var(--display-font);font-style:italic}
+html[data-theme="matrix"] .pause-panel h2{font-style:normal;text-transform:uppercase}
+
+.pause-meta{display:flex;gap:13px;flex-wrap:wrap;color:#b0c4de;font:12px var(--mono)}
+html[data-theme="matrix"] .pause-meta{font-family:var(--timer-font);color:#a0a0a0}
+
+.pause-panel p{line-height:1.65;color:#c8d8cf;margin:20px 0;max-width:57ch;font-size:clamp(13px,1.35vw,17px)}
+.pause-actions{display:flex;gap:10px;flex-wrap:wrap}
+.pause-actions button{border:1px solid #e55353;padding:13px 22px;border-radius:8px;background:#d94141;color:#ffffff;font:600 13px var(--sans);cursor:pointer;transition:.25s}
+html[data-theme="matrix"] .pause-actions button{background:#ffffff;color:#000000;border-color:#ffffff;font-weight:700}
+
+.pause-actions button+button{background:#18232e;color:#d0e0ed;border-color:#3a4b5c}
+html[data-theme="matrix"] .pause-actions button+button{background:#1d1d1d;color:#ffffff;border-color:#333333}
+
+.pause-actions button:hover{transform:translateY(-3px);box-shadow:0 0 22px #d9414150}
+html[data-theme="matrix"] .pause-actions button:hover{box-shadow:0 0 22px #ffffff40}
+
+.pc{background:#161d24;border:1px solid #283440}.pc #pp{background:#d94141;color:#ffffff}
+html[data-theme="matrix"] .pc{background:#121212;border-color:#262626}
+
+/* Correção do botão de play no modo escuro (La Haine): fundo escuro estruturado com ícone branco bem visível */
+html[data-theme="matrix"] .pc #pp {
+  background: #1d1d1d !important;
+  color: #ffffff !important;
+  border: 1px solid #3d3d3d !important;
+}
+
+#media-help{color:#fce4c2;background:#362819;padding:10px 16px;border-radius:8px;font:12px/1.5 var(--mono)}
+#media-help code{display:block;overflow-wrap:anywhere;user-select:all;margin-top:7px}
+#media-help button{padding:7px 12px;border:1px solid currentColor;background:transparent;color:inherit;border-radius:6px;margin-top:7px;cursor:pointer}
+
+@media(max-width:860px){.hero{padding:80px 0 50px;gap:30px}h1{font-size:clamp(38px,10vw,64px)}.theme-label{display:none}.brand:after{display:none}header .wrap{gap:8px}.pill.me{padding-right:12px}.pill.me i{width:32px;height:32px}#det .dh{grid-template-columns:1fr;padding:0 22px 35px;gap:12px;margin-top:-75px}#det .dh img{max-width:145px}#det .bd{height:240px}}
+@media(max-width:570px){.brand{font-size:0}.brand svg{width:32px}header .wrap{padding:0 14px}.theme-switch{padding:7px}.theme-switch .theme-symbol{display:none}#key1{padding:0 12px}.wrap{padding:0 18px}.hero{padding-top:75px}.pc{gap:6px}.pause-panel p{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}#pause-info{padding:20px}.pause-panel h2{font-size:31px}.pause-actions button{padding:10px 14px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+#cfg input{background:var(--bg);color:var(--ink)}#tt{background:var(--ink);color:var(--bg)}#pl input[type=range]{accent-color:#d94141}
+html[data-theme="matrix"] #pl input[type=range]{accent-color:#ffffff}
+
+#det .dh img{border-color:var(--line)}.pause-meta{display:block} .pause-meta::first-letter{color:#ff7575}
+html[data-theme="matrix"] .pause-meta::first-letter{color:#ffffff}
+
+/* LAYOUT RESPONSIVO E PLAYER FULLSCREEN */
+html,body{max-width:100%;overflow-x:clip}
+button,input,select{touch-action:manipulation}
+#pl{height:100dvh;min-height:0;overflow:hidden}
+#stage{min-height:0}
+#pl:fullscreen{width:100vw;height:100dvh;padding:0;gap:0;border-radius:0;background:#000;position:relative}
+#pl:fullscreen #stage,#pl:fullscreen #stage #vd{position:absolute;inset:0;width:100%;height:100%;border-radius:0}
+#pl:fullscreen .pt,#pl:fullscreen .pc{position:absolute;z-index:12;left:0;right:0;border:0;border-radius:0;transition:opacity .3s ease,transform .3s ease,visibility .3s;}
+#pl:fullscreen .pt{top:0;padding:24px max(24px,env(safe-area-inset-right)) 55px max(24px,env(safe-area-inset-left));background:linear-gradient(#000c,transparent)}
+#pl:fullscreen .pc{bottom:0;margin:0;padding:44px max(24px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));background:linear-gradient(transparent,#000e);flex-wrap:nowrap}
+#pl:fullscreen #pe,#pl:fullscreen #media-help{position:absolute;z-index:14;bottom:105px;left:5%;max-width:90%;}
+#pl:fullscreen.controls-hidden{cursor:none}
+#pl:fullscreen.controls-hidden .pt{opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-18px)}
+#pl:fullscreen.controls-hidden .pc{opacity:0;visibility:hidden;pointer-events:none;transform:translateY(18px)}
+#pl:fullscreen #stage.is-paused{cursor:default}
+#pl:fullscreen #pause-info{z-index:6}
+
+@media(max-width:680px){
+ header .wrap{height:60px;padding:0 14px;gap:10px}
+ #add1,#drive1,#key1{display:none}
+ .brand{font-size:17px;gap:10px;white-space:nowrap;min-width:0;flex-shrink:1}
+ .brand svg{width:30px;height:30px;flex:none}
+ .theme-switch{height:44px;min-width:64px;padding:0 9px;margin-left:auto;justify-content:center}
+ .theme-track{width:46px;height:26px}
+ .theme-knob{width:18px;height:18px}
+ [data-theme="matrix"] .theme-knob{transform:translateX(20px)}
+ .hero .acts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .hero .acts .btn{width:100%;padding:0 12px}
+ .hero .acts .btn.k{grid-column:1/-1}
+}
+
+/* ÉDITION ANATOMIE D'UNE CHUTE — Estática Alpina / Forense (MODO CLARO) */
+:root{
+  --bg: #eef1f2;
+  --card: #f8fafb;
+  --ink: #182026;
+  --mut: #596a75;
+  --line: #cfd8dc;
+  --grn: #a82b2b;
+  --soft: #e2e8eb;
+  --glow: #a82b2b;
+  color-scheme: light;
+}
+
+body{
+  background: var(--bg);
+  font-family: var(--sans);
+}
+
+header{
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand svg{ color: var(--grn); }
+.brand:after{ content: ""; color: var(--mut); }
+.hero:before{ content: ""; color: var(--grn); }
+
+h1 {
+  font-family: var(--display-font);
+  font-weight: 700;
+  letter-spacing: -.05em;
+  font-style: italic;
+}
+
+.stat:before{ content: "◆ EVIDÊNCIAS NO ACERVO"; color: var(--grn); }
+
+.pill,.btn,.chip,.tools input,.tools select,.card,dialog{ border-radius: 8px; }
+.pill.k,.btn.k,button.chip.on{
+  background: var(--grn)!important;
+  border-color: var(--grn)!important;
+  color: #fff!important;
+}
+
+.pill i{ background: var(--grn); color: #fff; }
+
+.theme-switch{ border-radius: 6px; }
+.theme-track{ border-radius: 4px; }
+.theme-knob{ border-radius: 2px; background: var(--grn); }
+
+.po{ background: var(--soft); }
+.mv{ border-radius: 8px; }
+.mv:hover{ border-color: var(--grn); }
+.chip.g{ color: var(--grn); }
+
+.bd:after{ background: linear-gradient(transparent 30%, var(--card)); }
+.intro,.ov,.tag{ color: var(--mut); }
+
+#pl{ background: #0c1014; }
+.pc{ background: #182028; border-color: #313e4b; }
+#pl .pc #pp{ background: var(--grn); color: #fff; }
+#pause-info{ background: linear-gradient(90deg, #0b0f13f2, #141c24e8 55%, #0005); }
+.pause-overline,.pause-meta{ color: #f28b8b; }
+.pause-actions button{ background: var(--grn); color: #fff; border-color: var(--grn); border-radius: 6px; }
+.pause-actions button+button{ background: #222c36; color: #eee; border-color: #435463; }
+
+#pause-info .pause-panel h2{ font-family: var(--display-font); }
+
+#pl input[type=range]{ accent-color: var(--grn); }
+#spin{ border-top-color: var(--grn); }
+
+@media(max-width:680px){
+  h1{ font-size: clamp(36px, 10vw, 58px); }
+  .brand:after{ display: none; }
+}
+
   </style>
 </head>
 
 <body>
   <header>
     <div class="wrap">
-      <a class="brand" href="#">
-        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+      <a class="brand" href="#"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="1.5" aria-hidden="true">
           <rect x="3" y="3" width="18" height="18" rx="4" />
           <path d="M8 3v18M16 3v18M3 8h5M3 16h5M16 8h5M16 16h5" />
-        </svg>Acervo do Cidjei
-      </a>
-      <nav>
-        <a href="#">Início</a>
-        <a href="#lib">Biblioteca</a>
-      </nav>
-      <button class="theme-switch" id="theme-switch" type="button" aria-label="Ativar tema La Haine Escuro" aria-pressed="false">
-        <span class="theme-symbol" aria-hidden="true">◐</span>
-        <span class="theme-label" id="theme-label">MODO LA HAINE</span>
-        <span class="theme-track"><span class="theme-knob"></span></span>
-      </button>
+        </svg>Acervo do Cidjei</a>
+      <nav><a href="#">Início</a><a href="#lib">Biblioteca</a></nav>
+      <button class="theme-switch" id="theme-switch" type="button" aria-label="Ativar tema La Haine Escuro" aria-pressed="false"><span class="theme-symbol" aria-hidden="true">◐</span><span class="theme-label" id="theme-label">MODO LA HAINE</span><span class="theme-track"><span class="theme-knob"></span></span></button>
       <button class="pill me" id="add1"><i>+</i>Adicionar pasta</button>
       <button class="pill" id="drive1" type="button">☁ Drive</button>
       <button class="pill" id="key1">TMDB</button>
@@ -1444,106 +1042,446 @@
         <div class="lbl">◆ FILMES, MEMÓRIAS E RECONSTRUÇÕES</div>
         <h1>Histórias<br>à sua maneira.</h1>
         <p class="intro">Sua cinemateca particular. Entre a sobriedade dos fatos e a subjetividade das narrativas, organize e assista sem sair daqui.</p>
-        <div class="acts">
-          <button class="btn k" id="add2">Adicionar pasta de filmes</button>
-          <button class="btn" id="key2">Chave do TMDB</button>
-          <button class="btn" id="drive2" type="button">☁ Google Drive</button>
-        </div>
+        <div class="acts"><button class="btn k" id="add2">Adicionar pasta de filmes</button><button class="btn"
+            id="key2">Chave do TMDB</button><button class="btn" id="drive2" type="button">☁ Google Drive</button></div>
+        <div class="lbl" id="st" style="margin-top:26px;min-height:16px"></div>
       </div>
-      <div class="card stat">
-        <div class="lbl">Estatísticas do Acervo</div>
-        <p>Total de obras <b><span id="st-total">0</span></b></p>
-        <p>Catálogo TMDB <b><span id="st-tmdb">0%</span></b></p>
-        <p>Espaço local <b><span id="st-space">0 GB</span></b></p>
-        <button class="lnk" id="export-btn">Exportar backup JSON ↗</button>
-      </div>
+      <aside class="card stat">
+        <div class="lbl">Panorama</div>
+        <p>Filmes no acervo<b id="s1">0</b></p>
+        <p>Identificados no TMDB<b id="s2">0/0</b></p>
+        <p>Tempo de tela<b id="s3">0 h</b></p>
+        <a class="lnk" href="#lib">Ir para a biblioteca →</a>
+      </aside>
     </section>
 
-    <section>
-      <h2 class="big" id="lib">Biblioteca</h2>
-      <div class="tools">
-        <input type="search" id="q" placeholder="Buscar por título, diretor, ator ou ano..." aria-label="Buscar filmes">
-        <select id="sort" aria-label="Ordenar biblioteca">
-          <option value="recent">Adicionados recentemente</option>
-          <option value="title">Título (A-Z)</option>
-          <option value="year">Ano de lançamento</option>
-          <option value="rating">Avaliação</option>
-        </select>
-      </div>
-      <div class="chips" id="gc"></div>
-      <div class="grid" id="gr">
-        <div class="card empty">
-          <div>
-            <div class="lbl">Nenhum arquivo indexado</div>
-            <h3>Sua cinemateca está vazia.</h3>
-            <p class="sm">Adicione uma pasta de filmes do seu computador ou conecte o Google Drive para começar.</p>
-          </div>
-          <button class="btn k" id="add3">Selecionar pasta</button>
-        </div>
-      </div>
-    </section>
+    <h2 class="lbl big" id="lib">Biblioteca</h2>
+    <div class="tools">
+      <input id="q" type="search" placeholder="Buscar por título, elenco, diretor ou gênero" aria-label="Buscar">
+      <select id="so" aria-label="Ordenar">
+        <option value="add">Mais recentes</option>
+        <option value="t">Título</option>
+        <option value="y">Ano</option>
+        <option value="v">Nota</option>
+      </select>
+      <button class="pill" id="rf">Atualizar</button>
+    </div>
+    <div class="chips" id="gc"></div>
+    <div class="grid" id="gr"></div>
   </main>
 
-  <!-- Modais e Player -->
-  <dialog id="det">
-    <div class="detail-top">
-      <button class="pill ghost" id="det-close">✕ Fechar</button>
-    </div>
-    <div class="bd" id="det-bg"></div>
-    <div class="dh">
-      <img id="det-poster" src="" alt="">
-      <div>
-        <div class="lbl" id="det-lbl">FICHA TÉCNICA</div>
-        <h2 id="det-title">Título</h2>
-        <div class="chips" id="det-genres"></div>
-        <p class="tag" id="det-tagline"></p>
-        <p class="ov" id="det-overview"></p>
-        <div class="acts">
-          <button class="btn k" id="det-play">▶ Assistir filme</button>
-        </div>
-        <h4>Elenco Principal</h4>
-        <div class="cast" id="det-cast"></div>
-        <div class="fx" id="det-details" style="margin-top: 34px;"></div>
-      </div>
-    </div>
-  </dialog>
-
+  <dialog id="det"></dialog>
   <dialog id="cfg">
     <div class="in">
-      <div class="lbl">Configurações</div>
-      <h2>Chave da API TMDB</h2>
-      <p>Insira sua chave v3 do The Movie Database para buscar pôsteres, sinopses e metadados automaticamente.</p>
-      <input type="password" id="tmdb-key-input" placeholder="Cole sua chave aqui (ex: a07e22...b1)">
-      <div class="acts" style="gap: 10px;">
-        <button class="btn k" id="tmdb-save">Salvar chave</button>
-        <button class="btn" id="tmdb-cancel">Cancelar</button>
-      </div>
+      <div class="lbl">Integração</div>
+      <h2>Chave do TMDB</h2>
+      <p>Crie uma conta gratuita no <a href="https://www.themoviedb.org/settings/api" target="_blank"
+          rel="noopener">TMDB</a>, abra Configurações › API e cole aqui a chave de API (v3) ou o Token de Leitura (v4).
+        Ela fica salva só neste navegador.</p>
+      <input id="kv" type="password" placeholder="Cole sua chave aqui" autocomplete="off">
+      <div class="acts"><button class="pill k" id="ks">Salvar</button><button class="pill" id="kc">Fechar</button></div>
+      <p style="margin:24px 0 0"><button class="lnk" id="clr">Limpar catálogo salvo</button></p>
     </div>
   </dialog>
 
+  <dialog id="drive-dialog" aria-labelledby="drive-heading"><div class="in">
+    <div class="lbl">FONTE REMOTA / GOOGLE DRIVE</div><h2 id="drive-heading">Conectar biblioteca na nuvem</h2>
+    <p>Conecte sua conta Google e cole o link ou ID de uma pasta que você pode acessar. Os filmes serão catalogados sem baixar os arquivos. A reprodução acontece no player do próprio site através das Serverless Functions no Vercel.</p>
+    <label for="drive-client">ID de cliente OAuth 2.0 (Aplicativo da Web)</label><input id="drive-client" autocomplete="off" placeholder="123456...apps.googleusercontent.com">
+    <p class="sm">Configure a origem JavaScript autorizada na Google Cloud com a URL do seu site Vercel e ative a Google Drive API. Nunca cole o segredo do cliente.</p>
+    <div class="acts"><button class="pill k" id="drive-login" type="button">Conectar Google</button><button class="pill" id="drive-logout" type="button">Desconectar</button></div>
+    <p class="sm" id="drive-status" role="status">Não conectado.</p>
+    <label for="drive-folder">Link ou ID da pasta</label><input id="drive-folder" placeholder="https://drive.google.com/drive/folders/…">
+    <div class="acts"><button class="pill k" id="drive-add" type="button">Importar pasta</button><button class="pill" id="drive-sync" type="button">Sincronizar pastas</button><button class="pill" id="drive-close" type="button">Fechar</button></div>
+    <p class="sm">Somente leitura. As pastas importadas são lembradas neste navegador; para sincronizar após fechar a página, conecte-se novamente.</p>
+  </div></dialog>
+  <input type="file" id="fi" webkitdirectory multiple hidden>
+
   <div id="pl" hidden>
-    <div class="pt">
-      <button class="pill ghost" id="pl-back">← Voltar</button>
-      <b id="pl-title">Título do Filme</b>
-      <button class="pill ghost" id="pl-fs">Tela Cheia ⛶</button>
-    </div>
-    <div id="stage">
-      <video id="vd" playsinline></video>
-      <div id="pause-info">
-        <div class="pause-panel">
-          <div class="pause-overline">FILME PAUSADO / ANÁLISE FORENSE</div>
-          <h2 id="pause-title">Título</h2>
-          <div class="pause-meta" id="pause-meta"></div>
-          <p id="pause-synopsis">Sinopse ou notas de análise...</p>
-          <div class="pause-actions">
-            <button id="pause-resume">Continuar Reprodução</button>
-            <button id="pause-details">Ver Ficha Técnica</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div class="pt"><b id="pn"></b><span class="pt-r"><button class="pill ghost" id="drive-renew" type="button" hidden>↻ Renovar sessão</button><button class="pill ghost" id="px">Fechar</button></span></div>
+    <div id="stage"><video id="vd" playsinline></video><div id="spin" hidden aria-hidden="true"></div><section id="pause-info" aria-label="Informações do filme pausado" aria-hidden="true"><div class="pause-panel"><div class="pause-overline">◆ REPRODUÇÃO PAUSADA <span id="pause-time"></span></div><h2 id="pause-title"></h2><div class="pause-meta" id="pause-meta"></div><p id="pause-description"></p><div class="pause-actions"><button type="button" id="pause-resume">▶ Continuar filme</button><button type="button" id="pause-details">ⓘ Ficha completa</button></div></div></section></div>
+    <p id="pe" hidden>Este arquivo usa um formato ou codec que o navegador não reproduz (como HEVC, AC3/DTS ou AVI). Use
+      MP4 (H.264/AAC) ou WebM.</p>
+    <div id="media-help" hidden>Alguns MKVs usam áudio que seu navegador não decodifica. Para converter uma cópia em MP4 (H.264/AAC), instale FFmpeg e execute na pasta do arquivo:<code id="convert-cmd"></code><button type="button" id="copy-cmd">Copiar comando</button></div>
     <div class="pc">
-      <button id="pp">▶</button>
-      <input type="range" id="sk" min="0" max="100" value="0" step="0.1">
-      <span id="pe">00:00 / 00:00</span>
-      <input type="range" id="vo" min="0" max="1" value="1" step="0.05" aria-label="Volume">
+      <button id="pp" aria-label="Reproduzir ou pausar"></button>
+      <span id="tc">0:00</span>
+      <input type="range" id="sk" min="0" max="1000" value="0" aria-label="Posição">
+      <span id="td">0:00</span>
+      <button id="mu">VOL</button><input type="range" id="vo" min="0" max="1" step=".05" value="1" aria-label="Volume">
+      <button id="cc" hidden>CC</button><button id="sp">1×</button><button id="fs" aria-label="Tela cheia">⛶</button>
+    </div>
+  </div>
+  <div id="tt" popover="manual"></div>
+
+  <script>
+    const $ = s => document.querySelector(s), L = localStorage, IMG = 'https://image.tmdb.org/t/p/';
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';');
+    const J = (k, d) => { try { return JSON.parse(L[k]) ?? d } catch { return d } };
+    let lib = J('cine.lib', []), pos = J('cine.pos', {}), FILES = new Map(), view = [], gf = '', cur = null, urls = [], busy = false, tto, ls = 0;
+    const themeSwitch = $('#theme-switch');
+    function setTheme(theme) { 
+      document.documentElement.dataset.theme = theme; 
+      L.setItem('cine.theme',theme); 
+      themeSwitch.setAttribute('aria-pressed',String(theme==='matrix'));
+      document.querySelector('meta[name=theme-color]').content=theme==='matrix'?'#080808':'#eef1f2';
+      themeSwitch.setAttribute('aria-label',theme==='matrix'?'Ativar modo claro':'Ativar modo escuro (La Haine)');
+      $('#theme-label').textContent=theme==='matrix'?'MODO ESCURO':'MODO CLARO'; 
+    }
+    themeSwitch.onclick=()=>setTheme(document.documentElement.dataset.theme==='matrix'?'light':'matrix');
+    setTheme(L.getItem('cine.theme')==='matrix'?'matrix':'light');
+    const ffQuote = n => '"'+n.replace(/"/g,'\\"')+'"';
+    const conversionCommand = n => 'ffmpeg -i '+ffQuote(n)+' -map 0:v:0 -map 0:a:0? -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k -sn -movflags +faststart '+ffQuote(n.replace(/\.[^.]+$/,'')+' - navegador.mp4');
+    $('#copy-cmd').onclick=async()=>{try{await navigator.clipboard.writeText($('#convert-cmd').textContent);toast('Comando copiado. Execute com FFmpeg instalado.')}catch{toast('Selecione e copie o comando exibido.')}};
+    const det = $('#det'), cfg = $('#cfg'), pl = $('#pl'), vd = $('#vd');
+    const toast = t => { const e = $('#tt'); e.textContent = t; try { e.hidePopover() } catch { } try { e.showPopover() } catch { } clearTimeout(tto); tto = setTimeout(() => { try { e.hidePopover() } catch { } }, 4500) };
+    const save = () => { try { L['cine.lib'] = JSON.stringify(lib) } catch { toast('Armazenamento do navegador cheio.') } };
+    const savePos = () => { L['cine.pos'] = JSON.stringify(pos) };
+    const KEY = () => L['cine.key'] || '';
+    const driveDlg = $('#drive-dialog');
+    let driveToken = null, driveClient = null, driveExp = 0, resumeAt = null, driveWarned = false;
+    const driveFolders = () => J('cine.drive.folders', []);
+    const driveStatus = t => $('#drive-status').textContent = t;
+    const folderId = raw => { const v = raw.trim(); const m = v.match(/\/folders\/([a-zA-Z0-9_-]+)/); return m ? m[1] : (/^[a-zA-Z0-9_-]{10,}$/.test(v) ? v : ''); };
+    function openDrive(){ $('#drive-client').value=L.getItem('cine.drive.client')||'';driveStatus(driveToken?'Conta conectada nesta sessão.':'Conecte sua conta para importar ou sincronizar.');driveDlg.showModal(); }
+    ['drive1','drive2'].forEach(id=>$('#'+id).onclick=openDrive);
+    $('#drive-close').onclick=()=>driveDlg.close();
+    async function ensureGIS(){
+      if(window.google?.accounts?.oauth2)return;
+      await new Promise((resolve,reject)=>{const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.async=true;sc.onload=resolve;sc.onerror=()=>reject(Error('Não foi possível carregar a autenticação Google.'));document.head.append(sc)});
+    }
+    async function loginDrive(savedId,promptMode){
+      const id=(savedId||$('#drive-client').value).trim();
+      if(!/^\d+-[a-z0-9-]+\.apps\.googleusercontent\.com$/.test(id))throw Error('Informe um ID OAuth de aplicativo Web válido.');
+      L.setItem('cine.drive.client',id);await ensureGIS();
+      return new Promise((resolve,reject)=>{
+        driveClient=google.accounts.oauth2.initTokenClient({client_id:id,scope:'https://www.googleapis.com/auth/drive.readonly',
+          callback:r=>{if(r.error)return reject(Error(r.error_description||r.error));driveToken=r.access_token;driveExp=Date.now()+(+r.expires_in||3600)*1000;driveStatus('Conta conectada. Acesso somente de leitura.');resolve()},
+          error_callback:e=>reject(Error(e?.type==='popup_closed'?'Login do Google cancelado.':e?.type==='popup_failed_to_open'?'O navegador bloqueou a janela de login do Google. Permita pop-ups e tente de novo.':'Não foi possível conectar ao Google.'))});
+        driveClient.requestAccessToken({prompt:promptMode!==undefined?promptMode:(driveToken?'':'consent')});
+      });
+    }
+    async function ensureDriveToken(){
+      if(driveToken&&Date.now()<driveExp-15*60*1000)return;
+      const id=L.getItem('cine.drive.client')||'';
+      if(!id){openDrive();throw Error('Informe o ID OAuth e conecte sua conta Google para assistir.')}
+      await loginDrive(id,'');
+    }
+    $('#drive-login').onclick=async()=>{try{await loginDrive()}catch(e){driveStatus(e.message)}};
+    $('#drive-logout').onclick=()=>{if(driveToken&&window.google?.accounts?.oauth2)google.accounts.oauth2.revoke(driveToken,()=>{});driveToken=null;fetch('/api/session',{method:'DELETE'}).catch(()=>{});driveStatus('Desconectado. O catálogo continua salvo.');};
+    async function driveGet(path,query={}){
+      if(!driveToken)throw Error('Conecte sua conta Google primeiro.');
+      const u=new URL('https://www.googleapis.com/drive/v3/'+path);Object.entries(query).forEach(([k,v])=>u.searchParams.set(k,v));
+      const r=await fetch(u,{headers:{Authorization:'Bearer '+driveToken}});
+      if(!r.ok){if(r.status===401)driveToken=null;throw Error('Google Drive: '+r.status+'. Verifique a autorização e o acesso à pasta.')}return r.json();
+    }
+    async function scanDriveFolder(id){
+      const info=await driveGet('files/'+encodeURIComponent(id),{fields:'id,name,mimeType',supportsAllDrives:'true'});
+      if(info.mimeType!=='application/vnd.google-apps.folder')throw Error('O ID fornecido não corresponde a uma pasta.');
+      const items=[],queue=[{id,path:''}],visited=new Set();
+      while(queue.length){const cur=queue.shift();if(visited.has(cur.id))continue;visited.add(cur.id);
+        let page='';do{
+          const response=await driveGet('files',{q:"'"+cur.id+"' in parents and trashed = false",fields:'nextPageToken,files(id,name,mimeType,size,webViewLink,videoMediaMetadata)',pageSize:'1000',pageToken:page,supportsAllDrives:'true',includeItemsFromAllDrives:'true'});
+          for(const f of response.files||[]){if(f.mimeType==='application/vnd.google-apps.folder')queue.push({id:f.id,path:cur.path+f.name+'/'});else if(VID.test(f.name)&& (f.mimeType.startsWith('video/')||f.mimeType==='application/octet-stream'||/\.(mkv|avi)$/i.test(f.name)))items.push({id:'drive:'+f.id,driveId:f.id,r:'Drive: '+info.name,p:cur.path+f.name,n:f.name,...parse(f.name),add:Date.now(),source:'drive'});}
+          page=response.nextPageToken||'';
+        }while(page);
+        driveStatus('Lendo '+info.name+': '+items.length+' vídeo(s) encontrados…');
+      }
+      items.forEach(m=>m.driveFolder=id);
+      lib=lib.filter(m=>m.driveFolder!==id||items.some(i=>i.id===m.id));
+      for(const m of items)if(!lib.some(x=>x.id===m.id))lib.push(m);
+      save();render();idAll();return {id,name:info.name,count:items.length};
+    }
+    $('#drive-add').onclick=async()=>{const id=folderId($('#drive-folder').value);if(!id)return driveStatus('Cole um link de pasta válido ou seu ID.');try{driveStatus('Lendo pasta…');const result=await scanDriveFolder(id);const folders=driveFolders().filter(x=>x.id!==id);folders.push({id,name:result.name});L.setItem('cine.drive.folders',JSON.stringify(folders));driveStatus(result.count+' filmes importados de '+result.name+'.');}catch(e){driveStatus(e.message)}};
+    $('#drive-sync').onclick=async()=>{try{for(const folder of driveFolders())await scanDriveFolder(folder.id);driveStatus('Sincronização concluída.')}catch(e){driveStatus(e.message)}};
+
+    const st = t => $('#st').textContent = t || '';
+    const nota = v => v.toFixed(1).replace('.', ',');
+    const base = n => n.replace(/\.[^.]+$/, '');
+    const VID = /\.(mp4|m4v|webm|mkv|mov|avi|ogv)$/i, SUB = /\.(srt|vtt)$/i;
+    const idb = v => new Promise((ok, no) => { const o = indexedDB.open('acervo', 1); o.onupgradeneeded = () => o.result.createObjectStore('k'); o.onerror = () => no(o.error); o.onsuccess = () => { const s = o.result.transaction('k', v ? 'readwrite' : 'readonly').objectStore('k'), r = v ? s.put(v, 'roots') : s.get('roots'); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error) } });
+    const roots = () => idb().then(r => r || [], () => []);
+
+    const parse = n => {
+      let s = base(n).replace(/[._]+/g, ' ').replace(/\[[^\]]*\]/g, ' '), y = null;
+      const m = [...s.matchAll(/\b((?:19|20)\d\d)\b/g)].filter(x => x.index > 0).pop();
+      if (m) { y = +m[1]; s = s.slice(0, m.index) }
+      s = s.split(/\b(?:2160p|1080p|720p|480p|4k|bluray|brrip|bdrip|web-?dl|webrip|dvdrip|hdtv|x26[45]|hevc|dublado|dual|legendado)\b/i)[0];
+      return { q: s.replace(/[()]/g, ' ').replace(/\s+/g, ' ').replace(/[\s-]+$/, '').trim() || base(n), y }
+    };
+
+    async function tmdb(path, q = {}) {
+      const k = KEY(), b = k.length > 40, u = new URL('https://api.themoviedb.org/3' + path);
+      for (const [a, x] of Object.entries({ language: 'pt-BR', ...q })) u.searchParams.set(a, x);
+      if (!b) u.searchParams.set('api_key', k);
+      const r = await fetch(u, b ? { headers: { Authorization: 'Bearer ' + k } } : {});
+      if (!r.ok) throw Object.assign(new Error('TMDB ' + r.status), { s: r.status });
+      return r.json()
+    }
+    async function ident(m) {
+      let r = (await tmdb('/search/movie', m.y ? { query: m.q, year: m.y } : { query: m.q })).results;
+      if (!r.length && m.y) r = (await tmdb('/search/movie', { query: m.q })).results;
+      if (!r.length) { m.tm = false; return }
+      const d = await tmdb('/movie/' + r[0].id, { append_to_response: 'credits' }), c = d.credits.crew, nm = a => [...new Set(a.map(x => x.name))];
+      if (!d.overview) d.overview = (await tmdb('/movie/' + d.id, { language: 'en-US' })).overview;
+      m.tm = {
+        id: d.id, t: d.title, o: d.original_title, tag: d.tagline, ov: d.overview, dt: d.release_date, rt: d.runtime, g: d.genres.map(g => g.name), v: d.vote_average, vc: d.vote_count, p: d.poster_path, b: d.backdrop_path,
+        dir: nm(c.filter(x => x.job === 'Director')), wr: nm(c.filter(x => /Screenplay|Writer/.test(x.job))).slice(0, 3),
+        cast: d.credits.cast.slice(0, 12).map(x => ({ n: x.name, c: x.character, p: x.profile_path })),
+        pc: d.production_countries.map(x => x.name), co: d.production_companies.slice(0, 3).map(x => x.name), lang: d.original_language, bud: d.budget, rev: d.revenue
+      }
+    }
+    async function idAll() {
+      if (busy || !KEY()) return;
+      const q = lib.filter(m => m.tm === undefined), tot = q.length; if (!tot) return;
+      busy = true; let n = 0, f = 0;
+      try {
+        await Promise.all([0, 1, 2, 3].map(async () => {
+          for (let m; m = q.shift();) {
+            try { await ident(m) } catch (e) { if (e.s === 401) { q.length = 0; throw e } f++ }
+            st(`Identificando ${++n}/${tot}…`); if (n % 6 === 0) { save(); render() }
+          }
+        }))
+      } catch (e) { toast('Chave do TMDB inválida. Confira no botão TMDB.') }
+      busy = false; save(); render(); st('');
+      if (f) toast(f + ' filme(s) sem identificação. Confira a conexão e use Atualizar.')
+    }
+
+    async function walk(d, p, out) {
+      const vs = [], ss = [];
+      for await (const [n, h] of d.entries()) h.kind === 'directory' ? await walk(h, p + n + '/', out) : VID.test(n) ? vs.push([n, h]) : SUB.test(n) && ss.push([n, h]);
+      for (const [n, h] of vs) { const b = base(n).toLowerCase(), x = ss.find(y => y[0].toLowerCase().startsWith(b)); out.push({ n, p: p + n, get: () => h.getFile(), sub: x && (() => x[1].getFile()) }) }
+    }
+    async function scan(h) { st('Lendo pasta…'); const out = []; await walk(h, '', out); st(''); ingest(h.name, out) }
+    function ingest(root, es) {
+      const ids = new Set();
+      for (const e of es) { const id = root + '/' + e.p; ids.add(id); FILES.set(id, e); if (!lib.some(m => m.id === id)) lib.push({ id, r: root, p: e.p, n: e.n, ...parse(e.n), add: Date.now() }) }
+      for (const id of FILES.keys()) if (id.startsWith(root + '/') && !ids.has(id)) FILES.delete(id);
+      lib = lib.filter(m => m.r !== root || ids.has(m.id));
+      save(); render(); toast(es.length + ' vídeo(s) em ' + root); idAll()
+    }
+    async function pick() {
+      if (!window.showDirectoryPicker) { st('Selecione a pasta. No Firefox, você precisará selecioná-la novamente após reabrir a página.'); return $('#fi').click(); }
+      try {
+        const h = await showDirectoryPicker({ id: 'acervo', mode: 'read' }), r = (await roots()).filter(x => x.name !== h.name);
+        r.push(h); try { await idb(r) } catch { }
+        await scan(h); if (!KEY()) cfg.showModal()
+      } catch (e) { if (e.name !== 'AbortError') toast('Não foi possível abrir a pasta: ' + e.message) }
+    }
+    $('#fi').onchange = e => {
+      const f = [...e.target.files]; if (!f.length) return;
+      const root = f[0].webkitRelativePath.split('/')[0], subs = f.filter(x => SUB.test(x.name)), dirOf = p => p.replace(/[^/]+$/, '');
+      const out = f.filter(x => VID.test(x.name)).map(x => {
+        const p = x.webkitRelativePath, s = subs.find(y => dirOf(y.webkitRelativePath) === dirOf(p) && y.name.toLowerCase().startsWith(base(x.name).toLowerCase()));
+        return { n: x.name, p: p.slice(root.length + 1), get: async () => x, sub: s && (async () => s) }
+      });
+      ingest(root, out); if (!KEY()) cfg.showModal(); e.target.value = ''
+    };
+    async function reconnect() {
+      const hs = await roots();
+      if (!hs.length) return pick();
+      for (const h of hs) try { if (await h.requestPermission({ mode: 'read' }) === 'granted') await scan(h) } catch { }
+    }
+
+    function render() {
+      const q = $('#q').value.toLowerCase().trim(), so = $('#so').value, ti = m => m.tm?.t || m.q, yr = m => +(m.tm?.dt?.slice(0, 4) || m.y || 0);
+      view = lib.filter(m => (!gf || m.tm?.g?.includes(gf)) && (!q || [ti(m), m.tm?.o, m.n, ...(m.tm?.dir || []), ...(m.tm?.g || []), ...(m.tm?.cast || []).map(c => c.n)].join(' ').toLowerCase().includes(q)));
+      view.sort({ add: (a, b) => b.add - a.add, t: (a, b) => ti(a).localeCompare(ti(b), 'pt'), y: (a, b) => yr(b) - yr(a), v: (a, b) => (b.tm?.v || 0) - (a.tm?.v || 0) }[so]);
+      $('#gr').innerHTML = view.length ? view.map((m, i) => {
+        const t = m.tm, y = t?.dt?.slice(0, 4) || m.y || '';
+        return `<article class="card mv" tabindex="0" data-i="${i}"><div class="po">${m.source==='drive'?'<span class="drive-mark">☁ DRIVE</span>':''}${t?.p ? `<img loading="lazy" alt="" src="${IMG}w342${t.p}">` : esc(m.n)}</div><div class="mb"><h3>${esc(ti(m))}</h3><div><span>${y}${t?.rt ? ' · ' + t.rt + ' min' : ''}</span>${t?.v ? `<span class="chip g s">★ ${nota(t.v)}</span>` : `<span class="chip s">${t === false ? 'Sem dados' : 'Pendente'}</span>`}</div></div></article>`
+      }).join('')
+        : lib.length ? '<p class="lbl" style="grid-column:1/-1">Nenhum filme corresponde à busca.</p>'
+          : '<div class="card empty"><div><span class="chip">Vazio</span><h3>Nenhuma pasta adicionada</h3><span class="sm">Formatos: mp4, mkv, webm, mov, avi · subpastas incluídas · legendas .srt/.vtt com o mesmo nome</span></div><button class="pill k big" data-add>Adicionar pasta</button></div>';
+      const gs = [...new Set(lib.flatMap(m => m.tm?.g || []))].sort();
+      $('#gc').innerHTML = gs.map(g => `<button class="chip${g === gf ? ' on' : ''}" data-g="${esc(g)}">${esc(g)}</button>`).join('');
+      const id = lib.filter(m => m.tm);
+      $('#s1').textContent = lib.length; $('#s2').textContent = id.length + '/' + lib.length;
+      $('#s3').textContent = Math.round(id.reduce((a, m) => a + (m.tm.rt || 0), 0) / 60) + ' h'
+    }
+    function detail(m) {
+      const t = m.tm, y = t?.dt?.slice(0, 4) || m.y || '',
+        usd = n => n ? n.toLocaleString('pt-BR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }) : '',
+        lg = t?.lang ? new Intl.DisplayNames(['pt-BR'], { type: 'language' }).of(t.lang) : '',
+        rows = (t ? [['Título original', t.o], ['Lançamento', t.dt && new Date(t.dt + 'T12:00').toLocaleDateString('pt-BR')], ['Duração', t.rt && Math.floor(t.rt / 60) + 'h ' + t.rt % 60 + 'min'], ['Direção', t.dir.join(', ')], ['Roteiro', t.wr.join(', ')], ['País', t.pc.join(', ')], ['Idioma original', lg], ['Produção', t.co.join(', ')], ['Orçamento', usd(t.bud)], ['Bilheteria', usd(t.rev)]] : []).filter(r => r[1]),
+        ov = t?.ov || (t === false ? 'Este arquivo não foi encontrado no TMDB. Use Corrigir identificação.' : t ? 'Sem sinopse disponível.' : 'Aguardando identificação no TMDB.');
+      det.innerHTML = `<div class="detail-top"><button class="pill k" id="dtop" type="button">✕ Fechar ficha</button></div><div class="bd"${t?.b ? ` style="background-image:url(${IMG}w1280${t.b})"` : ''}></div>
+<div class="dh"><div>${t?.p ? `<img src="${IMG}w500${t.p}" alt="">` : ''}</div><div>
+<div class="lbl">${y}${t?.v ? ' · nota ' + nota(t.v) + ' (' + t.vc + ' votos)' : ''}</div>
+<h2>${esc(t?.t || m.q)}</h2>${t?.tag ? `<p class="tag">${esc(t.tag)}</p>` : ''}
+<div class="chips">${(t?.g || []).map(g => `<span class="chip">${esc(g)}</span>`).join('')}</div>
+<p class="ov">${esc(ov)}</p>
+<div class="acts"><button class="pill k big" id="dp">▶ Assistir</button><button class="pill big" id="dx">Fechar</button></div>
+<p class="sm" style="margin-top:22px">${esc(m.p)} · <button class="lnk" id="dfix">Corrigir identificação</button>${t ? ` · <a class="lnk" target="_blank" rel="noopener" href="https://www.themoviedb.org/movie/${t.id}">Abrir no TMDB</a>` : ''}</p>
+${t?.cast?.length ? `<h4 class="lbl">Elenco</h4><div class="cast">${t.cast.map(c => `<div class="cm">${c.p ? `<img loading="lazy" alt="" src="${IMG}w185${c.p}">` : '<i></i>'}${esc(c.n)}<small>${esc(c.c)}</small></div>`).join('')}</div>` : ''}
+${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map(([a, b]) => `<p>${a}<b>${esc(b)}</b></p>`).join('')}</div>` : ''}
+</div></div>`;
+      $('#dp').onclick = () => { det.close(); play(m) };
+      $('#dx').onclick = $('#dtop').onclick = () => det.close();
+      $('#dfix').onclick = async () => {
+        const s = prompt('Informe o título correto (e o ano), ex.: Interestelar 2014', m.q + (m.y ? ' ' + m.y : '')); if (!s) return;
+        Object.assign(m, parse(s + '.x')); m.tm = undefined;
+        try { await ident(m) } catch { toast('Falha ao consultar o TMDB. Confira a chave e a conexão.') }
+        save(); render(); detail(m)
+      };
+      if (!det.open) det.showModal(); det.scrollTop=0;
+    }
+
+    const I = { p: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>', z: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>' };
+    const fmt = s => { s = Math.floor(s || 0); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s % 60).padStart(2, '0') };
+    const tog = () => vd.paused ? vd.play() : vd.pause();
+    const PE_LOCAL = $('#pe').textContent.replace(/\s+/g, ' ').trim();
+    const PE_DRIVE = 'Não foi possível reproduzir este vídeo do Google Drive. Confira se sua conta tem acesso ao arquivo e se o formato é compatível (MP4 H.264/AAC ou WebM).';
+    const PE_EXP = 'A sessão do Google expirou. Toque em “Renovar sessão” para continuar de onde parou.';
+    const spin = on => $('#spin').hidden = !on;
+
+    const driveUrl = m => '/api/stream/' + encodeURIComponent(m.driveId);
+    async function prepareDrivePlayback(){
+      const r = await fetch('/api/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: driveToken })
+      });
+      if(!r.ok) throw Error('Ponte de streaming indisponível no servidor Vercel.');
+    }
+
+    function resetPlayerUI() {
+      $('#pe').hidden = true; $('#drive-renew').hidden = true; $('#stage').classList.remove('is-paused'); $('#pause-info').setAttribute('aria-hidden', 'true');
+      vd.querySelectorAll('track').forEach(t => t.remove()); driveWarned = false; resumeAt = null
+    }
+
+    async function play(m) {
+      if (m.source === 'drive') {
+        try { await ensureDriveToken(); await prepareDrivePlayback() } catch (e) { return toast(e.message || 'Conecte sua conta Google para assistir.') }
+        cur = m; resetPlayerUI(); $('#pe').textContent = PE_DRIVE;
+        const mkv = /\.mkv$/i.test(m.n); $('#media-help').hidden = !mkv; $('#convert-cmd').textContent = mkv ? conversionCommand(m.n) : '';
+        urls = []; vd.src = driveUrl(m); vd.playbackRate = 1; $('#sp').textContent = '1×'; $('#cc').hidden = true;
+        $('#pn').textContent = (m.tm?.t || m.q) + ' · Google Drive'; pl.hidden = false; spin(true); vd.play().catch(() => { });
+        return;
+      }
+      let e = FILES.get(m.id);
+      if (!e) { if(window.showDirectoryPicker) await reconnect(); else {toast('Selecione novamente a pasta para reconectar os arquivos.');await pick()} e = FILES.get(m.id) }
+      if (!e) return toast('Arquivo não encontrado. Adicione a pasta novamente.');
+      try {
+        cur = m; resetPlayerUI(); $('#pe').textContent = PE_LOCAL;
+        const mkv = /\.mkv$/i.test(m.n); $('#media-help').hidden=!mkv; $('#convert-cmd').textContent=mkv?conversionCommand(m.n):'';
+        const u = URL.createObjectURL(await e.get()); urls = [u]; vd.src = u;
+        if (e.sub) {
+          const b = await (await e.sub()).arrayBuffer(); let t;
+          try { t = new TextDecoder('utf-8', { fatal: true }).decode(b) } catch { t = new TextDecoder('windows-1252').decode(b) }
+          if (!/^\s*WEBVTT/.test(t)) t = 'WEBVTT\n\n' + t.replace(/\r/g, '').replace(/(\d\d:\d\d:\d\d),(\d{3})/g, '$1.$2');
+          const tr = document.createElement('track'), tu = URL.createObjectURL(new Blob([t], { type: 'text/vtt' })); urls.push(tu);
+          Object.assign(tr, { kind: 'subtitles', label: 'Legenda', srclang: 'pt', src: tu, default: true }); vd.append(tr)
+        }
+        $('#cc').hidden = !e.sub; $('#pn').textContent = m.tm?.t || m.q; vd.playbackRate = 1; $('#sp').textContent = '1×';
+        pl.hidden = false; vd.play().catch(() => { })
+      } catch { toast('Não foi possível abrir o arquivo.') }
+    }
+
+    async function renewDrive() {
+      if (cur?.source !== 'drive') return;
+      const t = vd.currentTime;
+      try { driveToken = null; await ensureDriveToken(); await prepareDrivePlayback() } catch (e) { return toast(e.message || 'Não foi possível renovar a sessão.') }
+      $('#drive-renew').hidden = true; $('#pe').hidden = true; driveWarned = false;
+      resumeAt = t; vd.src = driveUrl(cur); spin(true); vd.play().catch(() => { })
+    }
+    $('#drive-renew').onclick = renewDrive;
+
+    function closePlayer() {
+      vd.pause(); if (cur) { pos[cur.id] = vd.currentTime; savePos() }
+      if (document.fullscreenElement) document.exitFullscreen();
+      vd.removeAttribute('src'); vd.querySelectorAll('track').forEach(t => t.remove()); vd.load(); spin(false);
+      clearTimeout(controlsTimer); pl.classList.remove('controls-hidden'); urls.forEach(u => URL.revokeObjectURL(u)); urls = []; pl.hidden = true;
+      $('#stage').classList.remove('is-paused'); $('#media-help').hidden = true; $('#pe').hidden = true; $('#drive-renew').hidden = true; resumeAt = null; driveWarned = false; cur = null
+    }
+
+    $('#pp').innerHTML = I.p;
+    let controlsTimer;
+    function revealControls(){
+      pl.classList.remove('controls-hidden');
+      clearTimeout(controlsTimer);
+      if(document.fullscreenElement===pl && !vd.paused && !vd.ended && !pl.hidden){
+        controlsTimer=setTimeout(()=>pl.classList.add('controls-hidden'),2700);
+      }
+    }
+    document.addEventListener('fullscreenchange',()=>{
+      pl.classList.remove('controls-hidden');
+      clearTimeout(controlsTimer);
+      if(document.fullscreenElement===pl) revealControls();
+    });
+    pl.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'||e.pointerType==='pen')revealControls()});
+    pl.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')revealControls()});
+    pl.addEventListener('focusin',revealControls);
+    vd.onclick = e => {
+      if(document.fullscreenElement===pl && e.detail && matchMedia('(pointer:coarse)').matches && pl.classList.contains('controls-hidden')){revealControls();return;}
+      tog();
+    };
+    $('#pp').onclick = tog;
+
+    function updatePauseOverlay(){
+      const visible=Boolean(cur && !pl.hidden && vd.paused && vd.readyState>=1 && !vd.ended);
+      $('#stage').classList.toggle('is-paused',visible); $('#pause-info').setAttribute('aria-hidden',String(!visible));
+      if(!visible)return;
+      const t=cur.tm;
+      $('#pause-title').textContent=t?.t||cur.q;$('#pause-time').textContent=' / '+fmt(vd.currentTime);
+      $('#pause-meta').textContent=[t?.dt?.slice(0,4)||cur.y,t?.rt?t.rt+' MIN':null,t?.v?'★ '+nota(t.v):null,...(t?.g||[]).slice(0,2)].filter(Boolean).join('  ·  ');
+      $('#pause-description').textContent=t?.ov||'Continue de onde parou. Consulte a ficha completa para explorar as informações disponíveis deste filme.';
+    }
+    vd.onplay = vd.onpause = () => { $('#pp').innerHTML = vd.paused ? I.p : I.z;updatePauseOverlay(); revealControls(); };
+    $('#pause-resume').onclick=()=>vd.play();
+    $('#pause-details').onclick=()=>{if(cur){const m=cur;closePlayer();detail(m)}};
+    vd.onvolumechange = () => $('#mu').textContent = vd.muted || vd.volume === 0 ? 'MUDO' : 'VOL';
+    vd.ontimeupdate = () => {
+      if(vd.paused && cur) $('#pause-time').textContent=' / '+fmt(vd.currentTime);
+      $('#tc').textContent = fmt(vd.currentTime); $('#sk').value = vd.currentTime / vd.duration * 1000 || 0;
+      if (cur?.source === 'drive' && !driveWarned && driveExp && driveExp - Date.now() < 3 * 60 * 1000) { driveWarned = true; $('#drive-renew').hidden = false; toast('Sua sessão do Google expira em instantes. Toque em “Renovar sessão” para não interromper o filme.') }
+      if (cur && Date.now() - ls > 5000) { ls = Date.now(); pos[cur.id] = vd.currentTime; savePos() }
+    };
+    vd.onloadedmetadata = () => { $('#td').textContent = fmt(vd.duration); if (resumeAt != null) { vd.currentTime = resumeAt; resumeAt = null; return } const p = pos[cur?.id]; if (p > 15 && p < vd.duration - 30) vd.currentTime = p };
+    vd.onerror = () => {
+      if (cur?.source === 'drive' && vd.getAttribute('src')) { $('#pe').textContent = Date.now() > driveExp - 30000 ? PE_EXP : PE_DRIVE; $('#pe').hidden = false; $('#drive-renew').hidden = false; return }
+      if (vd.getAttribute('src')) { $('#pe').hidden = false; $('#media-help').hidden=false; if(cur) $('#convert-cmd').textContent=conversionCommand(cur.n); } };
+    $('#sk').oninput = e => vd.currentTime = e.target.value / 1000 * vd.duration;
+    $('#vo').oninput = e => { vd.volume = e.target.value; if (vd.volume > 0) vd.muted = false };
+    $('#mu').onclick = () => { vd.muted = !vd.muted; $('#mu').textContent = vd.muted ? 'MUDO' : 'VOL' };
+    $('#sp').onclick = () => { const s = [1, 1.25, 1.5, 2, .75], n = s[(s.indexOf(vd.playbackRate) + 1) % s.length]; vd.playbackRate = n; $('#sp').textContent = n + '×' };
+    $('#cc').onclick = () => { const t = vd.textTracks[0]; if (t) t.mode = t.mode === 'showing' ? 'hidden' : 'showing' };
+    $('#fs').onclick = async () => {
+      try {
+        if (document.fullscreenElement) return await document.exitFullscreen();
+        if (pl.requestFullscreen) { await pl.requestFullscreen(); try { await screen.orientation.lock('landscape') } catch { } }
+        else if (vd.webkitEnterFullscreen) vd.webkitEnterFullscreen();
+        else throw 0
+      } catch { toast('Tela cheia indisponível neste navegador.'); }
+    };
+    document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) try { screen.orientation.unlock() } catch { } });
+    
+    vd.addEventListener('waiting', () => spin(true));
+    vd.addEventListener('loadstart', () => { if (vd.getAttribute('src')) spin(true) });
+    ['playing', 'canplay', 'pause', 'error'].forEach(ev => vd.addEventListener(ev, () => spin(false)));
+
+    $('#px').onclick = closePlayer;
+    pl.onpointerup = () => document.activeElement?.blur();
+    document.onkeydown = e => {
+      if (pl.hidden) return; const k = e.key;
+      if (['INPUT','BUTTON','SELECT'].includes(document.activeElement?.tagName) && k===' ') return;
+      if (k === ' ') { e.preventDefault(); tog() } else if (k === 'ArrowRight') vd.currentTime += 10; else if (k === 'ArrowLeft') vd.currentTime -= 10;
+      else if (k === 'f') $('#fs').click(); else if (k === 'm') $('#mu').click(); else if (k === 'Escape') closePlayer()
+    };
+
+    $('#gr').onclick = e => { const c = e.target.closest('.mv'); if (c) return detail(view[c.dataset.i]); if (e.target.closest('[data-add]')) pick() };
+    $('#gr').onkeydown = e => { if (e.key === 'Enter' && e.target.classList.contains('mv')) e.target.click() };
+    $('#gc').onclick = e => { const g = e.target.dataset.g; if (g !== undefined) { gf = gf === g ? '' : g; render() } };
+    ['add1', 'add2'].forEach(i => $('#' + i).onclick = pick);
+    ['key1', 'key2'].forEach(i => $('#' + i).onclick = () => { $('#kv').value = KEY(); cfg.showModal() });
+    $('#ks').onclick = () => { L['cine.key'] = $('#kv').value.trim(); cfg.close(); idAll() };
+    $('#kc').onclick = () => cfg.close();
+    $('#clr').onclick = () => { if (confirm('Remover o catálogo salvo neste navegador? Seus arquivos de vídeo não são apagados.')) { lib = []; pos = {}; gf = ''; L.removeItem('cine.lib'); L.removeItem('cine.pos'); render(); cfg.close() } };
+    $('#rf').onclick = () => window.showDirectoryPicker ? reconnect() : pick();
+    $('#q').oninput = $('#so').onchange = render;
+    [det, cfg].forEach(d => d.onclick = e => { if (e.target === d) d.close() });
+    render(); idAll();
+  </script>
+</body>
+
+</html>

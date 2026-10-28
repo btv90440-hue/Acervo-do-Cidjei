@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.vercel.acervo_do_cidjei.twa",
+        "sha256_cert_fingerprints": ["26:42:26:2F:6B:A6:EF:65:C9:94:E1:C7:F5:B4:EB:48:60:F3:D3:1D:11:B4:4E:55:B1:79:7A:E8:89:AB:82:B3"]
+      }
+    }]

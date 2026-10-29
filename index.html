@@ -1569,12 +1569,8 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     const PE_EXP = 'A sessão do Google expirou. Toque em “Renovar sessão” para continuar de onde parou.';
     const spin = on => $('#spin').hidden = !on;
 
-    /* Padrão: o <video> lê direto do Google Drive (rápido, sem passar pelo Vercel).
-       Se o Drive recusar, cai automaticamente para a ponte /api/stream do Vercel (plano B). */
-    let driveMode = 'direct';
-    const driveUrl = m => driveMode === 'proxy'
-      ? '/api/stream/' + encodeURIComponent(m.driveId)
-      : 'https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(m.driveId) + '?alt=media&supportsAllDrives=true&access_token=' + encodeURIComponent(driveToken);
+    /* Reprodução do Drive exclusivamente pela rota do Vercel. */
+    const driveUrl = m => '/api/stream/' + encodeURIComponent(m.driveId);
     async function prepareDrivePlayback(){
       const r = await fetch('/api/session', {
         method: 'POST',
@@ -1592,8 +1588,9 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     async function play(m) {
       if (m.source === 'drive') {
         try { await ensureDriveToken() } catch (e) { return toast(e.message || 'Conecte sua conta Google para assistir.') }
-        driveMode = 'direct'; cur = m; resetPlayerUI(); $('#pe').textContent = PE_DRIVE;
+        cur = m; resetPlayerUI(); $('#pe').textContent = PE_DRIVE;
         const mkv = /\.mkv$/i.test(m.n); $('#media-help').hidden = !mkv; $('#convert-cmd').textContent = mkv ? conversionCommand(m.n) : '';
+        try { await prepareDrivePlayback() } catch (e) { return toast(e.message || 'Servidor de streaming indisponível.') }
         urls = []; vd.src = driveUrl(m); vd.playbackRate = 1; $('#sp').textContent = '1×'; $('#cc').hidden = true;
         $('#pn').textContent = (m.tm?.t || m.q) + ' · Google Drive'; pl.hidden = false; spin(true); vd.play().catch(() => { });
         return;
@@ -1620,7 +1617,7 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     async function renewDrive() {
       if (cur?.source !== 'drive') return;
       const t = vd.currentTime;
-      try { driveToken = null; await ensureDriveToken(); if (driveMode === 'proxy') await prepareDrivePlayback() } catch (e) { return toast(e.message || 'Não foi possível renovar a sessão.') }
+      try { driveToken = null; await ensureDriveToken(); await prepareDrivePlayback() } catch (e) { return toast(e.message || 'Não foi possível renovar a sessão.') }
       $('#drive-renew').hidden = true; $('#pe').hidden = true; driveWarned = false;
       resumeAt = t; vd.src = driveUrl(cur); spin(true); vd.play().catch(() => { })
     }
@@ -1678,12 +1675,6 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     };
     vd.onloadedmetadata = () => { $('#td').textContent = fmt(vd.duration); if (resumeAt != null) { vd.currentTime = resumeAt; resumeAt = null; return } const p = pos[cur?.id]; if (p > 15 && p < vd.duration - 30) vd.currentTime = p };
     vd.onerror = async () => {
-      if (cur?.source === 'drive' && vd.getAttribute('src') && driveMode === 'direct' && Date.now() < driveExp - 30000) {
-        driveMode = 'proxy'; const t = vd.currentTime;
-        toast('Leitura direta do Drive indisponível. Usando a ponte do servidor, que é mais lenta.');
-        try { await prepareDrivePlayback() } catch { driveMode = 'direct'; $('#pe').textContent = PE_DRIVE; $('#pe').hidden = false; $('#drive-renew').hidden = false; return }
-        resumeAt = t > 1 ? t : null; vd.src = driveUrl(cur); spin(true); vd.play().catch(() => { }); return
-      }
       if (cur?.source === 'drive' && vd.getAttribute('src')) { $('#pe').textContent = Date.now() > driveExp - 30000 ? PE_EXP : PE_DRIVE; $('#pe').hidden = false; $('#drive-renew').hidden = false; return }
       if (vd.getAttribute('src')) { $('#pe').hidden = false; $('#media-help').hidden=false; if(cur) $('#convert-cmd').textContent=conversionCommand(cur.n); } };
     $('#sk').oninput = e => vd.currentTime = e.target.value / 1000 * vd.duration;

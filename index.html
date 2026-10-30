@@ -840,8 +840,9 @@ button:active,.mv:active{transform:scale(.97)}
 .chip:hover{border-color:var(--grn);color:var(--grn)}
 dialog{box-shadow:0 32px 100px #0009;animation:dialogIn .38s cubic-bezier(.2,.8,.2,1)}
 @keyframes dialogIn{from{opacity:0;transform:translateY(22px) scale(.98)}to{opacity:1;transform:none}}
-dialog::backdrop{background:#0d131abc;backdrop-filter:blur(13px)}
-html[data-theme="matrix"] dialog::backdrop{background:#000000cc;backdrop-filter:blur(16px)}
+dialog::backdrop{background:#0d131abc;-webkit-backdrop-filter:blur(13px);backdrop-filter:blur(13px)}
+html[data-theme="matrix"] dialog::backdrop{background:#000000cc;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+@media(max-width:680px){dialog::backdrop,html[data-theme="matrix"] dialog::backdrop{-webkit-backdrop-filter:none;backdrop-filter:none}}
 
 .bd:after{background:linear-gradient(transparent 30%,var(--card))}.tag{color:var(--mut)}
 
@@ -1023,11 +1024,11 @@ h1 {
 :root{--ok:#2f7d54}
 html[data-theme="matrix"]{--ok:#ffffff}
 
-#drive-dialog{width:min(580px,94vw);max-height:min(92dvh,780px);border:1px solid var(--line);border-radius:8px;overflow:hidden}
-#drive-dialog[open]{display:flex;flex-direction:column}
-#drive-dialog .dv{display:flex;flex-direction:column;min-height:0;flex:1}
+#drive-dialog{width:min(580px,94vw);max-height:92vh;max-height:min(92dvh,780px);border:1px solid var(--line);border-radius:8px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+#drive-dialog[open]{display:block}
+#drive-dialog .dv{display:block}
 
-.dv-head{position:relative;display:flex;align-items:center;gap:14px;padding:20px 22px 16px;border-bottom:1px solid var(--line)}
+.dv-head{position:sticky;top:0;z-index:3;background:var(--card);display:flex;align-items:center;gap:14px;padding:20px 22px 16px;border-bottom:1px solid var(--line)}
 .dv-ico{flex:none;width:46px;height:46px;display:grid;place-items:center;border:1px solid var(--line);border-radius:8px;background:var(--soft);color:var(--grn)}
 html[data-theme="matrix"] .dv-ico{color:var(--ink)}
 .dv-title{min-width:0;flex:1}
@@ -1036,7 +1037,7 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
 .dv-x{flex:none;align-self:flex-start;width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--ink);font-size:15px;transition:border-color .25s,background .25s}
 .dv-x:hover{border-color:var(--grn);background:var(--soft)}
 
-.dv-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:20px 22px 22px}
+.dv-body{padding:20px 22px 22px}
 .dv-lead{font-size:15px;line-height:1.6;color:var(--mut);max-width:60ch;margin:0 0 22px}
 
 .dv-step{position:relative;display:grid;grid-template-columns:30px minmax(0,1fr);gap:16px;padding-bottom:26px}
@@ -1056,7 +1057,7 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
 .dv-acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
 .dv-acts .pill{flex:1 1 150px;justify-content:center;height:46px;padding:0 18px;font-size:15px}
 
-.dv-foot{display:flex;align-items:center;gap:14px;padding:14px 22px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--card)}
+.dv-foot{position:sticky;bottom:0;z-index:3;display:flex;align-items:center;gap:14px;padding:14px 22px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--card)}
 .dv-foot .pill{flex:none;height:44px;padding:0 22px;font-size:15px}
 .dv-status{flex:1;min-width:0;display:flex;align-items:flex-start;gap:10px;margin:0;font:400 12px/1.55 var(--timer-font);color:var(--ink);overflow-wrap:anywhere}
 .dv-status::before{content:"";flex:none;width:10px;height:10px;margin-top:4px;border-radius:50%;border:2px solid var(--mut);box-sizing:border-box;transition:background .3s,border-color .3s}
@@ -1141,7 +1142,7 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
   .fx b{max-width:60%;font-size:12px;overflow-wrap:anywhere}
 
   /* janelas (Drive e TMDB) como painel que sobe da base da tela */
-  #drive-dialog,#cfg{width:100%;max-width:100%;max-height:92dvh;margin:auto 0 0;border-radius:16px 16px 0 0;animation:sheetUp .36s cubic-bezier(.2,.8,.2,1)}
+  #drive-dialog,#cfg{width:100%;max-width:100%;max-height:92vh;max-height:92dvh;margin:auto 0 0;border-radius:16px 16px 0 0;animation:sheetUp .36s cubic-bezier(.2,.8,.2,1)}
   @keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
   .dv-head{padding:26px 16px 14px;gap:12px}
   .dv-head::before{content:"";position:absolute;top:9px;left:50%;width:40px;height:4px;margin-left:-20px;border-radius:4px;background:var(--line)}

@@ -1338,6 +1338,11 @@ details.dv-link[open] summary{margin-bottom:10px}
   #pl:not(:fullscreen) .pc #fs{order:12}
 }
 @media(orientation:landscape) and (max-height:500px){#bk,#fw{display:none}}
+
+/* nota e duração nunca quebram dentro do chip; se faltar espaço, a nota desce para a linha de baixo */
+.chip.s{white-space:nowrap;flex:none}
+.mb div{flex-wrap:wrap;row-gap:6px}
+.mb div>span:first-child{white-space:nowrap}
 </style>
 </head>
 

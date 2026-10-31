@@ -5,6 +5,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#eef1f2">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Acervo">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Acervo do Cidjei">
+  <meta property="og:description" content="Sua cinemateca particular: cataloge e assista seus filmes com dados do TMDB.">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" type="image/png" href="/icons/icon-192.png">
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
@@ -14,9 +21,9 @@
   <link rel="preconnect" href="https://image.tmdb.org">
   <link rel="dns-prefetch" href="https://api.themoviedb.org">
   <meta name="description" content="Sua cinemateca particular: cataloge e assista seus filmes com dados do TMDB.">
-  <script>try{if(localStorage['cine.theme']==='matrix')document.documentElement.dataset.theme='matrix'}catch(e){}</script>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap"></noscript>
+  <script>try{var t=localStorage['cine.theme'];if(!t&&matchMedia('(prefers-color-scheme: dark)').matches)t='matrix';if(t==='matrix'){document.documentElement.dataset.theme='matrix';window._df=1;var l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Share+Tech+Mono&display=swap';document.head.append(l)}}catch(e){}</script>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..600&family=Space+Grotesk:wght@400..700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400..600&family=Space+Grotesk:wght@400..700&display=swap"></noscript>
   
   <style>
     :root {
@@ -1219,10 +1226,124 @@ html[data-theme="matrix"] .prog i{background:#fff}
 html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{display:block}
 #seekfx{position:absolute;top:50%;z-index:5;padding:12px 18px;border-radius:30px;background:#000b;color:#fff;font:600 14px var(--mono);transform:translateY(-50%);opacity:0;pointer-events:none;transition:opacity .2s}
 #seekfx.on{opacity:1}
-  </style>
+  /* ===== v2: acessibilidade, layouts por aparelho, novos componentes ===== */
+.skip{position:absolute;left:12px;top:-64px;z-index:100;padding:10px 16px;border-radius:8px;background:var(--ink);color:var(--bg);text-decoration:none;font:500 14px var(--sans)}
+.skip:focus{top:calc(10px + env(safe-area-inset-top))}
+@media(min-width:681px){.wrap{padding-left:max(28px,env(safe-area-inset-left));padding-right:max(28px,env(safe-area-inset-right))}}
+@media(min-width:1700px){.wrap{max-width:1560px}.grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}}
+.mv:focus-visible{outline:3px solid var(--grn);outline-offset:3px}
+html[data-theme="matrix"] .mv:focus-visible{outline-color:#fff}
+@media(pointer:coarse){.chip{min-height:40px}.pill{min-height:44px}}
+
+/* cabeçalho em tablets e janelas médias: só ícones, sem estourar a largura */
+@media(max-width:1100px){
+  nav,.theme-label,.brand:after{display:none}
+  .theme-switch{padding:7px 10px 7px 12px}
+  header .pill .t{display:none}
+  header .pill.me{padding:0 6px}
+  header .pill:not(.me){padding:0 14px}
+}
+
+/* com filmes no acervo, a abertura encolhe e a biblioteca aparece mais cedo */
+html.has-lib .hero{padding:44px 0 40px;gap:40px}
+html.has-lib .hero h1{font-size:clamp(34px,4.6vw,56px);margin:10px 0 18px}
+html.has-lib .intro{display:none}
+html.has-lib .hero .btn{height:56px;padding:0 28px;font-size:17px}
+html.has-lib .hero:before{display:none}
+@media(max-width:680px){
+  html.has-lib .hero{padding:12px 0 16px;gap:12px}
+  html.has-lib .hero h1,html.has-lib .hero>div>.lbl:first-child{display:none}
+  html.has-lib .hero .acts .btn{height:46px;font-size:13.5px;padding:0 8px}
+  html.has-lib .hero .acts .btn.k{height:50px}
+  html.has-lib #st{margin-top:10px!important}
+  html.has-lib .stat{padding:12px 10px}
+  html.has-lib .stat p{font-size:11px}
+  html.has-lib .stat b{font-size:17px}
+}
+@media(max-width:900px){
+  .hero{grid-template-columns:minmax(0,1fr)}
+  .hero .acts #sync2{grid-column:1/-1}
+  html.has-lib .stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 12px}
+  html.has-lib .stat:before,html.has-lib .stat>.lbl,html.has-lib .stat .lnk{display:none}
+  html.has-lib .stat p{flex-direction:column;align-items:flex-start;gap:2px;padding:0;border:0;line-height:1.25;color:var(--mut)}
+}
+
+/* esqueleto de carregamento */
+.sk{pointer-events:none}
+.sk .po{background:linear-gradient(100deg,var(--soft) 30%,color-mix(in srgb,var(--soft) 50%,var(--card)) 50%,var(--soft) 70%) 0 0/300% 100%;animation:shimmer 1.4s linear infinite}
+.sk .mb i{display:block;height:12px;border-radius:4px;background:var(--soft);margin-bottom:8px}
+.sk .mb i+i{width:55%}
+@keyframes shimmer{to{background-position:-300% 0}}
+.empty-q{grid-column:1/-1;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+
+/* continuar assistindo */
+#cont{margin:0 0 36px}
+.shelf-h{font:600 20px var(--sans);letter-spacing:-.03em;margin:0 0 16px}
+.shelf{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 14px;scroll-snap-type:x proximity;scrollbar-width:thin;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.shelf .mv{flex:0 0 clamp(132px,16vw,176px);scroll-snap-align:start}
+@media(max-width:680px){.shelf{margin:0 -16px;padding:4px 16px 12px;gap:10px}.shelf .mv{flex-basis:128px}.shelf-h{font-size:18px}}
+.done-mark{position:absolute;z-index:1;right:8px;top:8px;width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:var(--grn);color:#fff;font:700 13px var(--sans)}
+html[data-theme="matrix"] .done-mark{background:#fff;color:#000}
+
+/* Drive: navegador de pastas e lista de pastas importadas */
+.dv-step[data-locked="1"] .dv-c>:not(h3){opacity:.45;pointer-events:none}
+#dv-browser{margin-top:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg);overflow:hidden}
+.dv-bc{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;padding:8px 10px;border-bottom:1px solid var(--line);font:500 12px var(--timer-font);color:var(--mut)}
+.dv-bc button{background:none;border:0;padding:6px 4px;border-radius:4px;color:inherit;font:inherit;min-height:32px}
+.dv-bc button[aria-current]{color:var(--ink);font-weight:600}
+#dv-list{list-style:none;margin:0;padding:0;max-height:min(280px,38dvh);overflow:auto;overscroll-behavior:contain}
+#dv-list li+li{border-top:1px solid var(--line)}
+#dv-list button{width:100%;display:flex;align-items:center;gap:12px;padding:0 14px;min-height:48px;background:none;border:0;text-align:left;font-size:15px}
+#dv-list button:hover{background:var(--soft)}
+#dv-list svg{flex:none;color:var(--grn)}
+#dv-list span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dv-empty{padding:18px 14px;color:var(--mut);font:13px/1.5 var(--timer-font)}
+#dv-browser .dv-acts{margin:0;padding:12px;border-top:1px solid var(--line)}
+#dv-saved{margin-top:20px}
+#dv-saved h4{font:500 12px var(--timer-font);letter-spacing:.04em;color:var(--mut);margin-bottom:8px}
+#dv-folders{list-style:none;padding:0}
+#dv-folders li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+#dv-folders li+li{margin-top:8px}
+#dv-folders span{min-width:0;display:flex;flex-direction:column}
+#dv-folders b{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#dv-folders small{font:12px var(--timer-font);color:var(--mut)}
+.dv-rm{flex:none;width:40px;height:40px;border:1px solid var(--line);border-radius:8px;background:none;color:var(--mut)}
+.dv-rm:hover{border-color:var(--grn);color:var(--grn)}
+details.dv-link{margin-top:16px}
+details.dv-link summary{cursor:pointer;min-height:36px;display:flex;align-items:center;font:500 13px var(--timer-font);color:var(--mut)}
+details.dv-link[open] summary{margin-bottom:10px}
+
+/* corrigir identificação (substitui o prompt do navegador) */
+#fixbox{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--soft)}
+#fixform{display:flex;gap:8px}
+#fixform input{flex:1;min-width:0;height:46px;border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:0 14px;font:400 16px var(--sans)}
+#fixform .pill{height:46px;padding:0 18px}
+#fixres{display:grid;gap:8px;margin-top:12px}
+.fixitem{display:flex;align-items:center;gap:12px;text-align:left;padding:8px;min-height:64px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+.fixitem img,.fixitem i{flex:none;width:36px;height:54px;border-radius:4px;object-fit:cover;background:var(--line)}
+.fixitem span{display:flex;flex-direction:column;min-width:0}
+.fixitem small{font:12px var(--mono);color:var(--mut)}
+.fixitem:hover{border-color:var(--grn)}
+
+/* player: novos controles */
+.pc button{display:inline-grid;place-items:center}
+#bk,#fw{min-width:54px}
+@media(max-width:680px){
+  #pl:not(:fullscreen) .pc #cc{order:6}
+  #pl:not(:fullscreen) .pc #bk{order:7}
+  #pl:not(:fullscreen) .pc #pp{order:8}
+  #pl:not(:fullscreen) .pc #fw{order:9}
+  #pl:not(:fullscreen) .pc #mu{order:10}
+  #pl:not(:fullscreen) .pc #pip{order:11}
+  #pl:not(:fullscreen) .pc #fs{order:12}
+}
+@media(orientation:landscape) and (max-height:500px){#bk,#fw{display:none}}
+</style>
 </head>
 
 <body>
+  <a class="skip" href="#main">Ir para o conteúdo</a>
+  <noscript><p style="padding:24px;font:16px system-ui">O Acervo precisa de JavaScript para funcionar. Ative-o no navegador e recarregue a página.</p></noscript>
   <header>
     <div class="wrap">
       <a class="brand" href="#"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -1230,16 +1351,16 @@ html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{displa
           <rect x="3" y="3" width="18" height="18" rx="4" />
           <path d="M8 3v18M16 3v18M3 8h5M3 16h5M16 8h5M16 16h5" />
         </svg>Acervo do Cidjei</a>
-      <nav><a href="#">Início</a><a href="#lib">Biblioteca</a></nav>
+      <nav aria-label="Principal"><a href="#">Início</a><a href="#lib">Biblioteca</a></nav>
       <button class="theme-switch" id="theme-switch" type="button" aria-label="Ativar tema La Haine Escuro" aria-pressed="false"><span class="theme-symbol" aria-hidden="true">◐</span><span class="theme-label" id="theme-label">MODO LA HAINE</span><span class="theme-track"><span class="theme-knob"></span></span></button>
-      <button class="pill me" id="add1"><i>+</i>Adicionar pasta</button>
-      <button class="pill" id="drive1" type="button">☁ Drive</button>
-      <button class="pill" id="sync1" type="button">↻ Atualizar</button>
-      <button class="pill" id="key1">TMDB</button>
+      <button class="pill me" id="add1" type="button" title="Adicionar pasta de filmes"><i aria-hidden="true">+</i><span class="t">Adicionar pasta</span></button>
+      <button class="pill" id="drive1" type="button" title="Google Drive" aria-label="Google Drive"><span aria-hidden="true">☁</span><span class="t">Drive</span></button>
+      <button class="pill" id="sync1" type="button" title="Atualizar filmes do Drive" aria-label="Atualizar filmes do Drive"><span aria-hidden="true">↻</span><span class="t">Atualizar</span></button>
+      <button class="pill" id="key1" type="button" title="Chave do TMDB">TMDB</button>
     </div>
   </header>
 
-  <main class="wrap">
+  <main class="wrap" id="main">
     <section class="hero">
       <div>
         <div class="lbl">◆ FILMES, MEMÓRIAS E RECONSTRUÇÕES</div>
@@ -1247,7 +1368,7 @@ html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{displa
         <p class="intro">Sua cinemateca particular. Entre a sobriedade dos fatos e a subjetividade das narrativas, organize e assista sem sair daqui.</p>
         <div class="acts"><button class="btn k" id="add2">Adicionar pasta de filmes</button><button class="btn"
             id="key2">Chave do TMDB</button><button class="btn" id="drive2" type="button">☁ Google Drive</button><button class="btn" id="sync2" type="button">↻ Atualizar Drive</button></div>
-        <div class="lbl" id="st" style="margin-top:26px;min-height:16px"></div>
+        <div class="lbl" id="st" role="status" aria-live="polite" style="margin-top:26px;min-height:16px"></div>
       </div>
       <aside class="card stat">
         <div class="lbl">Panorama</div>
@@ -1257,6 +1378,8 @@ html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{displa
         <a class="lnk" href="#lib">Ir para a biblioteca →</a>
       </aside>
     </section>
+
+    <section id="cont" hidden aria-labelledby="cont-h"><h2 class="shelf-h" id="cont-h">Continuar assistindo</h2><div class="shelf" id="cont-row"></div></section>
 
     <h2 class="lbl big" id="lib">Biblioteca</h2>
     <div class="tools">
@@ -1275,7 +1398,7 @@ html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{displa
     <div class="grid" id="gr"></div>
   </main>
 
-  <dialog id="det"></dialog>
+  <dialog id="det" aria-label="Ficha do filme"></dialog>
   <dialog id="cfg">
     <div class="in">
       <div class="lbl">Integração</div>
@@ -1296,7 +1419,7 @@ html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{displa
       <button class="dv-x" id="drive-x" type="button" aria-label="Fechar">✕</button>
     </div>
     <div class="dv-body">
-      <p class="dv-lead">Conecte sua conta Google e importe uma pasta do Drive. Os filmes são catalogados sem baixar os arquivos e reproduzidos no player do próprio site, por meio das Serverless Functions no Vercel.</p>
+      <p class="dv-lead">Conecte sua conta Google e escolha as pastas de filmes direto no Drive, sem copiar links. Os filmes são catalogados sem baixar nada e tocam no player do próprio site.</p>
       <section class="dv-step" id="dv-step1">
         <span class="dv-n">1</span>
         <div class="dv-c">
@@ -1310,13 +1433,22 @@ html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{displa
       <section class="dv-step" id="dv-step2" data-locked="1">
         <span class="dv-n">2</span>
         <div class="dv-c">
-          <h3>Importar pasta de filmes</h3>
-          <label for="drive-folder">Link ou ID da pasta</label>
-          <input id="drive-folder" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="url" placeholder="https://drive.google.com/drive/folders/…">
-          <div class="dv-acts"><button class="pill k" id="drive-add" type="button">Importar pasta</button><button class="pill" id="drive-sync" type="button">Sincronizar pastas</button></div>
+          <h3>Escolher as pastas de filmes</h3>
+          <div class="dv-acts"><button class="pill k" id="drive-pick" type="button">Escolher pasta no Drive</button><button class="pill" id="drive-sync" type="button">Sincronizar pastas</button></div>
+          <div id="dv-browser" hidden>
+            <nav class="dv-bc" id="dv-bc" aria-label="Caminho"></nav>
+            <ul id="dv-list"></ul>
+            <div class="dv-acts"><button class="pill k" id="dv-use" type="button" disabled>Escolha uma pasta</button><button class="pill" id="dv-cancel" type="button">Cancelar</button></div>
+          </div>
+          <div id="dv-saved" hidden><h4>Pastas importadas</h4><ul id="dv-folders"></ul></div>
+          <details class="dv-link"><summary>Prefiro colar o link da pasta</summary>
+            <label for="drive-folder">Link ou ID da pasta</label>
+            <input id="drive-folder" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="url" placeholder="https://drive.google.com/drive/folders/…">
+            <div class="dv-acts"><button class="pill" id="drive-add" type="button">Importar pasta</button></div>
+          </details>
         </div>
       </section>
-      <p class="dv-hint dv-note">Somente leitura. A conta e as pastas ficam lembradas neste aparelho; toque em “↻ Atualizar Drive” na tela inicial para ver os filmes novos.</p>
+      <p class="dv-hint dv-note">Somente leitura. A conta e as pastas ficam lembradas neste aparelho. O site confere o Drive sozinho de tempos em tempos; para ver filmes novos na hora, toque em “↻ Atualizar Drive”.</p>
     </div>
     <div class="dv-foot">
       <p class="dv-status" id="drive-status" role="status" data-ok="0" data-busy="0">Não conectado.</p>
@@ -1333,11 +1465,13 @@ html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{displa
     <div id="media-help" hidden>Alguns MKVs usam áudio que seu navegador não decodifica. Para converter uma cópia em MP4 (H.264/AAC), instale FFmpeg e execute na pasta do arquivo:<code id="convert-cmd"></code><button type="button" id="copy-cmd">Copiar comando</button></div>
     <div class="pc">
       <button id="pp" aria-label="Reproduzir ou pausar"></button>
+      <button id="bk" type="button" aria-label="Voltar 10 segundos">−10s</button>
+      <button id="fw" type="button" aria-label="Avançar 10 segundos">+10s</button>
       <span id="tc">0:00</span>
-      <input type="range" id="sk" min="0" max="1000" value="0" aria-label="Posição">
+      <input type="range" id="sk" min="0" max="10000" value="0" aria-label="Posição">
       <span id="td">0:00</span>
-      <button id="mu">VOL</button><input type="range" id="vo" min="0" max="1" step=".05" value="1" aria-label="Volume">
-      <button id="cc" hidden>CC</button><button id="sp">1×</button><button id="fs" aria-label="Tela cheia">⛶</button>
+      <button id="mu" type="button" aria-label="Silenciar"></button><input type="range" id="vo" min="0" max="1" step=".05" value="1" aria-label="Volume">
+      <button id="cc" type="button" hidden aria-label="Legendas">CC</button><button id="sp" type="button" aria-label="Velocidade de reprodução">1×</button><button id="pip" type="button" hidden aria-label="Imagem sobre imagem">PiP</button><button id="fs" type="button" aria-label="Tela cheia">⛶</button>
     </div>
   </div>
   <div id="tt" popover="manual"></div>
@@ -1346,32 +1480,47 @@ html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{displa
     const $ = s => document.querySelector(s), L = localStorage, IMG = 'https://image.tmdb.org/t/p/';
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';');
     const J = (k, d) => { try { return JSON.parse(L[k]) ?? d } catch { return d } };
-    let lib = J('cine.lib', []), pos = J('cine.pos', {}), seen = J('cine.seen', {}), FILES = new Map(), view = [], gf = '', cur = null, urls = [], busy = false, tto, ls = 0;
-    const themeSwitch = $('#theme-switch');
-    function setTheme(theme) { 
-      document.documentElement.dataset.theme = theme; if (theme === 'matrix') darkFonts(); 
-      L.setItem('cine.theme',theme); 
-      themeSwitch.setAttribute('aria-pressed',String(theme==='matrix'));
-      document.querySelector('meta[name=theme-color]').content=theme==='matrix'?'#080808':'#eef1f2';
-      themeSwitch.setAttribute('aria-label',theme==='matrix'?'Ativar modo claro':'Ativar modo escuro (La Haine)');
-      $('#theme-label').textContent=theme==='matrix'?'MODO ESCURO':'MODO CLARO'; 
+    let lib = [], pos = J('cine.pos', {}), seen = J('cine.seen', {}), done = J('cine.done', {}), FILES = new Map(), view = [], byId = new Map(), gf = '', cur = null, urls = [], busy = false, tto, ls = 0;
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    /* Armazenamento: o catálogo vive no IndexedDB (sem o limite de ~5 MB do localStorage). */
+    let dbp; const db = () => dbp ||= new Promise((ok, no) => { const o = indexedDB.open('acervo', 1); o.onupgradeneeded = () => o.result.createObjectStore('k'); o.onerror = () => no(o.error); o.onsuccess = () => ok(o.result) });
+    const kvGet = async k => { const d = await db(); return new Promise((ok, no) => { const r = d.transaction('k').objectStore('k').get(k); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error) }) };
+    const kvSet = async (k, v) => { const d = await db(); return new Promise((ok, no) => { const t = d.transaction('k', 'readwrite'); t.objectStore('k').put(v, k); t.oncomplete = () => ok(); t.onerror = t.onabort = () => no(t.error) }) };
+    async function loadLib() {
+      try { const v = await kvGet('lib'); if (Array.isArray(v)) return v } catch { }
+      const old = J('cine.lib', []); /* migração do formato antigo (localStorage) */
+      if (old.length) { try { await kvSet('lib', old); L.removeItem('cine.lib') } catch { } }
+      return old
     }
-    themeSwitch.onclick=()=>setTheme(document.documentElement.dataset.theme==='matrix'?'light':'matrix');
-    setTheme(L.getItem('cine.theme')==='matrix'?'matrix':'light');
+    const themeSwitch = $('#theme-switch');
+    const sysDark = matchMedia('(prefers-color-scheme: dark)');
+    function setTheme(theme, persist = true) {
+      document.documentElement.dataset.theme = theme; if (theme === 'matrix') darkFonts();
+      if (persist) L.setItem('cine.theme', theme);
+      themeSwitch.setAttribute('aria-pressed', String(theme === 'matrix'));
+      document.querySelector('meta[name=theme-color]').content = theme === 'matrix' ? '#080808' : '#eef1f2';
+      themeSwitch.setAttribute('aria-label', theme === 'matrix' ? 'Ativar modo claro' : 'Ativar modo escuro (La Haine)');
+      $('#theme-label').textContent = theme === 'matrix' ? 'MODO ESCURO' : 'MODO CLARO';
+    }
+    themeSwitch.onclick = () => setTheme(document.documentElement.dataset.theme === 'matrix' ? 'light' : 'matrix');
+    /* Sem escolha salva, o site acompanha o tema do aparelho. */
+    setTheme(L.getItem('cine.theme') ? (L.getItem('cine.theme') === 'matrix' ? 'matrix' : 'light') : (sysDark.matches ? 'matrix' : 'light'), false);
+    sysDark.addEventListener?.('change', e => { if (!L.getItem('cine.theme')) setTheme(e.matches ? 'matrix' : 'light', false) });
     const ffQuote = n => '"'+n.replace(/"/g,'\\"')+'"';
     const conversionCommand = n => 'ffmpeg -i '+ffQuote(n)+' -map 0:v:0 -map 0:a:0? -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k -sn -movflags +faststart '+ffQuote(n.replace(/\.[^.]+$/,'')+' - navegador.mp4');
     $('#copy-cmd').onclick=async()=>{try{await navigator.clipboard.writeText($('#convert-cmd').textContent);toast('Comando copiado. Execute com FFmpeg instalado.')}catch{toast('Selecione e copie o comando exibido.')}};
     const det = $('#det'), cfg = $('#cfg'), pl = $('#pl'), vd = $('#vd');
     const POP = 'showPopover' in HTMLElement.prototype; if (!POP) document.documentElement.classList.add('nopop');
     const toast = t => { const e = $('#tt'); e.textContent = t; if (POP) { try { e.hidePopover() } catch { } try { e.showPopover() } catch { } } else e.classList.add('on'); clearTimeout(tto); tto = setTimeout(() => { if (POP) { try { e.hidePopover() } catch { } } else e.classList.remove('on') }, 4500) };
-    let svt; const flush = () => { clearTimeout(svt); svt = 0; try { L['cine.lib'] = JSON.stringify(lib) } catch { toast('Armazenamento do navegador cheio.') } };
+    let svt; const flush = () => { clearTimeout(svt); svt = 0; kvSet('lib', lib).catch(() => { try { L['cine.lib'] = JSON.stringify(lib) } catch { toast('Armazenamento do navegador cheio.') } }) };
     const save = () => { clearTimeout(svt); svt = setTimeout(flush, 500) };
     addEventListener('pagehide', () => { if (svt) flush(); if (cur) { pos[cur.id] = vd.currentTime; savePos() } });
-    document.addEventListener('visibilitychange', () => { if (document.hidden && svt) flush() });
-    const savePos = () => { L['cine.pos'] = JSON.stringify(pos); L['cine.seen'] = JSON.stringify(seen) };
+    document.addEventListener('visibilitychange', () => { if (document.hidden) { if (svt) flush(); if (cur) { pos[cur.id] = vd.currentTime; savePos() } } });
+    const savePos = () => { L['cine.pos'] = JSON.stringify(pos); L['cine.seen'] = JSON.stringify(seen); L['cine.done'] = JSON.stringify(done) };
+    let rq = 0; const renderSoon = () => { if (!rq) rq = setTimeout(render, 1200) };
     const KEY = () => L['cine.key'] || '';
     const driveDlg = $('#drive-dialog');
-    let driveToken = null, driveClient = null, driveExp = 0, resumeAt = null, driveWarned = false;
+    let driveToken = null, driveClient = null, driveExp = 0, resumeAt = null, driveWarned = false, autoRetried = false, renewing = false, lastRenew = 0;
     const driveFolders = () => J('cine.drive.folders', []);
     const AUTH='/api/auth/';let driveEmail='',SERVER_OK=null,syncing=false;
     const serverOk=async()=>{if(SERVER_OK===null)SERVER_OK=await fetch(AUTH+'status').then(r=>r.json()).then(x=>!!x.configured).catch(()=>false);return SERVER_OK};
@@ -1382,26 +1531,31 @@ html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{displa
         const loc=driveFolders();if(d.folders?.length&&!loc.length)L.setItem('cine.drive.folders',JSON.stringify(d.folders));else if(!d.folders?.length&&loc.length)saveFolders(loc);
         return true}catch{return false}
     }
-    async function syncAll(){
-      if(syncing)return;
-      if(!driveFolders().length){openDrive();return toast('Importe uma pasta do Drive primeiro.')}
-      syncing=true;const bs=['sync1','sync2'].map(i=>$('#'+i)),lab=bs.map(b=>b.textContent);bs.forEach(b=>{b.disabled=true;b.textContent='↻ Atualizando…'});
-      const ids=()=>new Set(lib.filter(m=>m.source==='drive').map(m=>m.id)),a=ids();
-      try{await ensureDriveToken();for(const f of driveFolders())await scanDriveFolder(f.id,true);save();render();idAll();
-        const b=ids();let add=0,rem=0;b.forEach(x=>a.has(x)||add++);a.forEach(x=>b.has(x)||rem++);
-        toast(add||rem?add+' novo(s) e '+rem+' removido(s) do Drive.':'Tudo em dia: nenhuma mudança no Drive.');driveStatus('Sincronização concluída.')}
-      catch(e){toast(e.message||'Não foi possível atualizar.')}
-      finally{syncing=false;bs.forEach((b,i)=>{b.disabled=false;b.textContent=lab[i]})}
+    async function syncAll(auto) {
+      if (syncing) return;
+      if (!driveFolders().length) { if (auto) return; openDrive(); return toast('Importe uma pasta do Drive primeiro.') }
+      syncing = true; const bs = ['sync1', 'sync2'].map(i => $('#' + i)); bs.forEach(b => { b.disabled = true; b.dataset.h = b.innerHTML; b.textContent = '↻ Atualizando…' });
+      const ids = () => new Set(lib.filter(m => m.source === 'drive').map(m => m.id)), a = ids();
+      try {
+        await ensureDriveToken(); for (const f of driveFolders()) await scanDriveFolder(f.id, true); save(); render(); idAll();
+        const b = ids(); let add = 0, rem = 0; b.forEach(x => a.has(x) || add++); a.forEach(x => b.has(x) || rem++);
+        L['cine.lastsync'] = Date.now();
+        if (add || rem) toast(add + ' novo(s) e ' + rem + ' removido(s) do Drive.'); else if (!auto) toast('Tudo em dia: nenhuma mudança no Drive.');
+        driveStatus('Sincronização concluída.'); renderFolders()
+      }
+      catch (e) { if (!auto) toast(e.message || 'Não foi possível atualizar.') }
+      finally { syncing = false; bs.forEach(b => { b.disabled = false; b.innerHTML = b.dataset.h }) }
     }
+    const autoSync = () => { if (driveFolders().length && Date.now() - (+L['cine.lastsync'] || 0) > 6 * 3600e3) syncAll(true) };
 
     const driveStatus = t => {
       const e = $('#drive-status'), on = !!driveToken;
       e.textContent = t; e.dataset.ok = on ? '1' : '0'; e.dataset.busy = /…$/.test(t) ? '1' : '0';
-      $('#drive-logout').disabled = !on; $('#drive-add').disabled = !on; $('#drive-sync').disabled = !on;
+      $('#drive-logout').disabled = !on; $('#drive-add').disabled = !on; $('#drive-sync').disabled = !on; $('#drive-pick').disabled = !on;
       $('#dv-step2').dataset.locked = on ? '0' : '1'
     };
     const folderId = raw => { const v = raw.trim(); const m = v.match(/\/folders\/([a-zA-Z0-9_-]+)/); return m ? m[1] : (/^[a-zA-Z0-9_-]{10,}$/.test(v) ? v : ''); };
-    function openDrive(){ $('#drive-client').value=L.getItem('cine.drive.client')||'';driveStatus(driveToken?'Conta conectada'+(driveEmail?': '+driveEmail:'')+'.':'Conecte sua conta para importar ou sincronizar.');driveDlg.showModal();serverOk().then(ok=>{$('#legacy-id').hidden=ok}) }
+    function openDrive(){ $('#drive-client').value=L.getItem('cine.drive.client')||'';driveStatus(driveToken?'Conta conectada'+(driveEmail?': '+driveEmail:'')+'.':'Conecte sua conta para importar ou sincronizar.');renderFolders();showBrowser(false);driveDlg.showModal();serverOk().then(ok=>{$('#legacy-id').hidden=ok}) }
     ['drive1','drive2'].forEach(id=>$('#'+id).onclick=openDrive);
     $('#drive-close').onclick=$('#drive-x').onclick=()=>driveDlg.close();
     async function ensureGIS(){
@@ -1457,8 +1611,14 @@ html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{displa
     async function driveGet(path,query={}){
       if(!driveToken)throw Error('Conecte sua conta Google primeiro.');
       const u=new URL('https://www.googleapis.com/drive/v3/'+path);Object.entries(query).forEach(([k,v])=>u.searchParams.set(k,v));
-      const r=await fetch(u,{headers:{Authorization:'Bearer '+driveToken}});
-      if(!r.ok){if(r.status===401)driveToken=null;throw Error('Google Drive: '+r.status+'. Verifique a autorização e o acesso à pasta.')}return r.json();
+      for(let i=0;;i++){
+        const r=await fetch(u,{headers:{Authorization:'Bearer '+driveToken}});
+        if(r.ok)return r.json();
+        if(r.status===401){driveToken=null;throw Error('Sessão do Google expirada. Conecte de novo.')}
+        const why=await r.json().then(j=>j?.error?.errors?.[0]?.reason||'',()=>'');
+        if((r.status===429||r.status>=500||/ratelimit|backenderror/i.test(why))&&i<3){await sleep(700*2**i+Math.random()*300);continue}
+        throw Error(r.status===404?'Pasta não encontrada ou sem acesso.':'Google Drive: '+r.status+'. Verifique a autorização e o acesso à pasta.')
+      }
     }
     async function scanDriveFolder(id,quiet){
       const info=await driveGet('files/'+encodeURIComponent(id),{fields:'id,name,mimeType',supportsAllDrives:'true'});
@@ -1482,16 +1642,56 @@ html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{displa
       if(!quiet){save();render();idAll()}
       return {id,name:info.name,count:items.length};
     }
-    $('#drive-add').onclick=async()=>{const id=folderId($('#drive-folder').value);if(!id)return driveStatus('Cole um link de pasta válido ou seu ID.');try{driveStatus('Lendo pasta…');const result=await scanDriveFolder(id);const folders=driveFolders().filter(x=>x.id!==id);folders.push({id,name:result.name});saveFolders(folders);driveStatus(result.count+' filmes importados de '+result.name+'.');}catch(e){driveStatus(e.message)}};
-    $('#drive-sync').onclick=syncAll;
-    ['sync1','sync2'].forEach(i=>$('#'+i).onclick=syncAll);
+    async function importFolder(id){
+      driveStatus('Lendo pasta…');const result=await scanDriveFolder(id);
+      const folders=driveFolders().filter(x=>x.id!==id);folders.push({id,name:result.name});saveFolders(folders);
+      driveStatus(result.count+' filmes importados de '+result.name+'.');renderFolders();return result
+    }
+    $('#drive-add').onclick=async()=>{const id=folderId($('#drive-folder').value);if(!id)return driveStatus('Cole um link de pasta válido ou seu ID.');try{await importFolder(id);$('#drive-folder').value=''}catch(e){driveStatus(e.message)}};
+    /* Navegador de pastas do Drive: dispensa copiar link. */
+    const FOLDER = 'application/vnd.google-apps.folder', ICON_F = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
+    let brStack = [];
+    function showBrowser(on) { $('#dv-browser').hidden = !on; $('#drive-pick').hidden = on; if (on) { brStack = [{ id: '', name: 'Drive' }]; brLoad() } }
+    async function brLoad() {
+      const cur = brStack.at(-1), list = $('#dv-list'), ok = cur.id && cur.id !== 'root' && cur.id !== 'shared';
+      $('#dv-bc').innerHTML = brStack.map((x, i) => `<button type="button" data-i="${i}"${i === brStack.length - 1 ? ' aria-current="true"' : ''}>${esc(x.name)}</button>`).join('<span aria-hidden="true">›</span>');
+      $('#dv-use').disabled = !ok; $('#dv-use').textContent = ok ? 'Importar “' + cur.name + '”' : 'Abra uma pasta para importar';
+      const row = (id, name) => `<li><button type="button" data-id="${esc(id)}" data-name="${esc(name)}">${ICON_F}<span>${esc(name)}</span></button></li>`;
+      if (!cur.id) { list.innerHTML = row('root', 'Meu Drive') + row('shared', 'Compartilhados comigo'); return }
+      list.innerHTML = '<li class="dv-empty">Carregando…</li>';
+      try {
+        const items = []; let page = '';
+        do {
+          const q = cur.id === 'shared' ? `sharedWithMe = true and mimeType = '${FOLDER}' and trashed = false` : `'${cur.id}' in parents and mimeType = '${FOLDER}' and trashed = false`;
+          const r = await driveGet('files', { q, fields: 'nextPageToken,files(id,name)', orderBy: 'name', pageSize: '200', pageToken: page, supportsAllDrives: 'true', includeItemsFromAllDrives: 'true' });
+          items.push(...(r.files || [])); page = r.nextPageToken || ''
+        } while (page && items.length < 1000);
+        if (brStack.at(-1) !== cur) return;
+        list.innerHTML = items.length ? items.map(f => row(f.id, f.name)).join('') : '<li class="dv-empty">Nenhuma subpasta aqui. Se os filmes estão nesta pasta, toque em importar.</li>'
+      } catch (e) { list.innerHTML = `<li class="dv-empty">${esc(e.message)}</li>` }
+    }
+    $('#drive-pick').onclick = () => showBrowser(true);
+    $('#dv-cancel').onclick = () => showBrowser(false);
+    $('#dv-bc').onclick = e => { const b = e.target.closest('button[data-i]'); if (b) { brStack = brStack.slice(0, +b.dataset.i + 1); brLoad() } };
+    $('#dv-list').onclick = e => { const b = e.target.closest('button'); if (b) { brStack.push({ id: b.dataset.id, name: b.dataset.name }); brLoad() } };
+    $('#dv-use').onclick = async () => { const c = brStack.at(-1); try { $('#dv-use').disabled = true; await importFolder(c.id); showBrowser(false) } catch (e) { driveStatus(e.message); brLoad() } };
+    function renderFolders() {
+      const f = driveFolders(); $('#dv-saved').hidden = !f.length;
+      $('#dv-folders').innerHTML = f.map(x => { const n = lib.filter(m => m.driveFolder === x.id).length; return `<li><span><b>${esc(x.name || 'Pasta')}</b><small>${n} filme${n === 1 ? '' : 's'}</small></span><button type="button" class="dv-rm" data-id="${esc(x.id)}" aria-label="Remover ${esc(x.name || 'pasta')}">✕</button></li>` }).join('')
+    }
+    $('#dv-folders').onclick = e => {
+      const b = e.target.closest('.dv-rm'); if (!b) return; const id = b.dataset.id, f = driveFolders().find(x => x.id === id);
+      if (!confirm('Remover “' + (f?.name || 'pasta') + '” do acervo? Os arquivos no Drive não são apagados.')) return;
+      lib = lib.filter(m => m.driveFolder !== id); saveFolders(driveFolders().filter(x => x.id !== id)); save(); render(); renderFolders()
+    };
+    $('#drive-sync').onclick=()=>syncAll();
+    ['sync1','sync2'].forEach(i=>$('#'+i).onclick=()=>syncAll());
 
     const st = t => $('#st').textContent = t || '';
     const nota = v => v.toFixed(1).replace('.', ',');
     const base = n => n.replace(/\.[^.]+$/, '');
     const VID = /\.(mp4|m4v|webm|mkv|mov|avi|ogv)$/i, SUB = /\.(srt|vtt)$/i;
-    const idb = v => new Promise((ok, no) => { const o = indexedDB.open('acervo', 1); o.onupgradeneeded = () => o.result.createObjectStore('k'); o.onerror = () => no(o.error); o.onsuccess = () => { const s = o.result.transaction('k', v ? 'readwrite' : 'readonly').objectStore('k'), r = v ? s.put(v, 'roots') : s.get('roots'); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error) } });
-    const roots = () => idb().then(r => r || [], () => []);
+    const roots = () => kvGet('roots').then(r => r || [], () => []);
 
     const parse = n => {
       let s = base(n).replace(/[._]+/g, ' ').replace(/\[[^\]]*\]/g, ' '), y = null;
@@ -1509,11 +1709,15 @@ html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{displa
       if (!r.ok) throw Object.assign(new Error('TMDB ' + r.status), { s: r.status });
       return r.json()
     }
-    async function ident(m) {
-      let r = (await tmdb('/search/movie', m.y ? { query: m.q, year: m.y } : { query: m.q })).results;
-      if (!r.length && m.y) r = (await tmdb('/search/movie', { query: m.q })).results;
-      if (!r.length) { m.tm = false; return }
-      const d = await tmdb('/movie/' + r[0].id, { append_to_response: 'credits' }), c = d.credits.crew, nm = a => [...new Set(a.map(x => x.name))];
+    async function ident(m, forceId) {
+      let id = forceId;
+      if (!id) {
+        let r = (await tmdb('/search/movie', m.y ? { query: m.q, year: m.y } : { query: m.q })).results;
+        if (!r.length && m.y) r = (await tmdb('/search/movie', { query: m.q })).results;
+        if (!r.length) { m.tm = false; return }
+        id = r[0].id
+      }
+      const d = await tmdb('/movie/' + id, { append_to_response: 'credits' }), c = d.credits.crew, nm = a => [...new Set(a.map(x => x.name))];
       if (!d.overview) d.overview = (await tmdb('/movie/' + d.id, { language: 'en-US' })).overview;
       m.tm = {
         id: d.id, t: d.title, o: d.original_title, tag: d.tagline, ov: d.overview, dt: d.release_date, rt: d.runtime, g: d.genres.map(g => g.name), v: d.vote_average, vc: d.vote_count, p: d.poster_path, b: d.backdrop_path,
@@ -1530,7 +1734,7 @@ html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{displa
         await Promise.all([0, 1, 2, 3].map(async () => {
           for (let m; m = q.shift();) {
             try { await ident(m) } catch (e) { if (e.s === 401) { q.length = 0; throw e } f++ }
-            st(`Identificando ${++n}/${tot}…`); if (n % 6 === 0) { save(); render() }
+            st(`Identificando ${++n}/${tot}…`); if (n % 6 === 0) { save(); renderSoon() }
           }
         }))
       } catch (e) { toast('Chave do TMDB inválida. Confira no botão TMDB.') }
@@ -1555,7 +1759,7 @@ html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{displa
       if (!window.showDirectoryPicker) { st('Selecione a pasta. No Firefox, você precisará selecioná-la novamente após reabrir a página.'); return $('#fi').click(); }
       try {
         const h = await showDirectoryPicker({ id: 'acervo', mode: 'read' }), r = (await roots()).filter(x => x.name !== h.name);
-        r.push(h); try { await idb(r) } catch { }
+        r.push(h); try { await kvSet('roots', r) } catch { }
         await scan(h); if (!KEY()) cfg.showModal()
       } catch (e) { if (e.name !== 'AbortError') toast('Não foi possível abrir a pasta: ' + e.message) }
     }
@@ -1575,28 +1779,41 @@ html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{displa
     }
 
     const PG = 48; let shown = 0;
-    const ti = m => m.tm?.t || m.q, HY = new WeakMap();
+    const ti = m => m.tm?.t || m.q, HY = new WeakMap(), NODES = new Map();
     const hay = m => { let h = HY.get(m); if (!h || h.k !== m.tm) HY.set(m, h = { k: m.tm, s: [ti(m), m.tm?.o, m.n, ...(m.tm?.dir || []), ...(m.tm?.g || []), ...(m.tm?.cast || []).map(c => c.n)].join(' ').toLowerCase() }); return h.s };
-    const card = (m, i) => {
-      const t = m.tm, y = t?.dt?.slice(0, 4) || m.y || '', p = pos[m.id], pr = p > 15 && t?.rt ? Math.min(100, p / (t.rt * 60) * 100) : 0;
-      return `<article class="card mv" tabindex="0" role="button" data-i="${i}" aria-label="${esc(ti(m))}"><div class="po">${m.source === 'drive' ? '<span class="drive-mark">☁ DRIVE</span>' : ''}${t?.p ? `<img decoding="async" loading="lazy" alt="" width="342" height="513" srcset="${IMG}w185${t.p} 185w,${IMG}w342${t.p} 342w,${IMG}w500${t.p} 500w" sizes="(max-width:680px) 46vw,220px" src="${IMG}w342${t.p}">` : esc(m.n)}${pr ? `<div class="prog"><i style="width:${pr.toFixed(0)}%"></i></div>` : ''}</div><div class="mb"><h3>${esc(ti(m))}</h3><div><span>${y}${t?.rt ? ' · ' + t.rt + ' min' : ''}</span>${t?.v ? `<span class="chip g s">★ ${nota(t.v)}</span>` : `<span class="chip s">${t === false ? 'Sem dados' : 'Pendente'}</span>`}</div></div></article>`
+    const prog = m => { const p = pos[m.id], rt = m.tm?.rt; return p > 15 && rt ? Math.min(100, p / (rt * 60) * 100) : 0 };
+    const card = m => {
+      const t = m.tm, y = t?.dt?.slice(0, 4) || m.y || '', pr = prog(m);
+      return `<article class="card mv" tabindex="0" role="button" data-id="${esc(m.id)}" aria-label="${esc(ti(m))}"><div class="po">${m.source === 'drive' ? '<span class="drive-mark">☁ DRIVE</span>' : ''}${done[m.id] ? '<span class="done-mark" title="Já assistido" aria-label="Já assistido">✓</span>' : ''}${t?.p ? `<img decoding="async" loading="lazy" alt="" width="342" height="513" srcset="${IMG}w185${t.p} 185w,${IMG}w342${t.p} 342w,${IMG}w500${t.p} 500w" sizes="(max-width:680px) 46vw,220px" src="${IMG}w342${t.p}">` : esc(m.n)}${pr ? `<div class="prog"><i style="width:${pr.toFixed(0)}%"></i></div>` : ''}</div><div class="mb"><h3>${esc(ti(m))}</h3><div><span>${y}${t?.rt ? ' · ' + t.rt + ' min' : ''}</span>${t?.v ? `<span class="chip g s">★ ${nota(t.v)}</span>` : `<span class="chip s">${t === false ? 'Sem dados' : 'Pendente'}</span>`}</div></div></article>`
     };
+    /* Cartões só são refeitos quando mudam (sem piscar nem recarregar pôsteres). */
+    const sig = m => [m.tm === undefined ? 'p' : m.tm === false ? 'n' : m.tm.id, m.tm?.p, ti(m), Math.round(prog(m)), done[m.id] ? 1 : 0].join('|');
+    function cardEl(m) {
+      const s = sig(m), n = NODES.get(m.id); if (n && n.s === s) return n.el;
+      const t = document.createElement('template'); t.innerHTML = card(m); const el = t.content.firstElementChild; NODES.set(m.id, { el, s }); return el
+    }
     const mo = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) more() }, { rootMargin: '900px' });
     function more(upto) {
-      const g = $('#gr'); g.querySelector('#more')?.remove();
+      const g = $('#gr'); mo.disconnect(); g.querySelector('#more')?.remove();
       const end = Math.min(view.length, upto || shown + PG);
-      g.insertAdjacentHTML('beforeend', view.slice(shown, end).map((m, k) => card(m, shown + k)).join('')); shown = end;
-      if (shown < view.length) { g.insertAdjacentHTML('beforeend', '<div id="more"></div>'); mo.observe($('#more')) }
+      g.append(...view.slice(shown, end).map(cardEl)); shown = end;
+      if (shown < view.length) { const e = document.createElement('div'); e.id = 'more'; g.append(e); mo.observe(e) }
     }
+    const skeleton = () => { $('#gr').innerHTML = '<div class="card mv sk" aria-hidden="true"><div class="po"></div><div class="mb"><i></i><i></i></div></div>'.repeat(12); $('#gr').setAttribute('aria-busy', 'true') };
     function redo() { shown = 0; render() }
     function render() {
+      clearTimeout(rq); rq = 0;
       const q = $('#q').value.toLowerCase().trim(), so = $('#so').value, yr = m => +(m.tm?.dt?.slice(0, 4) || m.y || 0), keep = Math.max(PG, shown);
+      byId = new Map(lib.map(m => [m.id, m])); for (const k of NODES.keys()) if (!byId.has(k)) NODES.delete(k);
+      document.documentElement.classList.toggle('has-lib', lib.length > 0);
       view = lib.filter(m => (!gf || m.tm?.g?.includes(gf)) && (!q || hay(m).includes(q)));
       view.sort({ add: (a, b) => b.add - a.add, t: (a, b) => ti(a).localeCompare(ti(b), 'pt'), y: (a, b) => yr(b) - yr(a), v: (a, b) => (b.tm?.v || 0) - (a.tm?.v || 0), w: (a, b) => (seen[b.id] || 0) - (seen[a.id] || 0) }[so] || ((a, b) => b.add - a.add));
-      shown = 0; const g = $('#gr'); g.innerHTML = '';
+      shown = 0; const g = $('#gr'); g.replaceChildren(); g.removeAttribute('aria-busy');
       if (view.length) more(keep);
-      else g.innerHTML = lib.length ? '<p class="lbl" style="grid-column:1/-1">Nenhum filme corresponde à busca.</p>'
+      else g.innerHTML = lib.length ? '<div class="empty-q"><p class="lbl">Nenhum filme corresponde à busca.</p><button class="pill" type="button" data-clear>Limpar busca e filtros</button></div>'
         : '<div class="card empty"><div><span class="chip">Vazio</span><h3>Nenhuma pasta adicionada</h3><span class="sm">Formatos: mp4, mkv, webm, mov, avi · subpastas incluídas · legendas .srt/.vtt com o mesmo nome</span></div><button class="pill k big" data-add>Adicionar pasta</button></div>';
+      const cont = !q && !gf ? lib.filter(m => pos[m.id] > 15).sort((a, b) => (seen[b.id] || 0) - (seen[a.id] || 0)).slice(0, 12) : [];
+      $('#cont').hidden = !cont.length; $('#cont-row').innerHTML = cont.map(card).join('');
       const gs = [...new Set(lib.flatMap(m => m.tm?.g || []))].sort();
       $('#gc').innerHTML = gs.length ? `<button class="chip${gf ? '' : ' on'}" data-g="">Todos</button>` + gs.map(x => `<button class="chip${x === gf ? ' on' : ''}" data-g="${esc(x)}">${esc(x)}</button>`).join('') : '';
       $('#rc').textContent = lib.length ? (view.length === lib.length ? lib.length + ' filmes' : view.length + ' de ' + lib.length + ' filmes') : '';
@@ -1616,23 +1833,34 @@ html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{displa
 <h2>${esc(t?.t || m.q)}</h2>${t?.tag ? `<p class="tag">${esc(t.tag)}</p>` : ''}
 <div class="chips">${(t?.g || []).map(g => `<span class="chip">${esc(g)}</span>`).join('')}</div>
 <p class="ov">${esc(ov)}</p>
-<div class="acts"><button class="pill k big" id="dp">▶ Assistir</button><button class="pill big" id="dx">Fechar</button></div>
+<div class="acts"><button class="pill k big" id="dp">▶ ${pos[m.id] > 15 ? 'Continuar de ' + fmt(pos[m.id]) : 'Assistir'}</button>${pos[m.id] > 15 ? '<button class="pill big" id="drs">↺ Do início</button>' : ''}<button class="pill big" id="dx">Fechar</button></div>
 <p class="sm" style="margin-top:22px">${esc(m.p)} · <button class="lnk" id="dfix">Corrigir identificação</button>${t ? ` · <a class="lnk" target="_blank" rel="noopener" href="https://www.themoviedb.org/movie/${t.id}">Abrir no TMDB</a>` : ''}</p>
+<div id="fixbox" hidden><form id="fixform"><input id="fixq" type="search" aria-label="Título correto" placeholder="Título e ano, ex.: Interestelar 2014" autocomplete="off"><button class="pill k" type="submit">Buscar</button></form><div id="fixres"></div></div>
 ${t?.cast?.length ? `<h4 class="lbl">Elenco</h4><div class="cast">${t.cast.map(c => `<div class="cm">${c.p ? `<img loading="lazy" alt="" src="${IMG}w185${c.p}">` : '<i></i>'}${esc(c.n)}<small>${esc(c.c)}</small></div>`).join('')}</div>` : ''}
 ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map(([a, b]) => `<p>${a}<b>${esc(b)}</b></p>`).join('')}</div>` : ''}
 </div></div>`;
       $('#dp').onclick = () => { det.close(); play(m) };
       $('#dx').onclick = $('#dtop').onclick = () => det.close();
-      $('#dfix').onclick = async () => {
-        const s = prompt('Informe o título correto (e o ano), ex.: Interestelar 2014', m.q + (m.y ? ' ' + m.y : '')); if (!s) return;
-        Object.assign(m, parse(s + '.x')); m.tm = undefined;
-        try { await ident(m) } catch { toast('Falha ao consultar o TMDB. Confira a chave e a conexão.') }
+      $('#drs')?.addEventListener('click', () => { delete pos[m.id]; savePos(); det.close(); play(m) });
+      $('#dfix').onclick = () => { const b = $('#fixbox'); b.hidden = !b.hidden; if (!b.hidden) { $('#fixq').value = m.q + (m.y ? ' ' + m.y : ''); $('#fixq').focus(); $('#fixq').select() } };
+      $('#fixform').onsubmit = async e => {
+        e.preventDefault(); const s = $('#fixq').value.trim(); if (!s) return; const p = parse(s + '.x'), res = $('#fixres'); res.innerHTML = '<p class="sm">Buscando…</p>';
+        try {
+          let r = (await tmdb('/search/movie', p.y ? { query: p.q, year: p.y } : { query: p.q })).results; if (!r.length && p.y) r = (await tmdb('/search/movie', { query: p.q })).results;
+          res.innerHTML = r.length ? r.slice(0, 6).map(x => `<button type="button" class="fixitem" data-id="${x.id}">${x.poster_path ? `<img alt="" loading="lazy" src="${IMG}w92${x.poster_path}">` : '<i></i>'}<span><b>${esc(x.title)}</b><small>${esc((x.release_date || '').slice(0, 4))}${x.original_title && x.original_title !== x.title ? ' · ' + esc(x.original_title) : ''}</small></span></button>`).join('') : '<p class="sm">Nada encontrado. Tente outro título ou o título original.</p>'
+        } catch { res.innerHTML = '<p class="sm">Falha ao consultar o TMDB. Confira a chave e a conexão.</p>' }
+      };
+      $('#fixres').onclick = async e => {
+        const b = e.target.closest('.fixitem'); if (!b) return; b.disabled = true; const old = m.tm;
+        try { await ident(m, +b.dataset.id) } catch { m.tm = old; toast('Falha ao consultar o TMDB. Confira a chave e a conexão.') }
         save(); render(); detail(m)
       };
       if (!det.open) det.showModal(); det.scrollTop=0;
     }
 
-    const I = { p: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>', z: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>' };
+    const I = { p: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>', z: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>', v: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>', m: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="m16 9 5 6M21 9l-5 6"/></svg>' };
+    const syncMute = () => { const m = vd.muted || vd.volume === 0; $('#mu').innerHTML = m ? I.m : I.v; $('#mu').setAttribute('aria-label', m ? 'Ativar som' : 'Silenciar') };
+    let scrubbing = false;
     const fmt = s => { s = Math.floor(s || 0); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s % 60).padStart(2, '0') };
     const tog = () => vd.paused ? vd.play() : vd.pause();
     const PE_LOCAL = $('#pe').textContent.replace(/\s+/g, ' ').trim();
@@ -1653,7 +1881,7 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
 
     function resetPlayerUI() {
       $('#pe').hidden = true; $('#drive-renew').hidden = true; $('#stage').classList.remove('is-paused'); $('#pause-info').setAttribute('aria-hidden', 'true');
-      vd.querySelectorAll('track').forEach(t => t.remove()); driveWarned = false; resumeAt = null
+      vd.querySelectorAll('track').forEach(t => t.remove()); driveWarned = false; resumeAt = null; autoRetried = false
     }
 
     async function play(m) {
@@ -1747,20 +1975,39 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     vd.onplay = vd.onpause = () => { $('#pp').innerHTML = vd.paused ? I.p : I.z;updatePauseOverlay(); revealControls(); if (vd.paused) releaseWake(); else { acquireWake(); if (cur) seen[cur.id] = Date.now() } };
     $('#pause-resume').onclick=()=>vd.play();
     $('#pause-details').onclick=()=>{if(cur){const m=cur;closePlayer();detail(m)}};
-    vd.onvolumechange = () => $('#mu').textContent = vd.muted || vd.volume === 0 ? 'MUDO' : 'VOL';
+    vd.onvolumechange = syncMute; syncMute();
+    /* Sessão do Google: com o login do servidor ela é renovada sozinha, sem interromper o filme. */
+    async function silentRenew() {
+      if (renewing || Date.now() - lastRenew < 30000) return false;
+      renewing = true; lastRenew = Date.now();
+      try { return (await serverOk()) && (await serverRefresh()) && (await prepareDrivePlayback(), true) } catch { return false } finally { renewing = false }
+    }
     vd.ontimeupdate = () => {
       if(vd.paused && cur) $('#pause-time').textContent=' / '+fmt(vd.currentTime);
-      $('#tc').textContent = fmt(vd.currentTime); $('#sk').value = vd.currentTime / vd.duration * 1000 || 0;
-      if (cur?.source === 'drive' && !driveWarned && driveExp && driveExp - Date.now() < 3 * 60 * 1000) { driveWarned = true; $('#drive-renew').hidden = false; toast('Sua sessão do Google expira em instantes. Toque em “Renovar sessão” para não interromper o filme.') }
+      $('#tc').textContent = fmt(vd.currentTime); if (!scrubbing && isFinite(vd.duration)) $('#sk').value = vd.currentTime / vd.duration * 10000 || 0;
+      if (cur?.source === 'drive' && driveExp) {
+        const left = driveExp - Date.now();
+        if (left < 8 * 60 * 1000 && SERVER_OK === true) silentRenew();
+        else if (left < 3 * 60 * 1000 && !driveWarned) { driveWarned = true; $('#drive-renew').hidden = false; toast('Sua sessão do Google expira em instantes. Toque em “Renovar sessão” para não interromper o filme.') }
+      }
       if (cur && Date.now() - ls > 5000) { ls = Date.now(); pos[cur.id] = vd.currentTime; savePos() }
     };
     vd.onloadedmetadata = () => { $('#td').textContent = fmt(vd.duration); if (resumeAt != null) { vd.currentTime = resumeAt; resumeAt = null; return } const p = pos[cur?.id]; if (p > 15 && p < vd.duration - 30) vd.currentTime = p };
     vd.onerror = async () => {
-      if (cur?.source === 'drive' && vd.getAttribute('src')) { $('#pe').textContent = Date.now() > driveExp - 30000 ? PE_EXP : PE_DRIVE; $('#pe').hidden = false; $('#drive-renew').hidden = false; return }
+      if (cur?.source === 'drive' && vd.getAttribute('src')) { if (!autoRetried && SERVER_OK === true) { autoRetried = true; lastRenew = 0; const t = vd.currentTime; if (await silentRenew()) { resumeAt = t; vd.src = driveUrl(cur); spin(true); vd.play().catch(() => { }); return } } $('#pe').textContent = Date.now() > driveExp - 30000 ? PE_EXP : PE_DRIVE; $('#pe').hidden = false; $('#drive-renew').hidden = false; return }
       if (vd.getAttribute('src')) { $('#pe').hidden = false; $('#media-help').hidden=false; if(cur) $('#convert-cmd').textContent=conversionCommand(cur.n); } };
-    $('#sk').oninput = e => vd.currentTime = e.target.value / 1000 * vd.duration;
+    const seekTo = v => { if (isFinite(vd.duration)) vd.currentTime = v / 10000 * vd.duration };
+    $('#sk').oninput = e => { if (isFinite(vd.duration)) { $('#tc').textContent = fmt(e.target.value / 10000 * vd.duration); if (!scrubbing) seekTo(e.target.value) } };
+    $('#sk').addEventListener('pointerdown', () => scrubbing = true);
+    ['pointerup', 'pointercancel'].forEach(ev => addEventListener(ev, () => { if (scrubbing) { scrubbing = false; seekTo($('#sk').value) } }));
+    $('#sk').onchange = () => { scrubbing = false; seekTo($('#sk').value) };
+    $('#bk').onclick = () => skip(-10, -1); $('#fw').onclick = () => skip(10, 1);
+    if (document.pictureInPictureEnabled || vd.webkitSupportsPresentationMode?.('picture-in-picture')) {
+      $('#pip').hidden = false;
+      $('#pip').onclick = async () => { try { if (document.pictureInPictureElement) await document.exitPictureInPicture(); else if (vd.requestPictureInPicture) await vd.requestPictureInPicture(); else vd.webkitSetPresentationMode(vd.webkitPresentationMode === 'picture-in-picture' ? 'inline' : 'picture-in-picture') } catch { toast('Imagem sobre imagem indisponível para este vídeo.') } }
+    }
     $('#vo').oninput = e => { vd.volume = e.target.value; if (vd.volume > 0) vd.muted = false };
-    $('#mu').onclick = () => { vd.muted = !vd.muted; $('#mu').textContent = vd.muted ? 'MUDO' : 'VOL' };
+    $('#mu').onclick = () => { vd.muted = !vd.muted; syncMute() };
     $('#sp').onclick = () => { const s = [1, 1.25, 1.5, 2, .75], n = s[(s.indexOf(vd.playbackRate) + 1) % s.length]; vd.playbackRate = n; $('#sp').textContent = n + '×' };
     $('#cc').onclick = () => { const t = vd.textTracks[0]; if (t) t.mode = t.mode === 'showing' ? 'hidden' : 'showing' };
     $('#fs').onclick = async () => {
@@ -1780,20 +2027,21 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     $('#px').onclick = closePlayer;
     pl.onpointerup = () => document.activeElement?.blur();
     document.onkeydown = e => {
-      if (pl.hidden) return; const k = e.key;
+      if (pl.hidden) { if (e.key === '/' && !e.ctrlKey && !e.metaKey && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName) && !anyOpen()) { e.preventDefault(); $('#q').focus() } return } const k = e.key;
       if (['INPUT','BUTTON','SELECT'].includes(document.activeElement?.tagName) && k===' ') return;
       if (k === ' ') { e.preventDefault(); tog() } else if (k === 'ArrowRight' && document.activeElement?.type !== 'range') vd.currentTime += 10; else if (k === 'ArrowLeft' && document.activeElement?.type !== 'range') vd.currentTime -= 10;
       else if (k === 'ArrowUp' || k === 'ArrowDown') { if (document.activeElement?.type !== 'range') { e.preventDefault(); vd.volume = Math.max(0, Math.min(1, vd.volume + (k === 'ArrowUp' ? .1 : -.1))); $('#vo').value = vd.volume } } else if (k === 'c' && !$('#cc').hidden) $('#cc').click(); else if (k === 'f') $('#fs').click(); else if (k === 'm') $('#mu').click(); else if (k === 'Escape') closePlayer()
     };
 
-    $('#gr').onclick = e => { const c = e.target.closest('.mv'); if (c) return detail(view[c.dataset.i]); if (e.target.closest('[data-add]')) pick() };
-    $('#gr').onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('mv')) { e.preventDefault(); e.target.click() } };
+    const openCard = e => { const c = e.target.closest('.mv'); if (c && !c.classList.contains('sk')) { const m = byId.get(c.dataset.id); if (m) return e.currentTarget.id === 'cont-row' ? play(m) : detail(m) } if (e.target.closest('[data-add]')) pick(); if (e.target.closest('[data-clear]')) { $('#q').value = ''; gf = ''; redo() } };
+    const cardKey = e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('mv')) { e.preventDefault(); e.target.click() } };
+    ['gr', 'cont-row'].forEach(i => { $('#' + i).onclick = openCard; $('#' + i).onkeydown = cardKey });
     $('#gc').onclick = e => { const g = e.target.dataset.g; if (g !== undefined) { gf = gf === g ? '' : g; redo() } };
     ['add1', 'add2'].forEach(i => $('#' + i).onclick = pick);
     ['key1', 'key2'].forEach(i => $('#' + i).onclick = () => { $('#kv').value = KEY(); cfg.showModal() });
     $('#ks').onclick = () => { L['cine.key'] = $('#kv').value.trim(); cfg.close(); idAll() };
     $('#kc').onclick = () => cfg.close();
-    $('#clr').onclick = () => { if (confirm('Remover o catálogo salvo neste navegador? Seus arquivos de vídeo não são apagados.')) { lib = []; pos = {}; gf = ''; L.removeItem('cine.lib'); L.removeItem('cine.pos'); render(); cfg.close() } };
+    $('#clr').onclick = () => { if (confirm('Remover o catálogo salvo neste navegador? Seus arquivos de vídeo não são apagados.')) { lib = []; pos = {}; gf = ''; L.removeItem('cine.lib'); L.removeItem('cine.pos'); L.removeItem('cine.done'); done = {}; flush(); render(); cfg.close() } };
     $('#rf').onclick = () => window.showDirectoryPicker ? reconnect() : pick();
     let qt; $('#q').oninput = () => { clearTimeout(qt); qt = setTimeout(redo, 160) };
     $('#so').onchange = () => { L['cine.sort'] = $('#so').value; redo() };
@@ -1814,14 +2062,25 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     document.addEventListener('visibilitychange', () => { if (!document.hidden && cur && !vd.paused) acquireWake() });
     function setMedia(m) { if ('mediaSession' in navigator && window.MediaMetadata) try { navigator.mediaSession.metadata = new MediaMetadata({ title: ti(m), artwork: m.tm?.p ? [{ src: IMG + 'w342' + m.tm.p, sizes: '342x513', type: 'image/jpeg' }] : [] }) } catch { } }
     if ('mediaSession' in navigator) [['play', () => vd.play()], ['pause', () => vd.pause()], ['seekbackward', () => vd.currentTime -= 10], ['seekforward', () => vd.currentTime += 10]].forEach(([a, f]) => { try { navigator.mediaSession.setActionHandler(a, f) } catch { } });
-    vd.onended = () => { if (cur) { delete pos[cur.id]; savePos(); toast('Fim do filme.') } };
+    vd.onended = () => { if (cur) { delete pos[cur.id]; done[cur.id] = 1; savePos(); toast('Fim do filme.') } };
     addEventListener('offline', () => toast('Sem conexão com a internet.')); addEventListener('online', () => { toast('Conexão restabelecida.'); idAll() });
     { const s = L['cine.sort']; if (s && [...$('#so').options].some(o => o.value === s)) $('#so').value = s }
+    function handleShortcut() {
+      const a = new URLSearchParams(location.search).get('acao'); if (!a) return;
+      history.replaceState(null, '', location.pathname + location.hash);
+      if (a === 'sync') syncAll(); else if (a === 'drive') openDrive(); else if (a === 'buscar') $('#q').focus()
+    }
+    skeleton();
     handleDriveRedirect();
-    render(); idAll();
-    (async()=>{const a=new URLSearchParams(location.search).get('auth');if(a)history.replaceState(null,'',location.pathname);
-      const ok=await serverRefresh();if(ok)driveStatus('Conta conectada'+(driveEmail?': '+driveEmail:'')+'.');
-      if(a==='ok'&&ok)openDrive();else if(a)toast('Não foi possível conectar ao Google. Tente de novo.')})();
+    (async () => {
+      lib = await loadLib(); render(); idAll(); renderFolders();
+      const a = new URLSearchParams(location.search).get('auth'); if (a) history.replaceState(null, '', location.pathname);
+      const ok = await serverRefresh();
+      if (ok) driveStatus('Conta conectada' + (driveEmail ? ': ' + driveEmail : '') + '.');
+      if (a === 'ok' && ok) openDrive(); else if (a) toast('Não foi possível conectar ao Google. Tente de novo.');
+      handleShortcut();
+      if (ok && !a) autoSync()
+    })();
   </script>
   <script>if(navigator.serviceWorker?.controller)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});if(navigator.serviceWorker?.controller&&window.caches)caches.keys().then(ks=>ks.forEach(k=>caches.delete(k))).catch(()=>{})</script>
 </body>

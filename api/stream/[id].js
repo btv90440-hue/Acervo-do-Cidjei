@@ -1,83 +1,53 @@
-// api/stream/[id].js
+// GET|HEAD /api/stream/:id  -> repassa o arquivo do Google Drive com suporte a Range (seek no player)
 'use strict';
 const { Readable } = require('node:stream');
 
-export const config = {
-  api: {
-    responseLimit: false, // Desativa limite de resposta para permitir arquivos grandes
-  },
-};
+const ID_RE = /^[\w-]{10,200}$/;
+const RANGE_RE = /^bytes=\d*-\d*$/;
 
-// Função auxiliar para extrair o cookie manualmente em ambiente Node.js puro
-function parseCookie(req, name) {
-  const list = {};
-  const rc = req.headers.cookie;
-  rc && rc.split(';').forEach(cookie => {
-    const parts = cookie.split('=');
-    list[parts.shift().trim()] = decodeURI(parts.join('='));
-  });
-  return list[name];
+function readCookie(req, name) {
+  const m = (req.headers.cookie || '').match(new RegExp('(?:^|;\\s*)' + name + '=([^;]*)'));
+  return m ? m[1] : '';
 }
 
-export default async function handler(req, res) {
-  const origin = req.headers.origin || '*';
-  res.setHeader('Access-Control-Allow-Origin', origin);
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Authorization, Range, Content-Type');
+async function handler(req, res) {
+  res.setHeader('Cache-Control', 'private, no-store');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (!['GET', 'HEAD'].includes(req.method)) {
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    res.setHeader('Allow', 'GET, HEAD');
     return res.status(405).send('Método não permitido');
   }
 
-  const { id } = req.query;
+  const id = String(req.query.id || '');
+  if (!ID_RE.test(id)) return res.status(400).send('ID de arquivo inválido');
 
-  if (!id || !/^[\w-]{10,200}$/.test(id)) {
-    return res.status(400).send('ID de arquivo inválido');
-  }
-
-  // Obtém o token do cabeçalho ou decodifica corretamente do Cookie
-  let token = '';
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    token = authHeader.substring(7);
-  } else {
-    token = parseCookie(req, 'cine_token');
-  }
-
-  if (!token) {
-    return res.status(401).send('Reconecte ao Google Drive (Token ausente)');
-  }
+  const auth = req.headers.authorization || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : readCookie(req, 'cine_token');
+  if (!token) return res.status(401).send('Reconecte ao Google Drive (token ausente)');
 
   const range = req.headers.range;
-  if (range && !/^bytes=\d*-\d*$/.test(range)) {
-    return res.status(416).send('Intervalo (Range) inválido');
-  }
+  if (range && !RANGE_RE.test(range)) return res.status(416).send('Intervalo (Range) inválido');
+
+  const controller = new AbortController();
+  res.on('close', () => controller.abort()); // usuário fechou/pulou: para de baixar do Drive
 
   try {
-    const controller = new AbortController();
-    req.on('close', () => controller.abort());
+    const upstream = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(id)}?alt=media&supportsAllDrives=true`,
+      {
+        method: req.method,
+        headers: { Authorization: `Bearer ${token}`, ...(range ? { Range: range } : {}) },
+        signal: controller.signal,
+        redirect: 'follow',
+      }
+    );
 
-    const driveUrl = `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(id)}?alt=media&supportsAllDrives=true`;
-    
-    const upstream = await fetch(driveUrl, {
-      method: req.method,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        ...(range ? { Range: range } : {}),
-      },
-      signal: controller.signal,
-      redirect: 'follow',
-    });
-
-    if (!upstream.ok && upstream.status !== 206) {
-      return res.status(upstream.status === 401 ? 401 : upstream.status).send(
-        upstream.status === 401 ? 'Sessão do Google Drive expirada' : `Drive recusou a mídia (${upstream.status})`
-      );
+    if (!upstream.ok) { // 206 já conta como ok
+      const msg = upstream.status === 401 ? 'Sessão do Google Drive expirada'
+        : upstream.status === 403 || upstream.status === 404 ? 'Sem acesso a este arquivo no Drive'
+        : `Drive recusou a mídia (${upstream.status})`;
+      return res.status(upstream.status === 416 ? 416 : upstream.status).send(msg);
     }
 
     const headers = {
@@ -86,28 +56,24 @@ export default async function handler(req, res) {
       'Accept-Ranges': 'bytes',
       'Content-Type': upstream.headers.get('content-type') || 'application/octet-stream',
     };
-
     for (const h of ['content-length', 'content-range', 'etag', 'last-modified']) {
-      if (upstream.headers.has(h)) {
-        headers[h] = upstream.headers.get(h);
-      }
+      const v = upstream.headers.get(h);
+      if (v) headers[h] = v;
     }
 
     res.writeHead(upstream.status, headers);
+    if (req.method === 'HEAD' || !upstream.body) return res.end();
 
-    if (req.method === 'HEAD' || !upstream.body) {
-      return res.end();
-    }
-
-    // Transmite o fluxo diretamente para a resposta, garantindo suporte perfeito a seeks e ranges
-    Readable.fromWeb(upstream.body).on('error', () => res.destroy()).pipe(res);
-    return;
+    const body = Readable.fromWeb(upstream.body);
+    body.on('error', () => res.destroy());
+    body.pipe(res);
   } catch (err) {
-    if (err.name === 'AbortError') return;
+    if (err && err.name === 'AbortError') return;
     console.error('Erro no streaming:', err);
-    if (!res.headersSent) {
-      return res.status(500).send('Falha na ponte de streaming');
-    }
+    if (!res.headersSent) return res.status(502).send('Falha na ponte de streaming');
     res.destroy();
   }
 }
+
+module.exports = handler;
+module.exports.config = { api: { responseLimit: false } }; // arquivos grandes

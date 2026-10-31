@@ -1075,7 +1075,7 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
   /* cabeçalho: marca à esquerda, somente o interruptor de tema à direita */
   header{padding-top:env(safe-area-inset-top)}
   header .wrap{height:60px;gap:10px;flex-wrap:nowrap;padding:0 max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left))}
-  #add1,#drive1,#key1{display:none}
+  #add1,#drive1,#key1,#sync1{display:none}
   .brand{font-size:17px;gap:10px;white-space:nowrap;min-width:0}
   .brand svg{width:30px;height:30px;flex:none}
   .theme-switch{height:44px;min-width:64px;padding:0 9px;margin-left:auto;justify-content:center}
@@ -1214,6 +1214,7 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
       <button class="theme-switch" id="theme-switch" type="button" aria-label="Ativar tema La Haine Escuro" aria-pressed="false"><span class="theme-symbol" aria-hidden="true">◐</span><span class="theme-label" id="theme-label">MODO LA HAINE</span><span class="theme-track"><span class="theme-knob"></span></span></button>
       <button class="pill me" id="add1"><i>+</i>Adicionar pasta</button>
       <button class="pill" id="drive1" type="button">☁ Drive</button>
+      <button class="pill" id="sync1" type="button">↻ Atualizar</button>
       <button class="pill" id="key1">TMDB</button>
     </div>
   </header>
@@ -1225,7 +1226,7 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
         <h1>Histórias<br>à sua maneira.</h1>
         <p class="intro">Sua cinemateca particular. Entre a sobriedade dos fatos e a subjetividade das narrativas, organize e assista sem sair daqui.</p>
         <div class="acts"><button class="btn k" id="add2">Adicionar pasta de filmes</button><button class="btn"
-            id="key2">Chave do TMDB</button><button class="btn" id="drive2" type="button">☁ Google Drive</button></div>
+            id="key2">Chave do TMDB</button><button class="btn" id="drive2" type="button">☁ Google Drive</button><button class="btn" id="sync2" type="button">↻ Atualizar Drive</button></div>
         <div class="lbl" id="st" style="margin-top:26px;min-height:16px"></div>
       </div>
       <aside class="card stat">
@@ -1278,9 +1279,9 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
         <span class="dv-n">1</span>
         <div class="dv-c">
           <h3>Conectar a conta Google</h3>
-          <label for="drive-client">ID de cliente OAuth 2.0 (aplicativo da Web)</label>
+          <div id="legacy-id"><label for="drive-client">ID de cliente OAuth 2.0 (aplicativo da Web)</label>
           <input id="drive-client" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="url" placeholder="123456…apps.googleusercontent.com">
-          <p class="dv-hint">Configure a origem JavaScript autorizada no Google Cloud com a URL do seu site Vercel e ative a Google Drive API. Nunca cole o segredo do cliente.</p>
+          <p class="dv-hint">Configure a origem JavaScript autorizada no Google Cloud com a URL do seu site Vercel e ative a Google Drive API. Nunca cole o segredo do cliente.</p></div>
           <div class="dv-acts"><button class="pill k" id="drive-login" type="button">Conectar Google</button><button class="pill" id="drive-logout" type="button">Desconectar</button></div>
         </div>
       </section>
@@ -1293,7 +1294,7 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
           <div class="dv-acts"><button class="pill k" id="drive-add" type="button">Importar pasta</button><button class="pill" id="drive-sync" type="button">Sincronizar pastas</button></div>
         </div>
       </section>
-      <p class="dv-hint dv-note">Somente leitura. As pastas importadas ficam lembradas neste navegador; para sincronizar depois de fechar a página, conecte-se novamente.</p>
+      <p class="dv-hint dv-note">Somente leitura. A conta e as pastas ficam lembradas neste aparelho; toque em “↻ Atualizar Drive” na tela inicial para ver os filmes novos.</p>
     </div>
     <div class="dv-foot">
       <p class="dv-status" id="drive-status" role="status" data-ok="0" data-busy="0">Não conectado.</p>
@@ -1346,6 +1347,27 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
     const driveDlg = $('#drive-dialog');
     let driveToken = null, driveClient = null, driveExp = 0, resumeAt = null, driveWarned = false;
     const driveFolders = () => J('cine.drive.folders', []);
+    const AUTH='/api/auth/';let driveEmail='',SERVER_OK=null,syncing=false;
+    const serverOk=async()=>{if(SERVER_OK===null)SERVER_OK=await fetch(AUTH+'status').then(r=>r.json()).then(x=>!!x.configured).catch(()=>false);return SERVER_OK};
+    const saveFolders=f=>{L.setItem('cine.drive.folders',JSON.stringify(f));fetch(AUTH+'folders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(f)}).catch(()=>{})};
+    async function serverRefresh(){
+      try{const r=await fetch(AUTH+'refresh',{method:'POST'});if(!r.ok)return false;const d=await r.json();
+        driveToken=d.access_token;driveExp=Date.now()+(+d.expires_in||3600)*1000;driveEmail=d.email||'';
+        const loc=driveFolders();if(d.folders?.length&&!loc.length)L.setItem('cine.drive.folders',JSON.stringify(d.folders));else if(!d.folders?.length&&loc.length)saveFolders(loc);
+        return true}catch{return false}
+    }
+    async function syncAll(){
+      if(syncing)return;
+      if(!driveFolders().length){openDrive();return toast('Importe uma pasta do Drive primeiro.')}
+      syncing=true;const bs=['sync1','sync2'].map(i=>$('#'+i)),lab=bs.map(b=>b.textContent);bs.forEach(b=>{b.disabled=true;b.textContent='↻ Atualizando…'});
+      const ids=()=>new Set(lib.filter(m=>m.source==='drive').map(m=>m.id)),a=ids();
+      try{await ensureDriveToken();for(const f of driveFolders())await scanDriveFolder(f.id);
+        const b=ids();let add=0,rem=0;b.forEach(x=>a.has(x)||add++);a.forEach(x=>b.has(x)||rem++);
+        toast(add||rem?add+' novo(s) e '+rem+' removido(s) do Drive.':'Tudo em dia: nenhuma mudança no Drive.');driveStatus('Sincronização concluída.')}
+      catch(e){toast(e.message||'Não foi possível atualizar.')}
+      finally{syncing=false;bs.forEach((b,i)=>{b.disabled=false;b.textContent=lab[i]})}
+    }
+
     const driveStatus = t => {
       const e = $('#drive-status'), on = !!driveToken;
       e.textContent = t; e.dataset.ok = on ? '1' : '0'; e.dataset.busy = /…$/.test(t) ? '1' : '0';
@@ -1353,7 +1375,7 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
       $('#dv-step2').dataset.locked = on ? '0' : '1'
     };
     const folderId = raw => { const v = raw.trim(); const m = v.match(/\/folders\/([a-zA-Z0-9_-]+)/); return m ? m[1] : (/^[a-zA-Z0-9_-]{10,}$/.test(v) ? v : ''); };
-    function openDrive(){ $('#drive-client').value=L.getItem('cine.drive.client')||'';driveStatus(driveToken?'Conta conectada nesta sessão.':'Conecte sua conta para importar ou sincronizar.');driveDlg.showModal(); }
+    function openDrive(){ $('#drive-client').value=L.getItem('cine.drive.client')||'';driveStatus(driveToken?'Conta conectada'+(driveEmail?': '+driveEmail:'')+'.':'Conecte sua conta para importar ou sincronizar.');driveDlg.showModal();serverOk().then(ok=>{$('#legacy-id').hidden=ok}) }
     ['drive1','drive2'].forEach(id=>$('#'+id).onclick=openDrive);
     $('#drive-close').onclick=$('#drive-x').onclick=()=>driveDlg.close();
     async function ensureGIS(){
@@ -1398,12 +1420,14 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
     }
     async function ensureDriveToken(){
       if(driveToken&&Date.now()<driveExp-15*60*1000)return;
+      if(await serverRefresh())return;
+      if(await serverOk()){toast('Entrando com o Google…');location.assign(AUTH+'login');return new Promise(()=>{})}
       const id=L.getItem('cine.drive.client')||'';
       if(!id){openDrive();throw Error('Informe o ID OAuth e conecte sua conta Google para assistir.')}
       await loginDrive(id,'');
     }
-    $('#drive-login').onclick=async()=>{try{await loginDrive()}catch(e){driveStatus(e.message)}};
-    $('#drive-logout').onclick=()=>{if(driveToken&&window.google?.accounts?.oauth2)google.accounts.oauth2.revoke(driveToken,()=>{});driveToken=null;fetch('/api/session',{method:'DELETE'}).catch(()=>{});driveStatus('Desconectado. O catálogo continua salvo.');};
+    $('#drive-login').onclick=async()=>{try{if(await serverOk())return location.assign(AUTH+'login');await loginDrive()}catch(e){driveStatus(e.message)}};
+    $('#drive-logout').onclick=()=>{if(driveToken&&window.google?.accounts?.oauth2)google.accounts.oauth2.revoke(driveToken,()=>{});driveToken=null;driveEmail='';fetch(AUTH+'logout',{method:'POST'}).catch(()=>{});fetch('/api/session',{method:'DELETE'}).catch(()=>{});driveStatus('Desconectado. O catálogo continua salvo.');};
     async function driveGet(path,query={}){
       if(!driveToken)throw Error('Conecte sua conta Google primeiro.');
       const u=new URL('https://www.googleapis.com/drive/v3/'+path);Object.entries(query).forEach(([k,v])=>u.searchParams.set(k,v));
@@ -1427,8 +1451,9 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
       for(const m of items)if(!lib.some(x=>x.id===m.id))lib.push(m);
       save();render();idAll();return {id,name:info.name,count:items.length};
     }
-    $('#drive-add').onclick=async()=>{const id=folderId($('#drive-folder').value);if(!id)return driveStatus('Cole um link de pasta válido ou seu ID.');try{driveStatus('Lendo pasta…');const result=await scanDriveFolder(id);const folders=driveFolders().filter(x=>x.id!==id);folders.push({id,name:result.name});L.setItem('cine.drive.folders',JSON.stringify(folders));driveStatus(result.count+' filmes importados de '+result.name+'.');}catch(e){driveStatus(e.message)}};
-    $('#drive-sync').onclick=async()=>{try{for(const folder of driveFolders())await scanDriveFolder(folder.id);driveStatus('Sincronização concluída.')}catch(e){driveStatus(e.message)}};
+    $('#drive-add').onclick=async()=>{const id=folderId($('#drive-folder').value);if(!id)return driveStatus('Cole um link de pasta válido ou seu ID.');try{driveStatus('Lendo pasta…');const result=await scanDriveFolder(id);const folders=driveFolders().filter(x=>x.id!==id);folders.push({id,name:result.name});saveFolders(folders);driveStatus(result.count+' filmes importados de '+result.name+'.');}catch(e){driveStatus(e.message)}};
+    $('#drive-sync').onclick=syncAll;
+    ['sync1','sync2'].forEach(i=>$('#'+i).onclick=syncAll);
 
     const st = t => $('#st').textContent = t || '';
     const nota = v => v.toFixed(1).replace('.', ',');
@@ -1719,6 +1744,9 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     [det, cfg, driveDlg].forEach(d => d.onclick = e => { if (e.target === d) d.close() });
     handleDriveRedirect();
     render(); idAll();
+    (async()=>{const a=new URLSearchParams(location.search).get('auth');if(a)history.replaceState(null,'',location.pathname);
+      const ok=await serverRefresh();if(ok)driveStatus('Conta conectada'+(driveEmail?': '+driveEmail:'')+'.');
+      if(a==='ok'&&ok)openDrive();else if(a)toast('Não foi possível conectar ao Google. Tente de novo.')})();
   </script>
   <script>if('serviceWorker' in navigator)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});if(window.caches)caches.keys().then(ks=>ks.forEach(k=>caches.delete(k))).catch(()=>{})</script>
 </body>

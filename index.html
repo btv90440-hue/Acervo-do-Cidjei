@@ -11,9 +11,12 @@
   <title>Acervo do CIDJEI · seus filmes, catalogados</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&family=Share+Tech+Mono&display=swap"
-    rel="stylesheet">
+  <link rel="preconnect" href="https://image.tmdb.org">
+  <link rel="dns-prefetch" href="https://api.themoviedb.org">
+  <meta name="description" content="Sua cinemateca particular: cataloge e assista seus filmes com dados do TMDB.">
+  <script>try{if(localStorage['cine.theme']==='matrix')document.documentElement.dataset.theme='matrix'}catch(e){}</script>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap"></noscript>
   
   <style>
     :root {
@@ -1198,7 +1201,24 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
   .pause-actions button{min-height:34px;padding:6px 12px}
   #pause-info{padding:10px 24px}
 }
-
+/* ===== OTIMIZAÇÕES: desempenho e usabilidade ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body,button{-webkit-tap-highlight-color:transparent}
+body{position:relative}body:before{position:absolute;inset:0 0 auto;height:100vh}
+header{-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.drive-mark,.mv .po:after{-webkit-backdrop-filter:none;backdrop-filter:none}
+@media(max-width:860px),(hover:none){header{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--bg)}
+dialog::backdrop,html[data-theme="matrix"] dialog::backdrop{-webkit-backdrop-filter:none;backdrop-filter:none;background:#0d131ae6}
+.mv:hover{transform:none;box-shadow:none}.mv:hover img{transform:none}}
+.mv{content-visibility:auto;contain-intrinsic-size:auto 380px}
+.po img{animation:imgIn .45s both}@keyframes imgIn{from{opacity:0}}
+.prog{position:absolute;left:0;right:0;bottom:0;height:4px;background:#0007;z-index:2}.prog i{display:block;height:100%;background:var(--grn)}
+html[data-theme="matrix"] .prog i{background:#fff}
+#more{grid-column:1/-1;height:1px}
+.rc{font:12px var(--mono);color:var(--mut);margin:-6px 0 12px;min-height:18px}
+html.nopop #tt{display:none;position:fixed;z-index:9999}html.nopop #tt.on{display:block}
+#seekfx{position:absolute;top:50%;z-index:5;padding:12px 18px;border-radius:30px;background:#000b;color:#fff;font:600 14px var(--mono);transform:translateY(-50%);opacity:0;pointer-events:none;transition:opacity .2s}
+#seekfx.on{opacity:1}
   </style>
 </head>
 
@@ -1246,10 +1266,12 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
         <option value="t">Título</option>
         <option value="y">Ano</option>
         <option value="v">Nota</option>
+        <option value="w">Assistidos recentemente</option>
       </select>
       <button class="pill" id="rf">Atualizar</button>
     </div>
     <div class="chips" id="gc"></div>
+    <p class="rc" id="rc" role="status"></p>
     <div class="grid" id="gr"></div>
   </main>
 
@@ -1324,10 +1346,10 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
     const $ = s => document.querySelector(s), L = localStorage, IMG = 'https://image.tmdb.org/t/p/';
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';');
     const J = (k, d) => { try { return JSON.parse(L[k]) ?? d } catch { return d } };
-    let lib = J('cine.lib', []), pos = J('cine.pos', {}), FILES = new Map(), view = [], gf = '', cur = null, urls = [], busy = false, tto, ls = 0;
+    let lib = J('cine.lib', []), pos = J('cine.pos', {}), seen = J('cine.seen', {}), FILES = new Map(), view = [], gf = '', cur = null, urls = [], busy = false, tto, ls = 0;
     const themeSwitch = $('#theme-switch');
     function setTheme(theme) { 
-      document.documentElement.dataset.theme = theme; 
+      document.documentElement.dataset.theme = theme; if (theme === 'matrix') darkFonts(); 
       L.setItem('cine.theme',theme); 
       themeSwitch.setAttribute('aria-pressed',String(theme==='matrix'));
       document.querySelector('meta[name=theme-color]').content=theme==='matrix'?'#080808':'#eef1f2';
@@ -1340,9 +1362,13 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
     const conversionCommand = n => 'ffmpeg -i '+ffQuote(n)+' -map 0:v:0 -map 0:a:0? -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k -sn -movflags +faststart '+ffQuote(n.replace(/\.[^.]+$/,'')+' - navegador.mp4');
     $('#copy-cmd').onclick=async()=>{try{await navigator.clipboard.writeText($('#convert-cmd').textContent);toast('Comando copiado. Execute com FFmpeg instalado.')}catch{toast('Selecione e copie o comando exibido.')}};
     const det = $('#det'), cfg = $('#cfg'), pl = $('#pl'), vd = $('#vd');
-    const toast = t => { const e = $('#tt'); e.textContent = t; try { e.hidePopover() } catch { } try { e.showPopover() } catch { } clearTimeout(tto); tto = setTimeout(() => { try { e.hidePopover() } catch { } }, 4500) };
-    const save = () => { try { L['cine.lib'] = JSON.stringify(lib) } catch { toast('Armazenamento do navegador cheio.') } };
-    const savePos = () => { L['cine.pos'] = JSON.stringify(pos) };
+    const POP = 'showPopover' in HTMLElement.prototype; if (!POP) document.documentElement.classList.add('nopop');
+    const toast = t => { const e = $('#tt'); e.textContent = t; if (POP) { try { e.hidePopover() } catch { } try { e.showPopover() } catch { } } else e.classList.add('on'); clearTimeout(tto); tto = setTimeout(() => { if (POP) { try { e.hidePopover() } catch { } } else e.classList.remove('on') }, 4500) };
+    let svt; const flush = () => { clearTimeout(svt); svt = 0; try { L['cine.lib'] = JSON.stringify(lib) } catch { toast('Armazenamento do navegador cheio.') } };
+    const save = () => { clearTimeout(svt); svt = setTimeout(flush, 500) };
+    addEventListener('pagehide', () => { if (svt) flush(); if (cur) { pos[cur.id] = vd.currentTime; savePos() } });
+    document.addEventListener('visibilitychange', () => { if (document.hidden && svt) flush() });
+    const savePos = () => { L['cine.pos'] = JSON.stringify(pos); L['cine.seen'] = JSON.stringify(seen) };
     const KEY = () => L['cine.key'] || '';
     const driveDlg = $('#drive-dialog');
     let driveToken = null, driveClient = null, driveExp = 0, resumeAt = null, driveWarned = false;
@@ -1361,7 +1387,7 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
       if(!driveFolders().length){openDrive();return toast('Importe uma pasta do Drive primeiro.')}
       syncing=true;const bs=['sync1','sync2'].map(i=>$('#'+i)),lab=bs.map(b=>b.textContent);bs.forEach(b=>{b.disabled=true;b.textContent='↻ Atualizando…'});
       const ids=()=>new Set(lib.filter(m=>m.source==='drive').map(m=>m.id)),a=ids();
-      try{await ensureDriveToken();for(const f of driveFolders())await scanDriveFolder(f.id);
+      try{await ensureDriveToken();for(const f of driveFolders())await scanDriveFolder(f.id,true);save();render();idAll();
         const b=ids();let add=0,rem=0;b.forEach(x=>a.has(x)||add++);a.forEach(x=>b.has(x)||rem++);
         toast(add||rem?add+' novo(s) e '+rem+' removido(s) do Drive.':'Tudo em dia: nenhuma mudança no Drive.');driveStatus('Sincronização concluída.')}
       catch(e){toast(e.message||'Não foi possível atualizar.')}
@@ -1434,22 +1460,27 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
       const r=await fetch(u,{headers:{Authorization:'Bearer '+driveToken}});
       if(!r.ok){if(r.status===401)driveToken=null;throw Error('Google Drive: '+r.status+'. Verifique a autorização e o acesso à pasta.')}return r.json();
     }
-    async function scanDriveFolder(id){
+    async function scanDriveFolder(id,quiet){
       const info=await driveGet('files/'+encodeURIComponent(id),{fields:'id,name,mimeType',supportsAllDrives:'true'});
       if(info.mimeType!=='application/vnd.google-apps.folder')throw Error('O ID fornecido não corresponde a uma pasta.');
-      const items=[],queue=[{id,path:''}],visited=new Set();
-      while(queue.length){const cur=queue.shift();if(visited.has(cur.id))continue;visited.add(cur.id);
-        let page='';do{
-          const response=await driveGet('files',{q:"'"+cur.id+"' in parents and trashed = false",fields:'nextPageToken,files(id,name,mimeType,size,webViewLink,videoMediaMetadata)',pageSize:'1000',pageToken:page,supportsAllDrives:'true',includeItemsFromAllDrives:'true'});
-          for(const f of response.files||[]){if(f.mimeType==='application/vnd.google-apps.folder')queue.push({id:f.id,path:cur.path+f.name+'/'});else if(VID.test(f.name)&& (f.mimeType.startsWith('video/')||f.mimeType==='application/octet-stream'||/\.(mkv|avi)$/i.test(f.name)))items.push({id:'drive:'+f.id,driveId:f.id,r:'Drive: '+info.name,p:cur.path+f.name,n:f.name,...parse(f.name),add:Date.now(),source:'drive'});}
-          page=response.nextPageToken||'';
-        }while(page);
+      const items=[],paths=new Map([[id,'']]),vis=new Set([id]);let level=[id];
+      while(level.length){
+        const bs=[];for(let i=0;i<level.length;i+=8)bs.push(level.slice(i,i+8));level=[];
+        await Promise.all(bs.map(async b=>{let page='';do{
+          const res=await driveGet('files',{q:'('+b.map(x=>"'"+x+"' in parents").join(' or ')+') and trashed = false',fields:'nextPageToken,files(id,name,mimeType,parents)',pageSize:'1000',pageToken:page,supportsAllDrives:'true',includeItemsFromAllDrives:'true'});
+          for(const f of res.files||[]){const par=(f.parents||[]).find(p=>paths.has(p))??(b.length===1?b[0]:undefined),bp=paths.get(par)||'';
+            if(f.mimeType==='application/vnd.google-apps.folder'){if(!vis.has(f.id)){vis.add(f.id);paths.set(f.id,bp+f.name+'/');level.push(f.id)}}
+            else if(VID.test(f.name)&&(f.mimeType.startsWith('video/')||f.mimeType==='application/octet-stream'||/\.(mkv|avi)$/i.test(f.name)))items.push({id:'drive:'+f.id,driveId:f.id,r:'Drive: '+info.name,p:bp+f.name,n:f.name,...parse(f.name),add:Date.now(),source:'drive'});}
+          page=res.nextPageToken||'';
+        }while(page)}));
         driveStatus('Lendo '+info.name+': '+items.length+' vídeo(s) encontrados…');
       }
       items.forEach(m=>m.driveFolder=id);
-      lib=lib.filter(m=>m.driveFolder!==id||items.some(i=>i.id===m.id));
-      for(const m of items)if(!lib.some(x=>x.id===m.id))lib.push(m);
-      save();render();idAll();return {id,name:info.name,count:items.length};
+      const have=new Set(lib.map(m=>m.id)),keep=new Set(items.map(i=>i.id));
+      lib=lib.filter(m=>m.driveFolder!==id||keep.has(m.id));
+      for(const m of items)if(!have.has(m.id))lib.push(m);
+      if(!quiet){save();render();idAll()}
+      return {id,name:info.name,count:items.length};
     }
     $('#drive-add').onclick=async()=>{const id=folderId($('#drive-folder').value);if(!id)return driveStatus('Cole um link de pasta válido ou seu ID.');try{driveStatus('Lendo pasta…');const result=await scanDriveFolder(id);const folders=driveFolders().filter(x=>x.id!==id);folders.push({id,name:result.name});saveFolders(folders);driveStatus(result.count+' filmes importados de '+result.name+'.');}catch(e){driveStatus(e.message)}};
     $('#drive-sync').onclick=syncAll;
@@ -1474,7 +1505,7 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
       const k = KEY(), b = k.length > 40, u = new URL('https://api.themoviedb.org/3' + path);
       for (const [a, x] of Object.entries({ language: 'pt-BR', ...q })) u.searchParams.set(a, x);
       if (!b) u.searchParams.set('api_key', k);
-      const r = await fetch(u, b ? { headers: { Authorization: 'Bearer ' + k } } : {});
+      let r; for (let i = 0; ; i++) { r = await fetch(u, b ? { headers: { Authorization: 'Bearer ' + k } } : {}); if (r.status !== 429 || i > 2) break; await new Promise(z => setTimeout(z, 1200 * (i + 1))) }
       if (!r.ok) throw Object.assign(new Error('TMDB ' + r.status), { s: r.status });
       return r.json()
     }
@@ -1503,7 +1534,7 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
           }
         }))
       } catch (e) { toast('Chave do TMDB inválida. Confira no botão TMDB.') }
-      busy = false; save(); render(); st('');
+      busy = false; save(); render(); st(''); if (n > f && lib.some(m => m.tm === undefined)) setTimeout(idAll, 300);
       if (f) toast(f + ' filme(s) sem identificação. Confira a conexão e use Atualizar.')
     }
 
@@ -1543,18 +1574,32 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
       for (const h of hs) try { if (await h.requestPermission({ mode: 'read' }) === 'granted') await scan(h) } catch { }
     }
 
+    const PG = 48; let shown = 0;
+    const ti = m => m.tm?.t || m.q, HY = new WeakMap();
+    const hay = m => { let h = HY.get(m); if (!h || h.k !== m.tm) HY.set(m, h = { k: m.tm, s: [ti(m), m.tm?.o, m.n, ...(m.tm?.dir || []), ...(m.tm?.g || []), ...(m.tm?.cast || []).map(c => c.n)].join(' ').toLowerCase() }); return h.s };
+    const card = (m, i) => {
+      const t = m.tm, y = t?.dt?.slice(0, 4) || m.y || '', p = pos[m.id], pr = p > 15 && t?.rt ? Math.min(100, p / (t.rt * 60) * 100) : 0;
+      return `<article class="card mv" tabindex="0" role="button" data-i="${i}" aria-label="${esc(ti(m))}"><div class="po">${m.source === 'drive' ? '<span class="drive-mark">☁ DRIVE</span>' : ''}${t?.p ? `<img decoding="async" loading="lazy" alt="" width="342" height="513" srcset="${IMG}w185${t.p} 185w,${IMG}w342${t.p} 342w,${IMG}w500${t.p} 500w" sizes="(max-width:680px) 46vw,220px" src="${IMG}w342${t.p}">` : esc(m.n)}${pr ? `<div class="prog"><i style="width:${pr.toFixed(0)}%"></i></div>` : ''}</div><div class="mb"><h3>${esc(ti(m))}</h3><div><span>${y}${t?.rt ? ' · ' + t.rt + ' min' : ''}</span>${t?.v ? `<span class="chip g s">★ ${nota(t.v)}</span>` : `<span class="chip s">${t === false ? 'Sem dados' : 'Pendente'}</span>`}</div></div></article>`
+    };
+    const mo = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) more() }, { rootMargin: '900px' });
+    function more(upto) {
+      const g = $('#gr'); g.querySelector('#more')?.remove();
+      const end = Math.min(view.length, upto || shown + PG);
+      g.insertAdjacentHTML('beforeend', view.slice(shown, end).map((m, k) => card(m, shown + k)).join('')); shown = end;
+      if (shown < view.length) { g.insertAdjacentHTML('beforeend', '<div id="more"></div>'); mo.observe($('#more')) }
+    }
+    function redo() { shown = 0; render() }
     function render() {
-      const q = $('#q').value.toLowerCase().trim(), so = $('#so').value, ti = m => m.tm?.t || m.q, yr = m => +(m.tm?.dt?.slice(0, 4) || m.y || 0);
-      view = lib.filter(m => (!gf || m.tm?.g?.includes(gf)) && (!q || [ti(m), m.tm?.o, m.n, ...(m.tm?.dir || []), ...(m.tm?.g || []), ...(m.tm?.cast || []).map(c => c.n)].join(' ').toLowerCase().includes(q)));
-      view.sort({ add: (a, b) => b.add - a.add, t: (a, b) => ti(a).localeCompare(ti(b), 'pt'), y: (a, b) => yr(b) - yr(a), v: (a, b) => (b.tm?.v || 0) - (a.tm?.v || 0) }[so]);
-      $('#gr').innerHTML = view.length ? view.map((m, i) => {
-        const t = m.tm, y = t?.dt?.slice(0, 4) || m.y || '';
-        return `<article class="card mv" tabindex="0" data-i="${i}"><div class="po">${m.source==='drive'?'<span class="drive-mark">☁ DRIVE</span>':''}${t?.p ? `<img loading="lazy" alt="" src="${IMG}w342${t.p}">` : esc(m.n)}</div><div class="mb"><h3>${esc(ti(m))}</h3><div><span>${y}${t?.rt ? ' · ' + t.rt + ' min' : ''}</span>${t?.v ? `<span class="chip g s">★ ${nota(t.v)}</span>` : `<span class="chip s">${t === false ? 'Sem dados' : 'Pendente'}</span>`}</div></div></article>`
-      }).join('')
-        : lib.length ? '<p class="lbl" style="grid-column:1/-1">Nenhum filme corresponde à busca.</p>'
-          : '<div class="card empty"><div><span class="chip">Vazio</span><h3>Nenhuma pasta adicionada</h3><span class="sm">Formatos: mp4, mkv, webm, mov, avi · subpastas incluídas · legendas .srt/.vtt com o mesmo nome</span></div><button class="pill k big" data-add>Adicionar pasta</button></div>';
+      const q = $('#q').value.toLowerCase().trim(), so = $('#so').value, yr = m => +(m.tm?.dt?.slice(0, 4) || m.y || 0), keep = Math.max(PG, shown);
+      view = lib.filter(m => (!gf || m.tm?.g?.includes(gf)) && (!q || hay(m).includes(q)));
+      view.sort({ add: (a, b) => b.add - a.add, t: (a, b) => ti(a).localeCompare(ti(b), 'pt'), y: (a, b) => yr(b) - yr(a), v: (a, b) => (b.tm?.v || 0) - (a.tm?.v || 0), w: (a, b) => (seen[b.id] || 0) - (seen[a.id] || 0) }[so] || ((a, b) => b.add - a.add));
+      shown = 0; const g = $('#gr'); g.innerHTML = '';
+      if (view.length) more(keep);
+      else g.innerHTML = lib.length ? '<p class="lbl" style="grid-column:1/-1">Nenhum filme corresponde à busca.</p>'
+        : '<div class="card empty"><div><span class="chip">Vazio</span><h3>Nenhuma pasta adicionada</h3><span class="sm">Formatos: mp4, mkv, webm, mov, avi · subpastas incluídas · legendas .srt/.vtt com o mesmo nome</span></div><button class="pill k big" data-add>Adicionar pasta</button></div>';
       const gs = [...new Set(lib.flatMap(m => m.tm?.g || []))].sort();
-      $('#gc').innerHTML = gs.map(g => `<button class="chip${g === gf ? ' on' : ''}" data-g="${esc(g)}">${esc(g)}</button>`).join('');
+      $('#gc').innerHTML = gs.length ? `<button class="chip${gf ? '' : ' on'}" data-g="">Todos</button>` + gs.map(x => `<button class="chip${x === gf ? ' on' : ''}" data-g="${esc(x)}">${esc(x)}</button>`).join('') : '';
+      $('#rc').textContent = lib.length ? (view.length === lib.length ? lib.length + ' filmes' : view.length + ' de ' + lib.length + ' filmes') : '';
       const id = lib.filter(m => m.tm);
       $('#s1').textContent = lib.length; $('#s2').textContent = id.length + '/' + lib.length;
       $('#s3').textContent = Math.round(id.reduce((a, m) => a + (m.tm.rt || 0), 0) / 60) + ' h'
@@ -1565,7 +1610,7 @@ html[data-theme="matrix"] .dv-title h2{font-style:normal;font-weight:800;text-tr
         lg = t?.lang ? new Intl.DisplayNames(['pt-BR'], { type: 'language' }).of(t.lang) : '',
         rows = (t ? [['Título original', t.o], ['Lançamento', t.dt && new Date(t.dt + 'T12:00').toLocaleDateString('pt-BR')], ['Duração', t.rt && Math.floor(t.rt / 60) + 'h ' + t.rt % 60 + 'min'], ['Direção', t.dir.join(', ')], ['Roteiro', t.wr.join(', ')], ['País', t.pc.join(', ')], ['Idioma original', lg], ['Produção', t.co.join(', ')], ['Orçamento', usd(t.bud)], ['Bilheteria', usd(t.rev)]] : []).filter(r => r[1]),
         ov = t?.ov || (t === false ? 'Este arquivo não foi encontrado no TMDB. Use Corrigir identificação.' : t ? 'Sem sinopse disponível.' : 'Aguardando identificação no TMDB.');
-      det.innerHTML = `<div class="detail-top"><button class="pill k" id="dtop" type="button">✕ Fechar ficha</button></div><div class="bd"${t?.b ? ` style="background-image:url(${IMG}w1280${t.b})"` : ''}></div>
+      det.innerHTML = `<div class="detail-top"><button class="pill k" id="dtop" type="button">✕ Fechar ficha</button></div><div class="bd"${t?.b ? ` style="background-image:url(${IMG}${innerWidth > 900 ? 'w1280' : 'w780'}${t.b})"` : ''}></div>
 <div class="dh"><div>${t?.p ? `<img src="${IMG}w500${t.p}" alt="">` : ''}</div><div>
 <div class="lbl">${y}${t?.v ? ' · nota ' + nota(t.v) + ' (' + t.vc + ' votos)' : ''}</div>
 <h2>${esc(t?.t || m.q)}</h2>${t?.tag ? `<p class="tag">${esc(t.tag)}</p>` : ''}
@@ -1614,18 +1659,18 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     async function play(m) {
       if (m.source === 'drive') {
         try { await ensureDriveToken() } catch (e) { return toast(e.message || 'Conecte sua conta Google para assistir.') }
-        cur = m; resetPlayerUI(); $('#pe').textContent = PE_DRIVE;
+        cur = m; setMedia(m); resetPlayerUI(); $('#pe').textContent = PE_DRIVE;
         const mkv = /\.mkv$/i.test(m.n); $('#media-help').hidden = !mkv; $('#convert-cmd').textContent = mkv ? conversionCommand(m.n) : '';
         try { await prepareDrivePlayback() } catch (e) { return toast(e.message || 'Servidor de streaming indisponível.') }
         urls = []; vd.src = driveUrl(m); vd.playbackRate = 1; $('#sp').textContent = '1×'; $('#cc').hidden = true;
-        $('#pn').textContent = (m.tm?.t || m.q) + ' · Google Drive'; pl.hidden = false; spin(true); vd.play().catch(() => { });
+        $('#pn').textContent = (m.tm?.t || m.q) + ' · Google Drive'; pl.hidden = false; layerOpen(); spin(true); vd.play().catch(() => { });
         return;
       }
       let e = FILES.get(m.id);
       if (!e) { if(window.showDirectoryPicker) await reconnect(); else {toast('Selecione novamente a pasta para reconectar os arquivos.');await pick()} e = FILES.get(m.id) }
       if (!e) return toast('Arquivo não encontrado. Adicione a pasta novamente.');
       try {
-        cur = m; resetPlayerUI(); $('#pe').textContent = PE_LOCAL;
+        cur = m; setMedia(m); resetPlayerUI(); $('#pe').textContent = PE_LOCAL;
         const mkv = /\.mkv$/i.test(m.n); $('#media-help').hidden=!mkv; $('#convert-cmd').textContent=mkv?conversionCommand(m.n):'';
         const u = URL.createObjectURL(await e.get()); urls = [u]; vd.src = u;
         if (e.sub) {
@@ -1636,7 +1681,7 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
           Object.assign(tr, { kind: 'subtitles', label: 'Legenda', srclang: 'pt', src: tu, default: true }); vd.append(tr)
         }
         $('#cc').hidden = !e.sub; $('#pn').textContent = m.tm?.t || m.q; vd.playbackRate = 1; $('#sp').textContent = '1×';
-        pl.hidden = false; vd.play().catch(() => { })
+        pl.hidden = false; layerOpen(); vd.play().catch(() => { })
       } catch { toast('Não foi possível abrir o arquivo.') }
     }
 
@@ -1654,7 +1699,7 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
       if (document.fullscreenElement) document.exitFullscreen();
       vd.removeAttribute('src'); vd.querySelectorAll('track').forEach(t => t.remove()); vd.load(); spin(false);
       clearTimeout(controlsTimer); pl.classList.remove('controls-hidden'); urls.forEach(u => URL.revokeObjectURL(u)); urls = []; pl.hidden = true;
-      $('#stage').classList.remove('is-paused'); $('#media-help').hidden = true; $('#pe').hidden = true; $('#drive-renew').hidden = true; resumeAt = null; driveWarned = false; cur = null
+      $('#stage').classList.remove('is-paused'); $('#media-help').hidden = true; $('#pe').hidden = true; $('#drive-renew').hidden = true; resumeAt = null; driveWarned = false; cur = null; releaseWake(); layerClose(); render()
     }
 
     $('#pp').innerHTML = I.p;
@@ -1674,9 +1719,19 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     pl.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'||e.pointerType==='pen')revealControls()});
     pl.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')revealControls()});
     pl.addEventListener('focusin',revealControls);
+    let tapT = 0, tapS = 0, tapTm;
+    function skip(d, side) {
+      vd.currentTime = Math.max(0, Math.min(vd.duration || 1e9, vd.currentTime + d));
+      let e = $('#seekfx'); if (!e) { $('#stage').insertAdjacentHTML('beforeend', '<div id="seekfx" aria-hidden="true"></div>'); e = $('#seekfx') }
+      e.textContent = side < 0 ? '« ' + -d + 's' : d + 's »'; e.style.left = side < 0 ? '10%' : 'auto'; e.style.right = side > 0 ? '10%' : 'auto';
+      e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('on'), 600)
+    }
     vd.onclick = e => {
-      if(document.fullscreenElement===pl && e.detail && matchMedia('(pointer:coarse)').matches && pl.classList.contains('controls-hidden')){revealControls();return;}
-      tog();
+      if (!matchMedia('(pointer:coarse)').matches) return tog();
+      const r = vd.getBoundingClientRect(), side = e.clientX < r.left + r.width / 3 ? -1 : e.clientX > r.left + r.width * 2 / 3 ? 1 : 0, now = Date.now();
+      if (side && now - tapT < 320 && side === tapS) { clearTimeout(tapTm); tapT = 0; return skip(side * 10, side) }
+      tapT = now; tapS = side; clearTimeout(tapTm);
+      tapTm = setTimeout(() => { if (document.fullscreenElement === pl && pl.classList.contains('controls-hidden')) revealControls(); else tog() }, side ? 240 : 0)
     };
     $('#pp').onclick = tog;
 
@@ -1689,7 +1744,7 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
       $('#pause-meta').textContent=[t?.dt?.slice(0,4)||cur.y,t?.rt?t.rt+' MIN':null,t?.v?'★ '+nota(t.v):null,...(t?.g||[]).slice(0,2)].filter(Boolean).join('  ·  ');
       $('#pause-description').textContent=t?.ov||'Continue de onde parou. Consulte a ficha completa para explorar as informações disponíveis deste filme.';
     }
-    vd.onplay = vd.onpause = () => { $('#pp').innerHTML = vd.paused ? I.p : I.z;updatePauseOverlay(); revealControls(); };
+    vd.onplay = vd.onpause = () => { $('#pp').innerHTML = vd.paused ? I.p : I.z;updatePauseOverlay(); revealControls(); if (vd.paused) releaseWake(); else { acquireWake(); if (cur) seen[cur.id] = Date.now() } };
     $('#pause-resume').onclick=()=>vd.play();
     $('#pause-details').onclick=()=>{if(cur){const m=cur;closePlayer();detail(m)}};
     vd.onvolumechange = () => $('#mu').textContent = vd.muted || vd.volume === 0 ? 'MUDO' : 'VOL';
@@ -1727,28 +1782,48 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     document.onkeydown = e => {
       if (pl.hidden) return; const k = e.key;
       if (['INPUT','BUTTON','SELECT'].includes(document.activeElement?.tagName) && k===' ') return;
-      if (k === ' ') { e.preventDefault(); tog() } else if (k === 'ArrowRight') vd.currentTime += 10; else if (k === 'ArrowLeft') vd.currentTime -= 10;
-      else if (k === 'f') $('#fs').click(); else if (k === 'm') $('#mu').click(); else if (k === 'Escape') closePlayer()
+      if (k === ' ') { e.preventDefault(); tog() } else if (k === 'ArrowRight' && document.activeElement?.type !== 'range') vd.currentTime += 10; else if (k === 'ArrowLeft' && document.activeElement?.type !== 'range') vd.currentTime -= 10;
+      else if (k === 'ArrowUp' || k === 'ArrowDown') { if (document.activeElement?.type !== 'range') { e.preventDefault(); vd.volume = Math.max(0, Math.min(1, vd.volume + (k === 'ArrowUp' ? .1 : -.1))); $('#vo').value = vd.volume } } else if (k === 'c' && !$('#cc').hidden) $('#cc').click(); else if (k === 'f') $('#fs').click(); else if (k === 'm') $('#mu').click(); else if (k === 'Escape') closePlayer()
     };
 
     $('#gr').onclick = e => { const c = e.target.closest('.mv'); if (c) return detail(view[c.dataset.i]); if (e.target.closest('[data-add]')) pick() };
-    $('#gr').onkeydown = e => { if (e.key === 'Enter' && e.target.classList.contains('mv')) e.target.click() };
-    $('#gc').onclick = e => { const g = e.target.dataset.g; if (g !== undefined) { gf = gf === g ? '' : g; render() } };
+    $('#gr').onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('mv')) { e.preventDefault(); e.target.click() } };
+    $('#gc').onclick = e => { const g = e.target.dataset.g; if (g !== undefined) { gf = gf === g ? '' : g; redo() } };
     ['add1', 'add2'].forEach(i => $('#' + i).onclick = pick);
     ['key1', 'key2'].forEach(i => $('#' + i).onclick = () => { $('#kv').value = KEY(); cfg.showModal() });
     $('#ks').onclick = () => { L['cine.key'] = $('#kv').value.trim(); cfg.close(); idAll() };
     $('#kc').onclick = () => cfg.close();
     $('#clr').onclick = () => { if (confirm('Remover o catálogo salvo neste navegador? Seus arquivos de vídeo não são apagados.')) { lib = []; pos = {}; gf = ''; L.removeItem('cine.lib'); L.removeItem('cine.pos'); render(); cfg.close() } };
     $('#rf').onclick = () => window.showDirectoryPicker ? reconnect() : pick();
-    $('#q').oninput = $('#so').onchange = render;
+    let qt; $('#q').oninput = () => { clearTimeout(qt); qt = setTimeout(redo, 160) };
+    $('#so').onchange = () => { L['cine.sort'] = $('#so').value; redo() };
     [det, cfg, driveDlg].forEach(d => d.onclick = e => { if (e.target === d) d.close() });
+    function darkFonts() { if (window._df) return; window._df = 1; const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Share+Tech+Mono&display=swap'; document.head.append(l) }
+    /* botão Voltar do celular fecha player/ficha/janelas em vez de sair do site */
+    const anyOpen = () => !pl.hidden || det.open || cfg.open || driveDlg.open; let selfBack = false;
+    function layerOpen() { if (!history.state?.ui) history.pushState({ ui: 1 }, '') }
+    function layerClose() { setTimeout(() => { if (history.state?.ui && !anyOpen()) { selfBack = true; history.back() } }, 0) }
+    const _sm = HTMLDialogElement.prototype.showModal; HTMLDialogElement.prototype.showModal = function () { _sm.call(this); layerOpen() };
+    [det, cfg, driveDlg].forEach(d => d.addEventListener('close', layerClose));
+    addEventListener('popstate', () => { if (selfBack) { selfBack = false; return } if (!pl.hidden) closePlayer(); else [det, cfg, driveDlg].forEach(d => d.open && d.close()) });
+    if (history.state?.ui) history.replaceState(null, '');
+    /* tela ligada durante o filme e controles na tela de bloqueio */
+    let wl = null;
+    async function acquireWake() { try { if (!wl && navigator.wakeLock) { wl = await navigator.wakeLock.request('screen'); wl.addEventListener('release', () => wl = null) } } catch { } }
+    function releaseWake() { try { wl?.release() } catch { } wl = null }
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && cur && !vd.paused) acquireWake() });
+    function setMedia(m) { if ('mediaSession' in navigator && window.MediaMetadata) try { navigator.mediaSession.metadata = new MediaMetadata({ title: ti(m), artwork: m.tm?.p ? [{ src: IMG + 'w342' + m.tm.p, sizes: '342x513', type: 'image/jpeg' }] : [] }) } catch { } }
+    if ('mediaSession' in navigator) [['play', () => vd.play()], ['pause', () => vd.pause()], ['seekbackward', () => vd.currentTime -= 10], ['seekforward', () => vd.currentTime += 10]].forEach(([a, f]) => { try { navigator.mediaSession.setActionHandler(a, f) } catch { } });
+    vd.onended = () => { if (cur) { delete pos[cur.id]; savePos(); toast('Fim do filme.') } };
+    addEventListener('offline', () => toast('Sem conexão com a internet.')); addEventListener('online', () => { toast('Conexão restabelecida.'); idAll() });
+    { const s = L['cine.sort']; if (s && [...$('#so').options].some(o => o.value === s)) $('#so').value = s }
     handleDriveRedirect();
     render(); idAll();
     (async()=>{const a=new URLSearchParams(location.search).get('auth');if(a)history.replaceState(null,'',location.pathname);
       const ok=await serverRefresh();if(ok)driveStatus('Conta conectada'+(driveEmail?': '+driveEmail:'')+'.');
       if(a==='ok'&&ok)openDrive();else if(a)toast('Não foi possível conectar ao Google. Tente de novo.')})();
   </script>
-  <script>if('serviceWorker' in navigator)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});if(window.caches)caches.keys().then(ks=>ks.forEach(k=>caches.delete(k))).catch(()=>{})</script>
+  <script>if(navigator.serviceWorker?.controller)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});if(navigator.serviceWorker?.controller&&window.caches)caches.keys().then(ks=>ks.forEach(k=>caches.delete(k))).catch(()=>{})</script>
 </body>
 
 </html>

@@ -1,39 +1,29 @@
-// api/session.js
+// POST   /api/session  { token }  -> grava o access token do Google num cookie HttpOnly (usado só por /api/stream)
+// DELETE /api/session             -> apaga o cookie
 'use strict';
 
-export default async function handler(req, res) {
-    const origin = req.headers.origin || '*';
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+// Access tokens do Google usam apenas estes caracteres. Rejeitar o resto evita injeção de atributos no cookie.
+const TOKEN_RE = /^[A-Za-z0-9._~+\/-]{20,2048}$/;
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+module.exports = async function handler(req, res) {
+  // Mesma origem: não há CORS aqui de propósito. Refletir a origem com credenciais permitiria
+  // que qualquer site lesse seus filmes usando o seu cookie.
+  res.setHeader('Cache-Control', 'no-store');
+
+  if (req.method === 'DELETE') {
+    res.setHeader('Set-Cookie', 'cine_token=; Path=/api; HttpOnly; Secure; SameSite=Lax; Max-Age=0');
+    return res.status(204).end();
+  }
+
+  if (req.method === 'POST') {
+    const token = req.body && req.body.token;
+    if (typeof token !== 'string' || !TOKEN_RE.test(token)) {
+      return res.status(400).send('Token inválido');
     }
+    res.setHeader('Set-Cookie', `cine_token=${token}; Path=/api; HttpOnly; Secure; SameSite=Lax; Max-Age=3600`);
+    return res.status(204).end();
+  }
 
-    if (req.method === 'DELETE') {
-        res.setHeader(
-            'Set-Cookie',
-            'cine_token=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0'
-        );
-        return res.status(204).end();
-    }
-
-    if (req.method === 'POST') {
-        const { token } = req.body || {};
-
-        if (typeof token !== 'string' || token.length < 20 || token.length > 4096) {
-            return res.status(400).send('Token inválido');
-        }
-
-        // Define o Cookie com o OAuth Access Token do Google
-        res.setHeader(
-            'Set-Cookie',
-            `cine_token=${token}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=3600`
-        );
-        return res.status(204).end();
-    }
-
-    return res.status(405).send('Método não permitido');
-}
+  res.setHeader('Allow', 'POST, DELETE');
+  return res.status(405).send('Método não permitido');
+};

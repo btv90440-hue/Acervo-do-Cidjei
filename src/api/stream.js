@@ -1,6 +1,6 @@
 // GET|HEAD /api/stream/:id  -> repassa o arquivo do Google Drive com suporte a Range (seek no player)
 //
-// Cloudflare Pages Functions (runtime Workers). O corpo da resposta é repassado como stream
+// Cloudflare Workers. O corpo da resposta é repassado como stream
 // (sem ler o arquivo na memória e sem gastar CPU em JS), então cabe no limite de 10 ms do plano gratuito.
 
 const ID_RE = /^[\w-]{10,200}$/;

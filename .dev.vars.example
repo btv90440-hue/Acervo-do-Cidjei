@@ -1,5 +1,5 @@
 # Copie para .dev.vars (não vai para o Git) e preencha, só para testar localmente com:
-#   npx wrangler pages dev public
+#   npx wrangler dev
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 COOKIE_SECRET=

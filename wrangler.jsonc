@@ -1,0 +1,13 @@
+{
+  // Mesmo nome do Worker que já existe no painel (acervo-do-cidjei), para atualizar o mesmo endereço.
+  "name": "acervo-do-cidjei",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-10-09",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    // O código só roda em /api/*. Site, ícones e manifest são servidos como arquivos estáticos
+    // (ilimitados e gratuitos) e não gastam a cota de 100 mil chamadas por dia.
+    "run_worker_first": ["/api/*"]
+  }
+}

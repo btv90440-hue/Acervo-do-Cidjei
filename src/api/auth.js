@@ -7,8 +7,8 @@
 //   POST /api/auth/folders   -> lembra as pastas importadas (cookie)
 //   POST /api/auth/logout    -> revoga o refresh token e apaga o cookie
 //
-// Cloudflare Pages Functions (runtime Workers).
-// Segredos (Cloudflare > Pages > Settings > Variables and Secrets):
+// Cloudflare Workers.
+// Segredos (Cloudflare > Workers & Pages > seu Worker > Settings > Variables and Secrets, tipo Secret):
 //   GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, COOKIE_SECRET (texto aleatório longo)
 
 const YEAR = 31536000;

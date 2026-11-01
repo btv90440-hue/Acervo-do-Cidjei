@@ -1,7 +1,7 @@
 // POST   /api/session  { token }  -> grava o access token do Google num cookie HttpOnly (usado só por /api/stream)
 // DELETE /api/session             -> apaga o cookie
 //
-// Cloudflare Pages Functions (runtime Workers). Sem dependências.
+// Cloudflare Workers. Sem dependências.
 
 // Access tokens do Google usam apenas estes caracteres. Rejeitar o resto evita injeção de atributos no cookie.
 const TOKEN_RE = /^[A-Za-z0-9._~+\/-]{20,2048}$/;

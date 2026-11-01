@@ -1431,7 +1431,7 @@ details.dv-link[open] summary{margin-bottom:10px}
           <h3>Conectar a conta Google</h3>
           <div id="legacy-id"><label for="drive-client">ID de cliente OAuth 2.0 (aplicativo da Web)</label>
           <input id="drive-client" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="url" placeholder="123456…apps.googleusercontent.com">
-          <p class="dv-hint">Configure a origem JavaScript autorizada no Google Cloud com a URL do seu site Vercel e ative a Google Drive API. Nunca cole o segredo do cliente.</p></div>
+          <p class="dv-hint">Configure a origem JavaScript autorizada no Google Cloud com a URL do seu site (por exemplo https://acervo-do-cidjei.pages.dev) e ative a Google Drive API. Nunca cole o segredo do cliente.</p></div>
           <div class="dv-acts"><button class="pill k" id="drive-login" type="button">Conectar Google</button><button class="pill" id="drive-logout" type="button">Desconectar</button></div>
         </div>
       </section>
@@ -1873,7 +1873,7 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     const PE_EXP = 'A sessão do Google expirou. Toque em “Renovar sessão” para continuar de onde parou.';
     const spin = on => $('#spin').hidden = !on;
 
-    /* Reprodução do Drive exclusivamente pela rota do Vercel. */
+    /* Reprodução do Drive exclusivamente pela ponte de streaming do próprio site (Cloudflare Pages Functions). */
     const driveUrl = m => '/api/stream/' + encodeURIComponent(m.driveId);
     async function prepareDrivePlayback(){
       const r = await fetch('/api/session', {
@@ -1881,7 +1881,7 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: driveToken })
       });
-      if(!r.ok) throw Error('Ponte de streaming indisponível no servidor Vercel.');
+      if(!r.ok) throw Error('Ponte de streaming indisponível no servidor.');
     }
 
     function resetPlayerUI() {

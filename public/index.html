@@ -1523,7 +1523,8 @@ details.dv-link[open] summary{margin-bottom:10px}
     document.addEventListener('visibilitychange', () => { if (document.hidden) { if (svt) flush(); if (cur) { pos[cur.id] = vd.currentTime; savePos() } } });
     const savePos = () => { L['cine.pos'] = JSON.stringify(pos); L['cine.seen'] = JSON.stringify(seen); L['cine.done'] = JSON.stringify(done) };
     let rq = 0; const renderSoon = () => { if (!rq) rq = setTimeout(render, 1200) };
-    const KEY = () => L['cine.key'] || '';
+    const TMDB_KEY = '04340c546340e95aad0676052e7268ad'; /* chave padrão (v3, somente leitura); quem salvar outra no botão TMDB passa a usar a dele */
+    const KEY = () => L['cine.key'] || TMDB_KEY;
     const driveDlg = $('#drive-dialog');
     let driveToken = null, driveClient = null, driveExp = 0, resumeAt = null, driveWarned = false, autoRetried = false, renewing = false, lastRenew = 0;
     const driveFolders = () => J('cine.drive.folders', []);

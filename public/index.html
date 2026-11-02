@@ -939,6 +939,7 @@ button,input,select{touch-action:manipulation}
 #pl:fullscreen.controls-hidden{cursor:none}
 #pl:fullscreen.controls-hidden .pt{opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-18px)}
 #pl:fullscreen.controls-hidden .pc{opacity:0;visibility:hidden;pointer-events:none;transform:translateY(18px)}
+@media(pointer:coarse){#pl:not(:fullscreen).controls-hidden .pt,#pl:not(:fullscreen).controls-hidden .pc{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility .3s}}
 #pl:fullscreen #stage.is-paused{cursor:default}
 #pl:fullscreen #pause-info{z-index:6}
 
@@ -1941,8 +1942,8 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     function revealControls(){
       pl.classList.remove('controls-hidden');
       clearTimeout(controlsTimer);
-      if(document.fullscreenElement===pl && !vd.paused && !vd.ended && !pl.hidden){
-        controlsTimer=setTimeout(()=>pl.classList.add('controls-hidden'),2700);
+      if((document.fullscreenElement===pl || matchMedia('(pointer:coarse)').matches) && !vd.paused && !vd.ended && !pl.hidden){
+        controlsTimer=setTimeout(()=>{ if(scrubbing) return revealControls(); pl.classList.add('controls-hidden') },2700);
       }
     }
     document.addEventListener('fullscreenchange',()=>{
@@ -1951,7 +1952,8 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
       if(document.fullscreenElement===pl) revealControls();
     });
     pl.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'||e.pointerType==='pen')revealControls()});
-    pl.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')revealControls()});
+    let ctlWasHidden = false; /* no celular, o primeiro toque com os controles ocultos só os mostra */
+    pl.addEventListener('pointerdown',e=>{ctlWasHidden=e.pointerType==='touch'&&pl.classList.contains('controls-hidden');if(e.pointerType==='touch')revealControls()});
     pl.addEventListener('focusin',revealControls);
     let tapT = 0, tapS = 0, tapTm;
     function skip(d, side) {
@@ -1964,6 +1966,7 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
       if (!matchMedia('(pointer:coarse)').matches) return tog();
       const r = vd.getBoundingClientRect(), side = e.clientX < r.left + r.width / 3 ? -1 : e.clientX > r.left + r.width * 2 / 3 ? 1 : 0, now = Date.now();
       if (side && now - tapT < 320 && side === tapS) { clearTimeout(tapTm); tapT = 0; return skip(side * 10, side) }
+      if (ctlWasHidden) { ctlWasHidden = false; tapT = now; tapS = side; clearTimeout(tapTm); return } /* 1º toque: só abre os controles (um 2º toque rápido nas bordas ainda avança/volta 10s) */
       tapT = now; tapS = side; clearTimeout(tapTm);
       tapTm = setTimeout(() => { if (document.fullscreenElement === pl && pl.classList.contains('controls-hidden')) revealControls(); else tog() }, side ? 240 : 0)
     };

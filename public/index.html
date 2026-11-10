@@ -902,6 +902,8 @@ html[data-theme="matrix"] .pause-actions button+button{background:#1d1d1d;color:
 html[data-theme="matrix"] .pause-actions button:hover{box-shadow:0 0 22px #ffffff40}
 
 .pc{background:#161d24;border:1px solid #283440}.pc #pp{background:#d94141;color:#ffffff}
+#stage{--acs-bottom:12px}#pl:fullscreen #stage{--acs-bottom:104px}html[data-theme="matrix"] #stage{--accent:#ffffff}
+.pc #cc[aria-pressed="true"]{background:#ffffff;color:#0b0f14;border-color:#ffffff}
 html[data-theme="matrix"] .pc{background:#121212;border-color:#262626}
 
 /* Correção do botão de play no modo escuro (La Haine): fundo escuro estruturado com ícone branco bem visível */
@@ -1483,6 +1485,336 @@ details.dv-link[open] summary{margin-bottom:10px}
   <div id="tt" popover="manual"></div>
 
   <script>
+/* legendas.js — Legendas para o player nativo do Acervo do Cidjei
+ * Busca .srt/.vtt/.ass/.ssa na mesma pasta do filme no Google Drive (e em subpastas
+ * "Legendas"/"Subs"), aceita arquivo do dispositivo, corrige acentos (UTF-8/Latin-1),
+ * ajusta sincronia e aparência, e lembra as escolhas.
+ *
+ * Opções extras: button (usa um botão que já existe), baseFontPx (tamanho base da legenda em px).
+ * Métodos: open, close, isOpen, toggle, refresh, loadFile(file, {auto}), destroy.
+ *
+ * Uso:
+ *   const leg = Legendas.attach({
+ *     video,                       // <video> do player
+ *     controlsEl,                  // (opcional) barra de controles onde entra o botão CC
+ *     movie: { id, name, parentId },  // arquivo do filme no Drive (parentId opcional)
+ *     getToken: async (force) => accessToken,  // token OAuth do Drive (escopo drive.readonly)
+ *     onToggle: (open) => {}       // (opcional) menu abriu/fechou
+ *   });
+ *   leg.destroy();  // ao trocar de filme / fechar o player
+ */
+(function (global) {
+  'use strict';
+
+  /* ---------- utilidades ---------- */
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  };
+  const PREF = 'acervo.legendas.prefs';
+  const OFF_KEY = id => 'acervo.legendas.offset.' + id;
+  const SUB_RE = /\.(srt|vtt|ass|ssa)$/i;
+  const norm = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+  const stripExt = s => s.replace(/\.[a-z0-9]{2,4}$/i, '');
+  const fmtOff = o => (o > 0 ? '+' : o < 0 ? '−' : '') + Math.abs(o).toFixed(1).replace('.', ',') + ' s';
+
+  const LANGS = [
+    [/pt[-_. ]?br|brasil|brazil/i, 'pt-br', 'Português (Brasil)'],
+    [/(^|[^a-z])(pt|por|portugues|portuguese)([^a-z]|$)/i, 'pt', 'Português'],
+    [/(^|[^a-z])(en|eng|english|ingles)([^a-z]|$)/i, 'en', 'Inglês'],
+    [/(^|[^a-z])(es|spa|spanish|espanhol)([^a-z]|$)/i, 'es', 'Espanhol'],
+    [/(^|[^a-z])(fr|fra|fre|french|frances)([^a-z]|$)/i, 'fr', 'Francês'],
+    [/(^|[^a-z])(it|ita|italian|italiano)([^a-z]|$)/i, 'it', 'Italiano'],
+    [/(^|[^a-z])(de|ger|deu|german|alemao)([^a-z]|$)/i, 'de', 'Alemão'],
+    [/(^|[^a-z])(ja|jpn|japanese|japones)([^a-z]|$)/i, 'ja', 'Japonês']
+  ];
+  function detectLang(fileName) {
+    const base = stripExt(fileName);
+    const seg = base.includes('.') ? base.split('.').pop() : ((base.match(/[-_\[(]\s*([^-_\[\]()]+)[\])]?\s*$/) || [])[1] || '');
+    const plain = seg.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    for (const [re, code, label] of LANGS) if (re.test(plain)) return { code, label };
+    return { code: 'und', label: 'Legenda' };
+  }
+
+  /* ---------- decodificação e parsers ---------- */
+  function decode(buf) {
+    const u = new Uint8Array(buf);
+    if (u[0] === 0xFF && u[1] === 0xFE) return new TextDecoder('utf-16le').decode(u);
+    if (u[0] === 0xFE && u[1] === 0xFF) return new TextDecoder('utf-16be').decode(u);
+    try { return new TextDecoder('utf-8', { fatal: true }).decode(u).replace(/^\uFEFF/, ''); }
+    catch { return new TextDecoder('windows-1252').decode(u); } // legendas antigas em Latin-1
+  }
+  const ts = s => {
+    const m = String(s).match(/(?:(\d+):)?(\d+):(\d+)[.,](\d+)/);
+    if (!m) return NaN;
+    return (+(m[1] || 0)) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4].padEnd(3, '0').slice(0, 3)) / 1000;
+  };
+  const clean = t => t.replace(/\{\\[^}]*\}/g, '').replace(/<\/?font[^>]*>/gi, '').trim();
+
+  function parseTimed(txt) { // SRT e VTT
+    const cues = [];
+    txt.replace(/\r/g, '').split(/\n{2,}/).forEach(block => {
+      const lines = block.split('\n');
+      const i = lines.findIndex(l => l.includes('-->'));
+      if (i < 0) return;
+      const [a, b] = lines[i].split('-->');
+      const s = ts(a), e = ts(b);
+      const t = clean(lines.slice(i + 1).join('\n'));
+      if (t && e > s) cues.push({ s, e, t });
+    });
+    return cues;
+  }
+  function parseASS(txt) {
+    let fmt = null; const cues = [];
+    txt.replace(/\r/g, '').split('\n').forEach(l => {
+      if (/^Format:/i.test(l) && /start/i.test(l)) fmt = l.slice(7).split(',').map(x => x.trim().toLowerCase());
+      else if (/^Dialogue:/i.test(l) && fmt) {
+        const p = l.slice(9).split(','), n = fmt.length;
+        const row = p.slice(0, n - 1); row.push(p.slice(n - 1).join(','));
+        const s = ts(row[fmt.indexOf('start')]), e = ts(row[fmt.indexOf('end')]);
+        const t = clean(row[fmt.indexOf('text')].replace(/\\N/gi, '\n').replace(/\\h/g, ' '));
+        if (t && e > s) cues.push({ s, e, t });
+      }
+    });
+    return cues.sort((a, b) => a.s - b.s);
+  }
+  const parse = (name, buf) => {
+    const txt = decode(buf);
+    return /\.(ass|ssa)$/i.test(name) ? parseASS(txt) : parseTimed(txt);
+  };
+
+  /* ---------- CSS ---------- */
+  const CSS = `
+.acs-btn{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.acs-btn svg{width:26px;height:26px}
+.acs-btn[aria-pressed=true]{color:var(--accent,#4da3ff)}
+.acs-btn.acs-float{position:absolute;top:12px;right:12px;z-index:40;background:rgba(28,28,30,.55);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.acs-menu{position:absolute;right:12px;bottom:var(--acs-bottom,76px);z-index:50;width:min(340px,calc(100% - 24px));max-height:calc(100% - var(--acs-bottom,76px) - 12px);overflow:auto;overscroll-behavior:contain;
+  padding:14px;border-radius:20px;color:#fff;font:14px/1.35 var(--sans,system-ui),-apple-system,"Segoe UI",sans-serif;
+  background:rgba(28,28,30,.66);-webkit-backdrop-filter:blur(26px) saturate(180%);backdrop-filter:blur(26px) saturate(180%);
+  border:1px solid rgba(255,255,255,.18);box-shadow:0 12px 40px rgba(0,0,0,.45)}
+.acs-menu[hidden]{display:none}
+.acs-head{display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:15px;margin-bottom:8px}
+.acs-head button,.acs-step button,.acs-file,.acs-sw{font:inherit;color:inherit;cursor:pointer}
+.acs-head button{background:none;border:0;font-size:18px;padding:4px 8px;opacity:.8}
+.acs-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;margin:2px 0;border:0;border-radius:12px;background:rgba(255,255,255,.08);color:inherit;font:inherit;cursor:pointer}
+.acs-item[aria-checked=true]{background:rgba(77,163,255,.32);background:color-mix(in srgb,var(--accent,#4da3ff) 35%,transparent)}
+.acs-item small{display:block;opacity:.65;font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
+.acs-item .acs-ck{margin-left:auto;opacity:0}.acs-item[aria-checked=true] .acs-ck{opacity:1}
+.acs-note{opacity:.7;font-size:12.5px;padding:6px 4px}
+.acs-file{display:block;text-align:center;margin:8px 0;padding:10px;border-radius:12px;border:1px dashed rgba(255,255,255,.35)}
+.acs-file input{display:none}
+.acs-sec{margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.14)}
+.acs-sec label{display:block;font-size:12.5px;opacity:.85;margin:0 0 6px}
+.acs-step{display:flex;gap:6px}
+.acs-step button{flex:1;padding:9px 0;border:0;border-radius:10px;background:rgba(255,255,255,.12);min-height:40px}
+.acs-step button.acs-val{flex:1.4;background:rgba(255,255,255,.2)}
+.acs-menu input[type=range]{width:100%;accent-color:var(--accent,#4da3ff)}
+.acs-sws{display:flex;gap:10px}
+.acs-sw{width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,.4);padding:0}
+.acs-sw[aria-checked=true]{border-color:#4da3ff;box-shadow:0 0 0 2px rgba(77,163,255,.5)}
+`;
+  const ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M10.2 10.2a2.4 2.4 0 1 0 0 3.6M17.2 10.2a2.4 2.4 0 1 0 0 3.6"/></svg>';
+
+  function h(tag, attrs, text) {
+    const e = document.createElement(tag);
+    for (const k in (attrs || {})) k in e && k !== 'class' ? (e[k] = attrs[k]) : e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  /* ---------- núcleo ---------- */
+  function attach(opts) {
+    const video = opts.video;
+    const host = opts.host || video.parentElement;
+    const movie = opts.movie || {};
+    if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+    if (!document.getElementById('acs-css')) document.head.appendChild(h('style', { id: 'acs-css' }, CSS));
+
+    const prefs = Object.assign({ last: null, size: 100, bg: 0.7, color: '#ffffff' }, store.get(PREF, {}));
+    const saveP = () => store.set(PREF, prefs);
+    const state = { items: [], cues: [], current: null, offset: movie.id ? store.get(OFF_KEY(movie.id), 0) : 0, dead: false };
+
+    // uma única trilha nativa reaproveitada (funciona também no fullscreen do iOS)
+    let track = Array.from(video.textTracks).find(t => t.label === 'Legendas');
+    if (!track) track = video.addTextTrack('subtitles', 'Legendas', 'pt');
+    track.mode = 'disabled';
+    video.classList.add('acs-video');
+
+    const styleEl = h('style');
+    document.head.appendChild(styleEl);
+    function applyStyle() {
+      const fs = opts.baseFontPx ? Math.round(opts.baseFontPx * prefs.size / 100) + 'px' : prefs.size + '%';
+      styleEl.textContent = `video.acs-video::cue{font-size:${fs};color:${prefs.color};` +
+        `background:rgba(0,0,0,${prefs.bg});text-shadow:0 1px 3px rgba(0,0,0,.9)}`;
+    }
+
+    function rebuild() {
+      Array.from(track.cues || []).forEach(c => track.removeCue(c));
+      for (const c of state.cues) {
+        const s = c.s + state.offset, e = c.e + state.offset;
+        if (e > 0) { try { track.addCue(new VTTCue(Math.max(0, s), e, c.t)); } catch {} }
+      }
+    }
+    function select(item, quiet) {
+      if (!item) { track.mode = 'disabled'; state.current = null; if (!quiet) { prefs.last = 'off'; saveP(); } render(); return; }
+      state.cues = item.cues; state.current = item; rebuild(); track.mode = 'showing';
+      if (!quiet) { prefs.last = item.lang; saveP(); }
+      render();
+    }
+    function setOffset(o) {
+      state.offset = Math.round(o * 10) / 10;
+      if (movie.id) store.set(OFF_KEY(movie.id), state.offset);
+      rebuild(); render();
+    }
+
+    /* Drive */
+    async function drv(url, asBuf) {
+      if (!opts.getToken) throw new Error('sem token');
+      for (let t = 0; t < 2; t++) {
+        const r = await fetch(url, { headers: { Authorization: 'Bearer ' + await opts.getToken(t > 0) } });
+        if (r.status === 401 && t === 0) continue;
+        if (!r.ok) throw new Error('Drive ' + r.status);
+        return asBuf ? r.arrayBuffer() : r.json();
+      }
+    }
+    const list = q => drv('https://www.googleapis.com/drive/v3/files?pageSize=1000&supportsAllDrives=true&includeItemsFromAllDrives=true' +
+      '&fields=' + encodeURIComponent('files(id,name,mimeType)') + '&q=' + encodeURIComponent(q));
+
+    let status = '';
+    async function search() {
+      if (!movie.id || !opts.getToken) { status = ''; render(); return; }
+      status = 'Buscando no Drive…'; render();
+      try {
+        let parent = movie.parentId;
+        if (!parent) parent = ((await drv(`https://www.googleapis.com/drive/v3/files/${movie.id}?fields=parents&supportsAllDrives=true`)).parents || [])[0];
+        const files = [];
+        const top = (await list(`'${parent}' in parents and trashed=false`)).files;
+        files.push(...top);
+        for (const f of top.filter(f => f.mimeType === 'application/vnd.google-apps.folder' && /legend|subs?|subtitles?/i.test(f.name)))
+          files.push(...(await list(`'${f.id}' in parents and trashed=false`)).files);
+        const base = norm(stripExt(movie.name || ''));
+        const drive = files.filter(f => SUB_RE.test(f.name)).map(f => {
+          const l = detectLang(f.name);
+          return { src: 'drive', id: f.id, name: f.name, lang: l.code, label: l.label, match: !!base && norm(f.name).startsWith(base) };
+        }).sort((a, b) => b.match - a.match).slice(0, 14);
+        if (state.dead) return;
+        state.items = state.items.filter(i => i.src === 'local').concat(drive);
+        status = drive.length ? '' : 'Nenhuma legenda encontrada na pasta do filme.';
+        render();
+        // seleção automática: preferência anterior, senão português
+        if (!state.current && prefs.last !== 'off') {
+          const pool = drive.filter(i => i.match);
+          const pick = pool.find(i => i.lang === prefs.last) || (prefs.last ? null : pool.find(i => i.lang === 'pt-br' || i.lang === 'pt'));
+          if (pick) await choose(pick);
+        }
+      } catch (e) { status = 'Não consegui ler o Drive (' + e.message + ').'; render(); }
+    }
+    async function choose(item) {
+      try {
+        if (!item.cues) { status = 'Carregando legenda…'; render(); item.cues = parse(item.name, await drv(`https://www.googleapis.com/drive/v3/files/${item.id}?alt=media&supportsAllDrives=true`, true)); status = ''; }
+        if (!item.cues.length) throw new Error('arquivo vazio ou formato inválido');
+        select(item);
+      } catch (e) { status = 'Falha ao abrir a legenda: ' + e.message; render(); }
+    }
+    async function loadFile(file, o) {
+      try {
+        const cues = parse(file.name, await file.arrayBuffer());
+        if (!cues.length) throw new Error('formato inválido');
+        const l = detectLang(file.name);
+        const item = { src: 'local', name: file.name, lang: l.code, label: l.label === 'Legenda' ? 'Do dispositivo' : l.label, cues };
+        state.items.unshift(item);
+        if (o && o.auto && prefs.last === 'off') render(); else select(item, o && o.auto);
+      } catch (e) { status = 'Falha ao abrir o arquivo: ' + e.message; render(); }
+    }
+
+    /* interface */
+    const own = !opts.button;
+    const btn = opts.button || h('button', { type: 'button', class: 'acs-btn', title: 'Legendas (C)', 'aria-label': 'Legendas', 'aria-pressed': 'false' });
+    if (own) {
+      btn.innerHTML = ICON;
+      if (opts.controlsEl) opts.controlsEl.appendChild(btn); else { btn.classList.add('acs-float'); host.appendChild(btn); }
+    }
+    const menu = h('div', { class: 'acs-menu', role: 'dialog', 'aria-label': 'Legendas' });
+    menu.hidden = true; host.appendChild(menu);
+    ['click', 'dblclick', 'pointerdown', 'touchstart', 'keydown', 'wheel'].forEach(ev => menu.addEventListener(ev, e => e.stopPropagation()));
+    menu.addEventListener('keydown', e => { if (e.key === 'Escape') { open(false); btn.focus(); } });
+
+    function open(v) { menu.hidden = !v; if (v) render(); opts.onToggle && opts.onToggle(v); }
+    const onBtn = e => { e.stopPropagation(); open(menu.hidden); };
+    btn.addEventListener('click', onBtn);
+    const onDoc = e => { if (!menu.hidden && !menu.contains(e.target) && !btn.contains(e.target)) open(false); };
+    const toggle = () => track.mode === 'showing' ? select(null) : select(state.current || state.items.find(i => i.cues) || null);
+    document.addEventListener('click', onDoc, true);
+
+    function render() {
+      btn.setAttribute('aria-pressed', String(track.mode === 'showing'));
+      if (menu.hidden) return;
+      menu.replaceChildren();
+      const head = h('div', { class: 'acs-head' }, 'Legendas');
+      const x = h('button', { type: 'button', 'aria-label': 'Fechar' }, '✕'); x.onclick = () => open(false);
+      const rf = h('button', { type: 'button', 'aria-label': 'Buscar de novo no Drive', title: 'Buscar de novo' }, '↻'); rf.onclick = search;
+      const hb = h('span'); hb.append(rf, x); head.append(hb); menu.append(head);
+
+      const row = (label, sub, item, on) => {
+        const b = h('button', { type: 'button', class: 'acs-item', role: 'menuitemradio', 'aria-checked': String(on) });
+        const t = h('span'); t.append(document.createTextNode(label));
+        if (sub) t.append(h('small', {}, sub));
+        b.append(t, h('span', { class: 'acs-ck' }, '✓')); b.onclick = () => item === 'off' ? select(null) : choose(item);
+        return b;
+      };
+      menu.append(row('Desativadas', '', 'off', track.mode !== 'showing'));
+      state.items.forEach(i => menu.append(row(i.label, i.name + (i.src === 'drive' && !i.match ? ' · outra da pasta' : ''), i, state.current === i && track.mode === 'showing')));
+      if (status) menu.append(h('div', { class: 'acs-note' }, status));
+
+      const lab = h('label', { class: 'acs-file' }, 'Carregar do dispositivo…');
+      const inp = h('input', { type: 'file', accept: '.srt,.vtt,.ass,.ssa,text/vtt,application/x-subrip' });
+      inp.onchange = () => inp.files[0] && loadFile(inp.files[0]); lab.append(inp); menu.append(lab);
+
+      // sincronia
+      const sy = h('div', { class: 'acs-sec' });
+      sy.append(h('label', {}, 'Sincronia (+ atrasa, − adianta)'));
+      const st = h('div', { class: 'acs-step' });
+      [['−0,5', -0.5], ['−0,1', -0.1]].forEach(([t, d]) => { const b = h('button', { type: 'button' }, t); b.onclick = () => setOffset(state.offset + d); st.append(b); });
+      const val = h('button', { type: 'button', class: 'acs-val', title: 'Toque para zerar' }, fmtOff(state.offset)); val.onclick = () => setOffset(0); st.append(val);
+      [['+0,1', 0.1], ['+0,5', 0.5]].forEach(([t, d]) => { const b = h('button', { type: 'button' }, t); b.onclick = () => setOffset(state.offset + d); st.append(b); });
+      sy.append(st); menu.append(sy);
+
+      // aparência
+      const ap = h('div', { class: 'acs-sec' });
+      const rng = (txt, min, max, step, v, fn) => {
+        const l = h('label', {}, txt); const r = h('input', { type: 'range', min, max, step, value: v });
+        r.oninput = () => { fn(+r.value); applyStyle(); saveP(); }; const w = h('div'); w.append(l, r); return w;
+      };
+      ap.append(rng('Tamanho', 70, 220, 5, prefs.size, v => prefs.size = v), rng('Fundo', 0, 0.9, 0.05, prefs.bg, v => prefs.bg = v));
+      const sws = h('div', { class: 'acs-sws' });
+      [['#ffffff', 'Branco'], ['#ffe14d', 'Amarelo'], ['#7be7ff', 'Ciano']].forEach(([c, n]) => {
+        const s = h('button', { type: 'button', class: 'acs-sw', role: 'radio', 'aria-label': n, 'aria-checked': String(prefs.color === c) });
+        s.style.background = c; s.onclick = () => { prefs.color = c; applyStyle(); saveP(); render(); }; sws.append(s);
+      });
+      ap.append(h('label', {}, 'Cor'), sws); menu.append(ap);
+    }
+
+    applyStyle(); render(); search();
+
+    return {
+      open: () => open(true), close: () => open(false), isOpen: () => !menu.hidden, toggle, refresh: search, loadFile,
+      destroy() {
+        state.dead = true; track.mode = 'disabled';
+        Array.from(track.cues || []).forEach(c => track.removeCue(c));
+        document.removeEventListener('click', onDoc, true); btn.removeEventListener('click', onBtn);
+        if (own) btn.remove(); else btn.removeAttribute('aria-pressed');
+        menu.remove(); styleEl.remove(); video.classList.remove('acs-video');
+      }
+    };
+  }
+
+  const api = { attach, parse, decode, detectLang };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  global.Legendas = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+  </script>
+  <script>
     const $ = s => document.querySelector(s), L = localStorage, IMG = 'https://image.tmdb.org/t/p/';
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';');
     const J = (k, d) => { try { return JSON.parse(L[k]) ?? d } catch { return d } };
@@ -1886,8 +2218,21 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
       if(!r.ok) throw Error('Ponte de streaming indisponível no servidor.');
     }
 
+    /* Legendas (Drive e disco): módulo Legendas, ver bloco no topo */
+    let leg = null;
+    const legDestroy = () => { leg?.destroy(); leg = null };
+    async function legToken(force) {
+      if (force || !driveToken || Date.now() >= driveExp - 60e3) { if (!(await serverRefresh()) && (force || !driveToken)) throw Error('sessão do Google expirada') }
+      return driveToken
+    }
+    function legAttach(m) {
+      legDestroy();
+      return leg = Legendas.attach({ video: vd, host: $('#stage'), button: $('#cc'), baseFontPx: 22,
+        movie: { id: m.source === 'drive' ? m.driveId : m.id, name: m.n }, getToken: m.source === 'drive' ? legToken : null });
+    }
+
     function resetPlayerUI() {
-      $('#pe').hidden = true; $('#drive-renew').hidden = true; $('#stage').classList.remove('is-paused'); $('#pause-info').setAttribute('aria-hidden', 'true');
+      legDestroy(); $('#pe').hidden = true; $('#drive-renew').hidden = true; $('#stage').classList.remove('is-paused'); $('#pause-info').setAttribute('aria-hidden', 'true');
       vd.querySelectorAll('track').forEach(t => t.remove()); driveWarned = false; resumeAt = null; autoRetried = false
     }
 
@@ -1897,7 +2242,7 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
         cur = m; setMedia(m); resetPlayerUI(); $('#pe').textContent = PE_DRIVE;
         const mkv = /\.mkv$/i.test(m.n); $('#media-help').hidden = !mkv; $('#convert-cmd').textContent = mkv ? conversionCommand(m.n) : '';
         try { await prepareDrivePlayback() } catch (e) { return toast(e.message || 'Servidor de streaming indisponível.') }
-        urls = []; vd.src = driveUrl(m); vd.playbackRate = 1; $('#sp').textContent = '1×'; $('#cc').hidden = true;
+        urls = []; vd.src = driveUrl(m); vd.playbackRate = 1; $('#sp').textContent = '1×'; $('#cc').hidden = false; legAttach(m);
         $('#pn').textContent = (m.tm?.t || m.q) + ' · Google Drive'; pl.hidden = false; layerOpen(); spin(true); vd.play().catch(() => { });
         return;
       }
@@ -1908,14 +2253,9 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
         cur = m; setMedia(m); resetPlayerUI(); $('#pe').textContent = PE_LOCAL;
         const mkv = /\.mkv$/i.test(m.n); $('#media-help').hidden=!mkv; $('#convert-cmd').textContent=mkv?conversionCommand(m.n):'';
         const u = URL.createObjectURL(await e.get()); urls = [u]; vd.src = u;
-        if (e.sub) {
-          const b = await (await e.sub()).arrayBuffer(); let t;
-          try { t = new TextDecoder('utf-8', { fatal: true }).decode(b) } catch { t = new TextDecoder('windows-1252').decode(b) }
-          if (!/^\s*WEBVTT/.test(t)) t = 'WEBVTT\n\n' + t.replace(/\r/g, '').replace(/(\d\d:\d\d:\d\d),(\d{3})/g, '$1.$2');
-          const tr = document.createElement('track'), tu = URL.createObjectURL(new Blob([t], { type: 'text/vtt' })); urls.push(tu);
-          Object.assign(tr, { kind: 'subtitles', label: 'Legenda', srclang: 'pt', src: tu, default: true }); vd.append(tr)
-        }
-        $('#cc').hidden = !e.sub; $('#pn').textContent = m.tm?.t || m.q; vd.playbackRate = 1; $('#sp').textContent = '1×';
+        const lg = legAttach(m);
+        if (e.sub) e.sub().then(f => lg.loadFile(f, { auto: true })).catch(() => { });
+        $('#cc').hidden = false; $('#pn').textContent = m.tm?.t || m.q; vd.playbackRate = 1; $('#sp').textContent = '1×';
         pl.hidden = false; layerOpen(); vd.play().catch(() => { })
       } catch { toast('Não foi possível abrir o arquivo.') }
     }
@@ -1932,7 +2272,7 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     function closePlayer() {
       vd.pause(); if (cur) { pos[cur.id] = vd.currentTime; savePos() }
       if (document.fullscreenElement) document.exitFullscreen();
-      vd.removeAttribute('src'); vd.querySelectorAll('track').forEach(t => t.remove()); vd.load(); spin(false);
+      legDestroy(); vd.removeAttribute('src'); vd.querySelectorAll('track').forEach(t => t.remove()); vd.load(); spin(false);
       clearTimeout(controlsTimer); pl.classList.remove('controls-hidden'); urls.forEach(u => URL.revokeObjectURL(u)); urls = []; pl.hidden = true;
       $('#stage').classList.remove('is-paused'); $('#media-help').hidden = true; $('#pe').hidden = true; $('#drive-renew').hidden = true; resumeAt = null; driveWarned = false; cur = null; releaseWake(); layerClose(); render()
     }
@@ -2018,7 +2358,6 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     $('#vo').oninput = e => { vd.volume = e.target.value; if (vd.volume > 0) vd.muted = false };
     $('#mu').onclick = () => { vd.muted = !vd.muted; syncMute() };
     $('#sp').onclick = () => { const s = [1, 1.25, 1.5, 2, .75], n = s[(s.indexOf(vd.playbackRate) + 1) % s.length]; vd.playbackRate = n; $('#sp').textContent = n + '×' };
-    $('#cc').onclick = () => { const t = vd.textTracks[0]; if (t) t.mode = t.mode === 'showing' ? 'hidden' : 'showing' };
     $('#fs').onclick = async () => {
       try {
         if (document.fullscreenElement) return await document.exitFullscreen();
@@ -2039,7 +2378,7 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
       if (pl.hidden) { if (e.key === '/' && !e.ctrlKey && !e.metaKey && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName) && !anyOpen()) { e.preventDefault(); $('#q').focus() } return } const k = e.key;
       if (['INPUT','BUTTON','SELECT'].includes(document.activeElement?.tagName) && k===' ') return;
       if (k === ' ') { e.preventDefault(); tog() } else if (k === 'ArrowRight' && document.activeElement?.type !== 'range') vd.currentTime += 10; else if (k === 'ArrowLeft' && document.activeElement?.type !== 'range') vd.currentTime -= 10;
-      else if (k === 'ArrowUp' || k === 'ArrowDown') { if (document.activeElement?.type !== 'range') { e.preventDefault(); vd.volume = Math.max(0, Math.min(1, vd.volume + (k === 'ArrowUp' ? .1 : -.1))); $('#vo').value = vd.volume } } else if (k === 'c' && !$('#cc').hidden) $('#cc').click(); else if (k === 'f') $('#fs').click(); else if (k === 'm') $('#mu').click(); else if (k === 'Escape') closePlayer()
+      else if (k === 'ArrowUp' || k === 'ArrowDown') { if (document.activeElement?.type !== 'range') { e.preventDefault(); vd.volume = Math.max(0, Math.min(1, vd.volume + (k === 'ArrowUp' ? .1 : -.1))); $('#vo').value = vd.volume } } else if (k === 'c') leg?.toggle(); else if (k === 'f') $('#fs').click(); else if (k === 'm') $('#mu').click(); else if (k === 'Escape') { leg?.isOpen() ? leg.close() : closePlayer() }
     };
 
     const openCard = e => { const c = e.target.closest('.mv'); if (c && !c.classList.contains('sk')) { const m = byId.get(c.dataset.id); if (m) return e.currentTarget.id === 'cont-row' ? play(m) : detail(m) } if (e.target.closest('[data-add]')) pick(); if (e.target.closest('[data-clear]')) { $('#q').value = ''; gf = ''; redo() } };

@@ -1638,7 +1638,7 @@ details.dv-link[open] summary{margin-bottom:10px}
     // uma única trilha nativa reaproveitada (funciona também no fullscreen do iOS)
     let track = Array.from(video.textTracks).find(t => t.label === 'Legendas');
     if (!track) track = video.addTextTrack('subtitles', 'Legendas', 'pt');
-    track.mode = 'disabled';
+    track.mode = 'hidden';
     video.classList.add('acs-video');
 
     const styleEl = h('style');
@@ -1650,14 +1650,17 @@ details.dv-link[open] summary{margin-bottom:10px}
     }
 
     function rebuild() {
+      const keep = track.mode;
+      if (keep === 'disabled') track.mode = 'hidden'; // com 'disabled' a lista de cues é null e os antigos não seriam removidos
       Array.from(track.cues || []).forEach(c => track.removeCue(c));
       for (const c of state.cues) {
         const s = c.s + state.offset, e = c.e + state.offset;
         if (e > 0) { try { track.addCue(new VTTCue(Math.max(0, s), e, c.t)); } catch {} }
       }
+      track.mode = keep;
     }
     function select(item, quiet) {
-      if (!item) { track.mode = 'disabled'; state.current = null; if (!quiet) { prefs.last = 'off'; saveP(); } render(); return; }
+      if (!item) { track.mode = 'hidden'; state.current = null; if (!quiet) { prefs.last = 'off'; saveP(); } render(); return; }
       state.cues = item.cues; state.current = item; rebuild(); track.mode = 'showing';
       if (!quiet) { prefs.last = item.lang; saveP(); }
       render();
@@ -1800,7 +1803,7 @@ details.dv-link[open] summary{margin-bottom:10px}
     return {
       open: () => open(true), close: () => open(false), isOpen: () => !menu.hidden, toggle, refresh: search, loadFile,
       destroy() {
-        state.dead = true; track.mode = 'disabled';
+        state.dead = true; track.mode = 'hidden';
         Array.from(track.cues || []).forEach(c => track.removeCue(c));
         document.removeEventListener('click', onDoc, true); btn.removeEventListener('click', onBtn);
         if (own) btn.remove(); else btn.removeAttribute('aria-pressed');
@@ -2276,6 +2279,20 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
       clearTimeout(controlsTimer); pl.classList.remove('controls-hidden'); urls.forEach(u => URL.revokeObjectURL(u)); urls = []; pl.hidden = true;
       $('#stage').classList.remove('is-paused'); $('#media-help').hidden = true; $('#pe').hidden = true; $('#drive-renew').hidden = true; resumeAt = null; driveWarned = false; cur = null; releaseWake(); layerClose(); render()
     }
+
+    /* Filme tocando sem som: o navegador não decodifica o áudio (AC3/E-AC3/DTS). O Drive toca porque converte no servidor dele. */
+    const audioCmd = n => { const b = n.replace(/\.[^.]+$/, ''); return 'ffmpeg -i ' + ffQuote(n) + ' -map 0:v:0 -map 0:a:0 -c:v copy -c:a aac -b:a 192k -sn -movflags +faststart ' + ffQuote(/\.mp4$/i.test(n) ? b + ' - navegador.mp4' : b + '.mp4') };
+    let audioChk = 0;
+    vd.addEventListener('playing', () => {
+      clearTimeout(audioChk);
+      audioChk = setTimeout(() => {
+        if (!cur || pl.hidden || vd.paused || vd.muted || vd.volume === 0 || vd.currentTime < 2) return;
+        const silent = (typeof vd.webkitAudioDecodedByteCount === 'number' && vd.webkitAudioDecodedByteCount === 0) || vd.mozHasAudio === false;
+        if (!silent) return;
+        $('#media-help').hidden = false; $('#convert-cmd').textContent = audioCmd(cur.n);
+        toast('Este filme está sem som aqui: o áudio dele não é suportado pelo navegador. Veja o comando abaixo do player.')
+      }, 5000)
+    });
 
     $('#pp').innerHTML = I.p;
     let controlsTimer;

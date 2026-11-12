@@ -5,7 +5,7 @@
   "compatibility_date": "2026-10-09",
   "vars": {
     // IDs fixos, separados por vírgula. Compartilhe cada pasta no Drive com os usuários autorizados.
-    "PUBLIC_DRIVE_FOLDER_IDS": ""
+    "PUBLIC_DRIVE_FOLDER_IDS": "1qprM6jOaJ9vS5ldaeImmZnUKLAccJaKm,1KRVKZseNHwSlbKv0F5EkTJTWXzFm3NT7"
   },
   "assets": {
     "directory": "./public",

@@ -1,10 +1,9 @@
 // Login Google persistente (OAuth "authorization code" com refresh token). Sem dependências.
 //
-//   GET  /api/auth/status    -> { configured }
+//   GET  /api/auth/status    -> { configured, folders } (pastas públicas fixadas pelo responsável)
 //   GET  /api/auth/login     -> redireciona para o Google
 //   GET  /api/auth/callback  -> troca o código pelo refresh token e guarda num cookie criptografado
-//   POST /api/auth/refresh   -> devolve um access token novo (+ e-mail e pastas salvas)
-//   POST /api/auth/folders   -> lembra as pastas importadas (cookie)
+//   POST /api/auth/refresh   -> devolve um access token novo (+ e-mail e pastas configuradas)
 //   POST /api/auth/logout    -> revoga o refresh token e apaga o cookie
 //
 // Cloudflare Workers.
@@ -79,6 +78,11 @@ const safeEqual = (a, b) => {
 export async function onRequest({ request, params, env }) {
   const { GOOGLE_CLIENT_ID: CLIENT_ID, GOOGLE_CLIENT_SECRET: CLIENT_SECRET, COOKIE_SECRET } = env;
   const configured = Boolean(CLIENT_ID && CLIENT_SECRET && COOKIE_SECRET);
+  // Configure os IDs das pastas que o proprietário compartilhou com os visitantes.
+  // A lista não concede acesso por si só: o próprio Google Drive verifica cada conta.
+  const sharedFolders = String(env.PUBLIC_DRIVE_FOLDER_IDS || '').split(',')
+    .map(id => id.trim()).filter(id => /^[\w-]{10,200}$/.test(id))
+    .map((id, i) => ({ id, name: `Pasta compartilhada ${i + 1}` }));
   const action = params.action;
   const url = new URL(request.url);
   const site = url.origin;
@@ -92,7 +96,7 @@ export async function onRequest({ request, params, env }) {
     return { ok: r.ok, data: await r.json().catch(() => ({})) };
   }
 
-  if (action === 'status') return respond(200, { configured });
+  if (action === 'status') return respond(200, { configured, folders: sharedFolders });
   if (!configured) return respond(503, { error: 'not_configured' });
   if (action !== 'login' && action !== 'callback' && request.method !== 'POST') {
     return respond(405, { error: 'method' });
@@ -143,26 +147,9 @@ export async function onRequest({ request, params, env }) {
         return respond(401, { error: data.error || 'refresh_failed' },
           data.error === 'invalid_grant' ? [cookie('acervo_rt', '', 0)] : []);
       }
-      let folders = [];
-      try { folders = JSON.parse(dec.decode(b64u.dec(readCookie(request, 'acervo_f')))); } catch { /* nenhuma */ }
       return respond(200, {
-        access_token: data.access_token, expires_in: data.expires_in, email: session.email, folders,
+        access_token: data.access_token, expires_in: data.expires_in, email: session.email, folders: sharedFolders,
       });
-    }
-
-    if (action === 'folders') {
-      const body = await request.json().catch(() => []);
-      const list = (Array.isArray(body) ? body : [])
-        .filter(f => f && typeof f.id === 'string' && /^[\w-]{10,}$/.test(f.id))
-        .slice(0, 15)
-        .map(f => ({ id: f.id, name: String(f.name || '').slice(0, 40) }));
-      // Cookies têm limite de ~4 KB: se os nomes forem muito longos (acentos), descarta as últimas pastas.
-      let value = b64u.enc(enc.encode(JSON.stringify(list)));
-      while (value.length > 3600 && list.length) {
-        list.pop();
-        value = b64u.enc(enc.encode(JSON.stringify(list)));
-      }
-      return respond(200, { ok: 1 }, [cookie('acervo_f', value, YEAR)]);
     }
 
     if (action === 'logout') {

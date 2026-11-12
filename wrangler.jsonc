@@ -3,6 +3,10 @@
   "name": "acervo-do-cidjei",
   "main": "src/worker.js",
   "compatibility_date": "2026-10-09",
+  "vars": {
+    // IDs fixos, separados por vírgula. Compartilhe cada pasta no Drive com os usuários autorizados.
+    "PUBLIC_DRIVE_FOLDER_IDS": ""
+  },
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",

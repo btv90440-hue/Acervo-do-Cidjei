@@ -3,15 +3,18 @@
   "name": "acervo-do-cidjei",
   "main": "src/worker.js",
   "compatibility_date": "2026-10-09",
-  "vars": {
-    // IDs fixos, separados por vírgula. Compartilhe cada pasta no Drive com os usuários autorizados.
-    "PUBLIC_DRIVE_FOLDER_IDS": "1qprM6jOaJ9vS5ldaeImmZnUKLAccJaKm,1KRVKZseNHwSlbKv0F5EkTJTWXzFm3NT7"
-  },
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
-    // O código só roda em /api/*. Site, ícones e manifest são servidos como arquivos estáticos
-    // (ilimitados e gratuitos) e não gastam a cota de 100 mil chamadas por dia.
     "run_worker_first": ["/api/*"]
   }
+
+  // As configurações do servidor ficam no PAINEL do Cloudflare (Settings > Variables and secrets), como Secret:
+  //   Já existem:  GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, COOKIE_SECRET
+  //   Novos:       OWNER_REFRESH_TOKEN  (token do seu Drive, gerado no OAuth Playground)
+  //                OWNER_EMAIL          (seu e-mail Google: sempre tem acesso)
+  //                FOLDER_IDS           (IDs das pastas do seu Drive, separados por vírgula)
+  //   Opcionais:   ALLOWED_EMAILS       (e-mails extras liberados, separados por vírgula)
+  //                ACCESS_MODE          ("lista" = só ALLOWED_EMAILS; vazio = quem tem a pasta compartilhada)
+  // Não use "vars" aqui: o deploy apagaria variáveis comuns criadas no painel. Segredos não são apagados.
 }

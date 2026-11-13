@@ -4,4 +4,4 @@ GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 COOKIE_SECRET=
 # IDs das pastas do Drive compartilhadas com os usuários autorizados, separados por vírgula.
-PUBLIC_DRIVE_FOLDER_IDS=1qprM6jOaJ9vS5ldaeImmZnUKLAccJaKm,1KRVKZseNHwSlbKv0F5EkTJTWXzFm3NT7
+PUBLIC_DRIVE_FOLDER_IDS=

@@ -1,9 +1,7 @@
-// GET|HEAD /api/stream/:id  -> (só com sessão) repassa o arquivo do Drive do responsável com suporte a Range (seek no player)
+// GET|HEAD /api/stream/:id  -> repassa o arquivo do Google Drive com suporte a Range (seek no player)
 //
 // Cloudflare Workers. O corpo da resposta é repassado como stream
 // (sem ler o arquivo na memória e sem gastar CPU em JS), então cabe no limite de 10 ms do plano gratuito.
-
-import { getSession, inCatalog, ownerToken } from '../lib.js';
 
 const ID_RE = /^[\w-]{10,200}$/;
 const RANGE_RE = /^bytes=\d*-\d*$/;
@@ -19,7 +17,7 @@ const text = (status, msg, extra = {}) =>
     headers: { 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff', ...extra },
   });
 
-export async function onRequest({ request, params, env }) {
+export async function onRequest({ request, params }) {
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     return text(405, 'Método não permitido', { Allow: 'GET, HEAD' });
   }
@@ -27,10 +25,9 @@ export async function onRequest({ request, params, env }) {
   const id = String(params.id || '');
   if (!ID_RE.test(id)) return text(400, 'ID de arquivo inválido');
 
-  if (!(await getSession(request, env))) return text(401, 'Entre no site para assistir');
-  if (!(await inCatalog(env, id))) return text(403, 'Arquivo fora do catálogo');
-  let token;
-  try { token = await ownerToken(env); } catch { return text(503, 'Servidor sem acesso ao Drive do responsável'); }
+  const auth = request.headers.get('Authorization') || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : readCookie(request, 'cine_token');
+  if (!token) return text(401, 'Reconecte ao Google Drive (token ausente)');
 
   const range = request.headers.get('Range');
   if (range && !RANGE_RE.test(range)) return text(416, 'Intervalo (Range) inválido');
@@ -53,7 +50,7 @@ export async function onRequest({ request, params, env }) {
   if (!upstream.ok) { // 206 já conta como ok
     const msg = upstream.status === 401 ? 'Sessão do Google Drive expirada'
       : upstream.status === 403 || upstream.status === 404 ? 'Sem acesso a este arquivo no Drive'
-        : `Drive recusou a mídia (${upstream.status})`;
+      : `Drive recusou a mídia (${upstream.status})`;
     return text(upstream.status, msg);
   }
 

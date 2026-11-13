@@ -11,6 +11,7 @@ export async function onRequest({ request, env }) {
         const roots = cfg(env).roots, items = [], where = new Map(); // id da pasta -> { r: nome da raiz, p: caminho }
         for (const id of roots) {
             const r = await drive(env, `files/${id}?fields=name&supportsAllDrives=true`);
+            if (!r.ok) throw new Error('pasta ' + id.slice(0, 6) + '… não encontrada ou sem acesso (Drive ' + r.status + ')');
             where.set(id, { r: 'Drive: ' + ((await r.json().catch(() => ({}))).name || 'Filmes'), p: '' });
         }
         let level = [...roots], calls = roots.length;
@@ -39,6 +40,6 @@ export async function onRequest({ request, env }) {
         return json(200, cache.v);
     } catch (e) {
         console.error('library:', e);
-        return json(502, { error: 'drive' });
+        return json(502, { error: 'drive', detail: String(e.message || e) });
     }
 }

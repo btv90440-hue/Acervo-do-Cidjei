@@ -53,7 +53,7 @@ export const json = (status, payload, headers = {}) => new Response(JSON.stringi
 });
 
 // ---- configuração (vem do wrangler.jsonc > vars) ----
-const list = v => String(v || '').split(',').map(s => s.trim()).filter(Boolean);
+const list = v => String(v || '').split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
 export const cfg = env => ({
     roots: list(env.FOLDER_IDS),                       // pastas do catálogo
     owner: String(env.OWNER_EMAIL || '').toLowerCase(), // sempre tem acesso
@@ -69,11 +69,11 @@ export async function ownerToken(env) {
         method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
             client_id: env.GOOGLE_CLIENT_ID, client_secret: env.GOOGLE_CLIENT_SECRET,
-            refresh_token: env.OWNER_REFRESH_TOKEN, grant_type: 'refresh_token'
+            refresh_token: String(env.OWNER_REFRESH_TOKEN || '').trim(), grant_type: 'refresh_token'
         }),
     });
     const d = await r.json().catch(() => ({}));
-    if (!r.ok || !d.access_token) throw new Error('owner_token');
+    if (!r.ok || !d.access_token) throw new Error('token do responsável recusado pelo Google (' + (d.error || r.status) + ')');
     tok = { v: d.access_token, exp: Date.now() + (d.expires_in || 3000) * 1000 };
     return tok.v;
 }

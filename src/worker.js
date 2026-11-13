@@ -1,6 +1,7 @@
 // Roteador do Worker: só /api/* chega aqui (ver run_worker_first em wrangler.jsonc).
 // Todo o resto é servido direto da pasta public/ como arquivo estático.
-import { onRequest as session } from './api/session.js';
+import { onRequest as library } from './api/library.js';
+import { onRequest as gd } from './api/gd.js';
 import { onRequest as stream } from './api/stream.js';
 import { onRequest as auth } from './api/auth.js';
 
@@ -11,9 +12,12 @@ export default {
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
 
-    if (pathname === '/api/session') return session({ request, env, params: {} });
+    if (pathname === '/api/library') return library({ request, env });
 
-    let m = pathname.match(/^\/api\/stream\/([^/]+)$/);
+    let m = pathname.match(/^\/api\/gd\/files(?:\/([\w-]+))?$/);
+    if (m) return gd({ request, env, params: { id: m[1] } });
+
+    m = pathname.match(/^\/api\/stream\/([^/]+)$/);
     if (m) {
       let id;
       try { id = decodeURIComponent(m[1]); } catch { return plain(400, 'ID de arquivo inválido'); }

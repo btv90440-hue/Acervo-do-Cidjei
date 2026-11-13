@@ -2496,11 +2496,11 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
       try {
         const r = await fetch('/api/library', { cache: 'no-store' });
         if (r.status === 401) return showGate();
-        if (!r.ok) throw 0;
+        if (!r.ok) { let d = {}; try { d = await r.json() } catch { } throw new Error(d.detail || d.error || 'HTTP ' + r.status) }
         const old = new Map(lib.map(m => [m.id, m]));
         lib = (await r.json()).items.map(f => old.has(f.id) ? Object.assign(old.get(f.id), { p: f.p, r: f.r, n: f.n }) : { ...parse(f.n), ...f, add: Date.now() });
         save(); render(); idAll(); if (manual) toast(lib.length + ' filme(s) na biblioteca')
-      } catch { toast('Não foi possível carregar a biblioteca agora.') }
+      } catch (e) { toast('Não foi possível carregar a biblioteca: ' + ((e && e.message) || 'erro desconhecido')) }
     }
     const acctMenu = open => { $('#acct-menu').hidden = !open; $('#acct-btn').setAttribute('aria-expanded', String(open)) };
     $('#acct-btn').onclick = e => { e.stopPropagation(); acctMenu($('#acct-menu').hidden) };

@@ -1346,6 +1346,66 @@ details.dv-link[open] summary{margin-bottom:10px}
 .chip.s{white-space:nowrap;flex:none}
 .mb div{flex-wrap:wrap;row-gap:6px}
 .mb div>span:first-child{white-space:nowrap}
+/* ===== ANIMAÇÕES: entrada, microinterações e troca de tema =====
+   Só opacity/translate/scale/filter (leves). Estados ocultos só existem com html.js-anim,
+   e o prefers-reduced-motion acima já desliga animações e transições. */
+@keyframes rise{from{opacity:0;translate:0 22px;filter:blur(6px)}}
+@keyframes slideIn{from{opacity:0;translate:24px 0;filter:blur(6px)}}
+@keyframes lineUp{from{opacity:0;translate:0 70%;rotate:4deg;filter:blur(10px)}}
+@keyframes fadeIn{from{opacity:0}}
+@keyframes pop{from{opacity:0;scale:.6;rotate:-12deg}}
+@keyframes ring{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--grn) 50%,transparent)}70%,100%{box-shadow:0 0 0 16px transparent}}
+@keyframes bar{from{scale:0 1}}
+@keyframes sweep{from{clip-path:circle(0 at var(--vx,95%) var(--vy,40px))}to{clip-path:circle(var(--vr,150vmax) at var(--vx,95%) var(--vy,40px))}}
+
+/* abertura da página: uma sequência só, no topo */
+.hero>div>*{animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
+.hero>div>:nth-child(3){animation-delay:.2s}
+.hero>div>:nth-child(4){animation-delay:.3s}
+.hero>div>:nth-child(5){animation-delay:.4s}
+.hero>div>h1{animation:none}
+.ln{display:inline-block;transform-origin:0 100%;animation:lineUp 1s cubic-bezier(.2,.8,.2,1) .1s both}
+.ln.l2{animation-delay:.24s}
+.hero .stat{animation:slideIn .9s cubic-bezier(.2,.7,.2,1) .3s both}
+.stat>*{animation:rise .6s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(.5s + var(--k,0)*.09s)}
+.stat>:nth-child(2){--k:1}.stat>:nth-child(3){--k:2}.stat>:nth-child(4){--k:3}.stat>:nth-child(5){--k:4}
+@media(max-width:900px){.hero .stat{animation-name:rise}}
+
+/* chamada do botão principal enquanto o acervo está vazio */
+html:not(.has-lib) #drive2{animation:ring 2.8s ease-out 2.2s infinite}
+#drive2:hover,#drive2:focus-visible{animation:none}
+
+/* cabeçalho */
+.brand svg{transition:rotate .5s cubic-bezier(.3,1.6,.5,1),scale .5s cubic-bezier(.3,1.6,.5,1)}
+.brand:hover svg{rotate:-10deg;scale:1.1}
+nav a{background-image:linear-gradient(currentColor,currentColor);background-repeat:no-repeat;background-position:12px calc(100% - 4px);background-size:0 2px;transition:background-size .35s cubic-bezier(.2,.7,.2,1),color .28s,background-color .28s}
+nav a:hover,nav a:focus-visible{background-size:calc(100% - 24px) 2px}
+@media(prefers-reduced-motion:no-preference){@supports(animation-timeline:scroll()){header:after{content:"";position:absolute;inset:auto 0 -1px;height:2px;background:var(--grn);transform-origin:0 50%;animation:bar linear both;animation-timeline:scroll(root)}}}
+
+/* botões e chips */
+.btn.k,.pill.k{background-image:linear-gradient(105deg,transparent 40%,color-mix(in srgb,currentColor 32%,transparent) 50%,transparent 60%);background-size:260% 100%;background-position:130% 0;background-repeat:no-repeat;transition:background .28s,color .28s,border-color .28s,box-shadow .28s,transform .28s,background-position .75s cubic-bezier(.2,.7,.2,1)}
+.btn.k:hover,.pill.k:hover{background-position:-30% 0}
+.chip{transition:background .28s,color .28s,border-color .28s,box-shadow .28s,transform .28s,translate .25s cubic-bezier(.3,1.5,.5,1)}
+button.chip:hover{translate:0 -2px}
+.mb h3{transition:color .25s}.mv:hover .mb h3{color:var(--grn)}
+
+/* cards: cascata na primeira vez que aparecem (refazer a lista não repete) */
+.js-anim .grid>.mv:not(.sk):not(.in),.js-anim .shelf>.mv:not(.in){opacity:0;translate:0 34px;scale:.96}
+.js-anim .grid>.mv.in,.js-anim .shelf>.mv.in{transition:transform .2s,border-color .2s,box-shadow .3s,opacity .6s cubic-bezier(.2,.7,.2,1) var(--d,0s),translate .7s cubic-bezier(.2,.7,.2,1) var(--d,0s),scale .7s cubic-bezier(.2,.7,.2,1) var(--d,0s)}
+
+/* ficha, player e janelas */
+dialog[open]::backdrop{animation:fadeIn .35s both}
+#det .dh>img{animation:pop .7s cubic-bezier(.2,.9,.3,1.25) .12s both}
+#det .dh>div>*{animation:rise .6s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(.18s + var(--k,0)*.07s)}
+#det .dh>div>:nth-child(2){--k:1}#det .dh>div>:nth-child(3){--k:2}#det .dh>div>:nth-child(4){--k:3}#det .dh>div>:nth-child(5){--k:4}#det .dh>div>:nth-child(n+6){--k:5}
+#pl:not([hidden]){animation:fadeIn .35s both}
+#stage.is-paused .pause-panel>*{animation:rise .5s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--k,0)*.06s)}
+.pause-panel>:nth-child(2){--k:1}.pause-panel>:nth-child(3){--k:2}.pause-panel>:nth-child(4){--k:3}.pause-panel>:nth-child(5){--k:4}
+#pp>*{animation:pop .28s cubic-bezier(.2,.9,.3,1.3)}
+
+/* troca de tema: círculo que se abre a partir do botão */
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-new(root){animation:sweep .7s cubic-bezier(.4,0,.2,1) both}
 </style>
 </head>
 
@@ -1369,7 +1429,7 @@ details.dv-link[open] summary{margin-bottom:10px}
     <section class="hero">
       <div>
         <div class="lbl">◆ FILMES, MEMÓRIAS E RECONSTRUÇÕES</div>
-        <h1>Histórias<br>à sua maneira.</h1>
+        <h1><span class="ln">Histórias</span><br><span class="ln l2">à sua maneira.</span></h1>
         <p class="intro">Um acervo compartilhado de filmes. Entre com sua conta Google autorizada e descubra o catálogo, sem precisar escolher pastas.</p>
         <div class="acts"><button class="btn k" id="drive2" type="button">Entrar para ver o acervo</button><button class="btn" id="key2" type="button">Chave do TMDB</button></div>
         <div class="lbl" id="st" role="status" aria-live="polite" style="margin-top:26px;min-height:16px"></div>
@@ -2344,6 +2404,39 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
       if (ok && a === 'ok') syncAll(); else if (ok) autoSync()
     })();
   </script>
+  <script>
+/* Animações com JS: cascata dos cards, contadores e troca de tema. Nada aqui bloqueia cliques. */
+(()=>{
+  const D=document,H=D.documentElement,$=s=>D.querySelector(s);
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  /* cards entram em cascata só na 1ª vez em que aparecem; filtrar/ordenar/atualizar não repete */
+  try{
+    if(!('IntersectionObserver' in window&&'MutationObserver' in window))throw 0;
+    H.classList.add('js-anim');
+    const seen=new Set();
+    const io=new IntersectionObserver(es=>{let n=0;es.forEach(e=>{if(!e.isIntersecting)return;const c=e.target;io.unobserve(c);c.style.setProperty('--d',Math.min(n++,8)*55+'ms');c.classList.add('in');seen.add(c._k)})},{rootMargin:'0px 0px -6% 0px',threshold:.08});
+    const tag=h=>h.querySelectorAll(':scope>.mv:not(.sk):not(.in)').forEach(c=>{c._k=h.id+':'+c.dataset.id;if(seen.has(c._k))c.classList.add('in');else io.observe(c)});
+    ['gr','cont-row'].forEach(id=>{const h=D.getElementById(id);if(!h)return;new MutationObserver(()=>tag(h)).observe(h,{childList:true});tag(h)});
+  }catch(e){H.classList.remove('js-anim')}
+  /* contadores do Panorama sobem até o valor novo */
+  ['s1','s2','s3'].forEach(id=>{const el=D.getElementById(id);if(!el)return;
+    let mine='',raf=0,from=(el.textContent.match(/\d+/g)||[]).map(Number);
+    new MutationObserver(()=>{const tpl=el.textContent;if(tpl===mine)return;cancelAnimationFrame(raf);
+      const to=(tpl.match(/\d+/g)||[]).map(Number);if(!to.length){from=[];return}
+      const f=from.slice(),t0=performance.now();
+      const step=now=>{const p=Math.min(1,(now-t0)/900),e=1-(1-p)**3;let i=0;
+        mine=p<1?tpl.replace(/\d+/g,()=>{const a=f[i]||0,b=to[i];i++;return Math.round(a+(b-a)*e)}):tpl;
+        el.textContent=mine;from=(mine.match(/\d+/g)||[]).map(Number);if(p<1)raf=requestAnimationFrame(step)};
+      raf=requestAnimationFrame(step)}).observe(el,{childList:true,characterData:true,subtree:true})});
+  /* troca de tema com círculo que nasce no botão (se o navegador suportar) */
+  const sw=$('#theme-switch'),go=sw&&sw.onclick;
+  if(sw&&go&&D.startViewTransition)sw.onclick=e=>{
+    const r=sw.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+    H.style.setProperty('--vx',x+'px');H.style.setProperty('--vy',y+'px');
+    H.style.setProperty('--vr',Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y))+'px');
+    D.startViewTransition(()=>go.call(sw,e))};
+})();
+</script>
   <script>if(navigator.serviceWorker?.controller)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});if(navigator.serviceWorker?.controller&&window.caches)caches.keys().then(ks=>ks.forEach(k=>caches.delete(k))).catch(()=>{})</script>
 </body>
 

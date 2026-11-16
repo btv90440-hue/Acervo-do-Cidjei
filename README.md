@@ -21,66 +21,52 @@ public/                      <- tudo que o site serve
   icons/                     <- seus ícones (icon-192.png, icon-512.png, icon-maskable-512.png)
 ```
 
-## Publicar (Workers Builds, ligado ao GitHub)
+## Modo público (sem login Google para visitantes)
 
-1. Suba esta pasta para o repositório (a pasta `icons/` do projeto antigo vai para dentro de `public/`).
-   Apague do repositório os arquivos antigos da raiz (`index.html`, `api/`, `vercel.json` etc.)
-   e qualquer `wrangler.toml` antigo, para existir só o `wrangler.jsonc` deste projeto.
-2. No painel: **Workers & Pages → seu Worker → Settings → Build**:
-   - **Build command:** vazio
-   - **Deploy command:** `npx wrangler deploy`
-   - **Root directory:** `/`
-3. Em **Settings → Variables and Secrets**, crie como **Secret**:
-   - `GOOGLE_CLIENT_ID`
-   - `GOOGLE_CLIENT_SECRET`
-   - `COOKIE_SECRET` — um texto aleatório longo (ex.: `openssl rand -base64 48`)
-4. Edite `PUBLIC_DRIVE_FOLDER_IDS` em `wrangler.jsonc` com os IDs das pastas autorizadas, separados por vírgulas. Exemplo: `ID_DA_PASTA_1,ID_DA_PASTA_2`.
-5. Compartilhe cada pasta no Google Drive com os e-mails Google das pessoas autorizadas. A lista configurada não concede acesso por si só: cada visitante entra com a própria conta Google, e o Drive verifica a permissão individual.
-6. Faça um novo deploy (um commit novo, ou **Deployments → Retry build**).
+O modo público permite que qualquer visitante navegue e reproduza os vídeos sem conectar uma Conta Google. Para isso, as pastas do Drive precisam estar compartilhadas como **Qualquer pessoa com o link → Leitor**.
 
-O nome em `wrangler.jsonc` (`acervo-do-cidjei`) precisa ser igual ao nome do Worker no painel.
+> **Atenção:** esse compartilhamento não limita o acesso ao site. Qualquer pessoa que obtenha o link da pasta ou de um arquivo poderá abri-lo diretamente no Google Drive. Publique somente arquivos que você tem autorização para distribuir.
 
-### Alternativa pela linha de comando
+### Configuração
 
-```bash
-npx wrangler secret put GOOGLE_CLIENT_ID
-npx wrangler secret put GOOGLE_CLIENT_SECRET
-npx wrangler secret put COOKIE_SECRET
-npx wrangler deploy
-```
+1. No Google Cloud Console, selecione o projeto usado pelo Acervo e confirme que a **Google Drive API** está ativada.
+2. Em **APIs e serviços → Credenciais**, crie uma **chave de API**. Em Restrições da API, limite-a somente à **Google Drive API**. Como as chamadas são feitas pelo Cloudflare Worker, não restrinja por domínio HTTP (referenciador).
+3. No Cloudflare, abra **Workers & Pages → acervo-do-cidjei → Settings → Variables and Secrets** e adicione:
+   - `GOOGLE_DRIVE_API_KEY` — **Secret** — chave de API criada no Google Cloud.
+   - `PUBLIC_STREAM_SECRET` — **Secret** — segredo aleatório com pelo menos 32 caracteres. No PowerShell, gere um valor com:
+     ```powershell
+     $bytes = New-Object byte[] 48
+     $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+     $rng.GetBytes($bytes)
+     $rng.Dispose()
+     [Convert]::ToBase64String($bytes)
+     ```
+     Guarde o resultado diretamente como Secret no Cloudflare; não o coloque no GitHub nem no chat.
+4. No Google Drive, compartilhe cada pasta cadastrada em `PUBLIC_DRIVE_FOLDER_IDS` como **Qualquer pessoa com o link — Leitor**.
+5. Se algum link da pasta contiver o parâmetro `resourcekey=`, configure também `PUBLIC_DRIVE_FOLDER_RESOURCE_KEYS` como **Secret**, no formato `ID_DA_PASTA/RESOURCE_KEY,OUTRO_ID/OUTRA_RESOURCE_KEY`. Use a chave que aparece no próprio link de compartilhamento; não invente uma.
+6. Salve as variáveis e publique uma nova versão do Worker pelo fluxo **Workers Builds** conectado ao GitHub.
 
-`PUBLIC_DRIVE_FOLDER_IDS` é uma variável normal, não um Secret. Para testar localmente, preencha também a mesma variável em `.dev.vars`.
+A chave de API e o segredo de assinatura ficam no servidor e não são enviados ao navegador. O endpoint `/api/public/catalog` lista recursivamente os vídeos das pastas públicas. O endpoint `/api/stream/:id` valida um token HMAC assinado, emitido junto do catálogo, e repassa o conteúdo ao player com suporte a requisições `Range`. O catálogo fica em cache por um curto período para reduzir chamadas à API do Google.
 
-## Google Cloud (obrigatório ao trocar de domínio)
+### Verificação
 
-No [Google Cloud Console](https://console.cloud.google.com/apis/credentials), no seu *OAuth client ID* da web, adicione:
+- `/api/public/status` deve retornar `{"public":true,...}`.
+- `/api/public/catalog` deve retornar `public: true`, os nomes das pastas e a lista de vídeos encontrados.
+- Abra o site em uma janela anônima ou em outro dispositivo: a biblioteca deve carregar sem login Google.
+- Teste reprodução, pausa e avanço/retrocesso em pelo menos dois vídeos.
 
-- **Origens JavaScript autorizadas:** `https://acervo-do-cidjei.btv90440.workers.dev`
-- **URIs de redirecionamento autorizados:**
-  - `https://acervo-do-cidjei.btv90440.workers.dev/`
-  - `https://acervo-do-cidjei.btv90440.workers.dev/api/auth/callback`
+Se o Google Drive informar que a pasta ou o arquivo não está acessível, confira o compartilhamento público e se a Google Drive API está ativada. O código mantém o modo OAuth antigo como alternativa quando `GOOGLE_DRIVE_API_KEY` não está configurada.
 
-Mantenha a **Google Drive API** ativada. Se usar domínio próprio, adicione também as URLs dele. O login é individual; cada pessoa só verá arquivos das pastas compartilhadas com a sua conta Google.
+## Modo privado legado (OAuth)
 
-## Verificação do app OAuth
+Se preferir manter o acesso individual, remova o Secret `GOOGLE_DRIVE_API_KEY`. Nesse modo, os visitantes precisam entrar com a própria Conta Google, e as pastas continuam sendo verificadas pelas permissões individuais do Drive.
 
-O código e estas páginas deixam o projeto preparado, mas o aviso “app não verificado” só desaparece depois da aprovação do Google. O escopo usado para localizar pastas e transmitir vídeos é `https://www.googleapis.com/auth/drive.readonly`, que o Google classifica como **restrito**. Não foi trocado por `drive.file`, pois esse escopo não permite consultar automaticamente pastas fixas que o visitante já recebeu por compartilhamento. Como o Worker intermedeia a API e o streaming, o projeto deve se preparar para a verificação de escopo restrito e para uma avaliação de segurança anual por avaliador aprovado pelo Google. O uso não comercial, por si só, não remove essas exigências. Consulte as [etapas de envio para verificação](https://support.google.com/cloud/answer/13461325?hl=pt-BR), os [requisitos para escopos restritos](https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification) e a [classificação dos escopos do Drive](https://developers.google.com/workspace/drive/api/guides/api-specific-auth).
+Para esse modo, configure como **Secrets** no Worker:
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `COOKIE_SECRET` — texto aleatório longo (por exemplo, gerado por `openssl rand -base64 48`)
 
-Antes de enviar:
-
-1. Substitua o e-mail de contato indicado em `public/privacidade.html` e `public/termos.html` por um endereço válido.
-2. Publique o site e as páginas de privacidade e termos em HTTPS. Verifique no Google Search Console um domínio que você controla e configure-o como domínio autorizado no projeto OAuth. Se a verificação não aceitar o endereço `workers.dev`, será necessário usar um domínio próprio no Worker.
-3. No Google Cloud Console, preencha nome do app, e-mail de suporte, domínio autorizado, página inicial, política de privacidade e contatos do desenvolvedor. Adicione os escopos que o código realmente usa: `openid`, `email` e `https://www.googleapis.com/auth/drive.readonly`.
-4. Publique o app em **Production** e inicie **Prepare for Verification**. Explique por que a leitura do Drive é necessária, envie uma demonstração do fluxo de login, pastas compartilhadas e reprodução, e contrate o avaliador de segurança aprovado caso o Google exija a avaliação CASA.
-5. Aguarde a revisão do Google. Enquanto o app estiver em Testing, usuários fora da lista de testadores podem ver o aviso ou não conseguir entrar.
-
-Texto-base para justificar o escopo: “O Acervo usa acesso somente de leitura ao Google Drive para localizar vídeos em IDs de pastas configurados pelo responsável e compartilhados diretamente com cada usuário. O usuário entra com sua própria Conta Google; a aplicação usa o Drive para mostrar os nomes dos vídeos e transmitir somente o arquivo selecionado. A aplicação não cria, altera, exclui nem compartilha arquivos. O acesso pode ser revogado nas configurações da Conta Google.” Revise o texto para refletir exatamente o comportamento publicado. A Google API Services User Data Policy e as decisões do processo de avaliação prevalecem.
-
-## Conferir se funcionou
-
-- `https://acervo-do-cidjei.btv90440.workers.dev/api/auth/status` deve mostrar `{"configured":true}`.
-- Ao abrir “Conta” no site, o campo “ID de cliente OAuth” não deve aparecer.
-- `/api/auth/status` também informa as pastas fixadas em `PUBLIC_DRIVE_FOLDER_IDS`.
+O OAuth usa o escopo `https://www.googleapis.com/auth/drive.readonly`, classificado pelo Google como restrito. Aplicativos públicos que usam esse escopo podem precisar passar pela verificação de escopo restrito e avaliação de segurança. Consulte as [regras de verificação de escopos restritos](https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification) e a [documentação de escopos do Drive](https://developers.google.com/workspace/drive/api/guides/api-specific-auth).
 
 ## APK (TWA)
 

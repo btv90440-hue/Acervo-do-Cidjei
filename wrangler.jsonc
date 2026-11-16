@@ -4,7 +4,8 @@
   "main": "src/worker.js",
   "compatibility_date": "2026-10-09",
   "vars": {
-    // IDs fixos, separados por vírgula. Compartilhe cada pasta no Drive com os usuários autorizados.
+    // IDs das pastas públicas, separados por vírgula. Compartilhe como “Qualquer pessoa com o link — Leitor”.
+    // GOOGLE_DRIVE_API_KEY deve ser configurada como Secret no painel do Cloudflare (nunca neste arquivo).
     "PUBLIC_DRIVE_FOLDER_IDS": "1qprM6jOaJ9vS5ldaeImmZnUKLAccJaKm,1KRVKZseNHwSlbKv0F5EkTJTWXzFm3NT7"
   },
   "assets": {

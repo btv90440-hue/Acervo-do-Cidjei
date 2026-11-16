@@ -1430,8 +1430,8 @@ dialog[open]::backdrop{animation:fadeIn .35s both}
       <div>
         <div class="lbl">◆ FILMES, MEMÓRIAS E RECONSTRUÇÕES</div>
         <h1><span class="ln">Histórias</span><br><span class="ln l2">à sua maneira.</span></h1>
-        <p class="intro">Um acervo compartilhado de filmes. Entre com sua conta Google autorizada e descubra o catálogo, sem precisar escolher pastas.</p>
-        <div class="acts"><button class="btn k" id="drive2" type="button">Entrar para ver o acervo</button><button class="btn" id="key2" type="button">Chave do TMDB</button></div>
+        <p class="intro">Um acervo público de filmes. Explore o catálogo e assista sem precisar conectar sua conta Google.</p>
+        <div class="acts"><button class="btn k" id="drive2" type="button">Ver o acervo</button><button class="btn" id="key2" type="button">Chave do TMDB</button></div>
         <div class="lbl" id="st" role="status" aria-live="polite" style="margin-top:26px;min-height:16px"></div>
       </div>
       <aside class="card stat">
@@ -1487,7 +1487,7 @@ dialog[open]::backdrop{animation:fadeIn .35s both}
       <button class="dv-x" id="drive-x" type="button" aria-label="Fechar">✕</button>
     </div>
     <div class="dv-body">
-      <p class="dv-lead">Entre com sua conta Google para consultar o acervo. As pastas são definidas pelo responsável e aparecem automaticamente quando ele compartilha o acesso com você no Google Drive.</p>
+      <p class="dv-lead" id="dv-lead">O catálogo é público e pode ser consultado sem login. O responsável pode atualizar a lista de filmes pelo painel.</p>
       <section class="dv-step" id="dv-step1">
         <span class="dv-n">1</span>
         <div class="dv-c">
@@ -1502,12 +1502,12 @@ dialog[open]::backdrop{animation:fadeIn .35s both}
         <span class="dv-n">2</span>
         <div class="dv-c">
           <h3>Pastas compartilhadas</h3>
-          <p>Você não precisa escolher pastas. Após entrar, o site busca as pastas configuradas pelo responsável e que sua conta Google pode acessar.</p>
+          <p id="dv-folder-copy">As pastas públicas configuradas pelo responsável aparecem automaticamente no catálogo.</p>
           <div class="dv-acts"><button class="pill k" id="drive-sync" type="button">↻ Atualizar acervo</button></div>
           <div id="dv-saved" hidden><h4>Pastas do acervo</h4><ul id="dv-folders"></ul></div>
         </div>
       </section>
-      <p class="dv-hint dv-note">Acesso somente de leitura. Cada visitante entra com sua própria conta; o Google Drive continua controlando quem pode abrir cada pasta. O acervo pode ser atualizado por este painel.</p>
+      <p class="dv-hint dv-note" id="dv-note">Acesso público somente para leitura: qualquer pessoa com acesso ao site poderá ver e reproduzir os arquivos compartilhados publicamente.</p>
     </div>
     <div class="dv-foot">
       <p class="dv-status" id="drive-status" role="status" data-ok="0" data-busy="0">Não conectado.</p>
@@ -1913,17 +1913,71 @@ dialog[open]::backdrop{animation:fadeIn .35s both}
     const driveDlg = $('#drive-dialog');
     let driveToken = null, driveClient = null, driveExp = 0, resumeAt = null, driveWarned = false, autoRetried = false, renewing = false, lastRenew = 0;
     const driveFolders = () => J('cine.drive.folders', []);
+    let PUBLIC_MODE = false;
     const AUTH='/api/auth/';let driveEmail='',SERVER_OK=null,syncing=false;
     const saveFolders=f=>L.setItem('cine.drive.folders',JSON.stringify(f));
-    const serverOk=async()=>{if(SERVER_OK===null)SERVER_OK=await fetch(AUTH+'status').then(r=>r.json()).then(x=>{if(Array.isArray(x.folders)){saveFolders(x.folders);renderFolders()}return !!x.configured}).catch(()=>false);return SERVER_OK};
+    const serverOk=async()=>{if(PUBLIC_MODE)return true;if(SERVER_OK===null)SERVER_OK=await fetch(AUTH+'status').then(r=>r.json()).then(x=>{if(Array.isArray(x.folders)){saveFolders(x.folders);renderFolders()}return !!x.configured}).catch(()=>false);return SERVER_OK};
     async function serverRefresh(){
       try{const r=await fetch(AUTH+'refresh',{method:'POST'});if(!r.ok)return false;const d=await r.json();
         driveToken=d.access_token;driveExp=Date.now()+(+d.expires_in||3600)*1000;driveEmail=d.email||'';
         if(Array.isArray(d.folders)){saveFolders(d.folders);renderFolders()}
         return true}catch{return false}
     }
+    async function loadPublicCatalog() {
+      const r = await fetch('/api/public/catalog', { cache: 'no-store' });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok || data.public !== true) throw new Error(data.error || 'Não foi possível carregar o catálogo público.');
+      const previous = new Map(lib.map(m => [m.id, m]));
+      PUBLIC_MODE = true;
+      SERVER_OK = true;
+      saveFolders(Array.isArray(data.folders) ? data.folders : []);
+      lib = (Array.isArray(data.files) ? data.files : []).map(f => {
+        const id = 'drive:' + f.id, old = previous.get(id) || {};
+        return {
+          ...old,
+          id,
+          driveId: f.id,
+          publicToken: f.streamToken,
+          source: 'drive',
+          driveFolder: f.rootId,
+          r: 'Drive: ' + (f.rootName || 'Acervo'),
+          p: f.path || f.name,
+          n: f.name,
+          ...parse(f.name || ''),
+          add: old.add || (Date.parse(f.modifiedTime || '') || Date.now()),
+        };
+      });
+      await kvSet('lib', lib).catch(() => {});
+      save();
+      render();
+      idAll();
+      renderFolders();
+      driveStatus('Acervo público carregado. Não é necessário entrar com Google.');
+      $('#drive2').textContent = 'Explorar acervo';
+      $('#dv-lead').textContent = 'O catálogo é público. Visitantes podem navegar e assistir sem conectar uma conta Google.';
+      $('#dv-folder-copy').textContent = 'As pastas públicas configuradas pelo responsável aparecem automaticamente no catálogo.';
+      $('#dv-note').textContent = 'Atenção: os vídeos dessas pastas também podem ser acessados diretamente por qualquer pessoa na internet. O Google Drive não restringe o acesso somente a visitantes deste site.';
+      return data;
+    }
     async function syncAll(auto) {
       if (syncing) return;
+      if (PUBLIC_MODE) {
+        syncing = true;
+        const button = $('#drive-sync');
+        if (button) { button.disabled = true; button.dataset.h = button.innerHTML; button.textContent = '↻ Atualizando…' }
+        try {
+          const data = await loadPublicCatalog();
+          if (!auto) toast('Acervo atualizado: ' + data.total + ' vídeo(s) disponível(is).');
+        } catch (e) {
+          if (!auto) toast(e.message || 'Não foi possível atualizar o acervo público.');
+          st('Falha ao atualizar o catálogo público.');
+        } finally {
+          syncing = false;
+          if (button) { button.disabled = false; button.innerHTML = button.dataset.h || '↻ Atualizar acervo' }
+          driveStatus('Acervo público. Visitantes não precisam entrar com Google.');
+        }
+        return;
+      }
       if (!driveFolders().length) {
         await serverOk();
         if (!driveFolders().length) { if (auto) return; openDrive(); return toast('O responsável ainda não configurou as pastas do acervo.') }
@@ -1943,13 +1997,26 @@ dialog[open]::backdrop{animation:fadeIn .35s both}
     const autoSync = () => { if (driveFolders().length && Date.now() - (+L['cine.lastsync'] || 0) > 6 * 3600e3) syncAll(true) };
 
     const driveStatus = t => {
-      const e = $('#drive-status'), on = !!driveToken;
+      const e = $('#drive-status'), on = !!driveToken || PUBLIC_MODE;
       e.textContent = t; e.dataset.ok = on ? '1' : '0'; e.dataset.busy = /…$/.test(t) ? '1' : '0';
-      $('#drive-logout').disabled = !on; $('#drive-sync').disabled = !on;
+      $('#drive-logout').disabled = !driveToken; $('#drive-sync').disabled = !on;
+      $('#drive-login').hidden = PUBLIC_MODE; $('#drive-logout').hidden = PUBLIC_MODE;
+      $('#dv-step1').hidden = PUBLIC_MODE; $('#legacy-id').hidden = PUBLIC_MODE;
       $('#dv-step2').dataset.locked = on ? '0' : '1'
     };
-    function openDrive(){ $('#drive-client').value=L.getItem('cine.drive.client')||'';driveStatus(driveToken?'Conta conectada'+(driveEmail?': '+driveEmail:'')+'.':'Entre com Google para ver o acervo.');renderFolders();driveDlg.showModal();serverOk().then(ok=>{$('#legacy-id').hidden=ok}) }
-    ['drive1','drive2'].forEach(id=>$('#'+id).onclick=openDrive);
+    function openDrive(){
+      $('#drive-client').value=L.getItem('cine.drive.client')||'';
+      if (PUBLIC_MODE) {
+        driveStatus('Acervo público. Visitantes não precisam entrar com Google.');
+      } else {
+        $('#dv-step1').hidden = false; $('#drive-login').hidden = false; $('#drive-logout').hidden = false;
+        driveStatus(driveToken?'Conta conectada'+(driveEmail?': '+driveEmail:'')+'.':'Entre com Google para ver o acervo.');
+      }
+      renderFolders(); driveDlg.showModal();
+      if(!PUBLIC_MODE) serverOk().then(ok=>{$('#legacy-id').hidden=ok});
+    }
+    $('#drive1').onclick=openDrive;
+    $('#drive2').onclick=()=>{ if(PUBLIC_MODE){document.querySelector('#lib').scrollIntoView({behavior:'smooth'});syncAll(true)}else openDrive() };
     $('#drive-close').onclick=$('#drive-x').onclick=()=>driveDlg.close();
     async function ensureGIS(){
       if(window.google?.accounts?.oauth2)return;
@@ -1992,6 +2059,7 @@ dialog[open]::backdrop{animation:fadeIn .35s both}
       openDrive();driveStatus('Conta conectada. Acesso somente de leitura.');
     }
     async function ensureDriveToken(){
+      if(PUBLIC_MODE)return true;
       if(driveToken&&Date.now()<driveExp-15*60*1000)return;
       if(await serverRefresh())return;
       if(await serverOk()){toast('Entrando com o Google…');location.assign(AUTH+'login');return new Promise(()=>{})}
@@ -2184,8 +2252,9 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     const spin = on => $('#spin').hidden = !on;
 
     /* Reprodução do Drive exclusivamente pela ponte de streaming do próprio site (Cloudflare Workers). */
-    const driveUrl = m => '/api/stream/' + encodeURIComponent(m.driveId);
+    const driveUrl = m => '/api/stream/' + encodeURIComponent(m.driveId) + (PUBLIC_MODE && m.publicToken ? '?public=' + encodeURIComponent(m.publicToken) : '');
     async function prepareDrivePlayback(){
+      if (PUBLIC_MODE) return true;
       const r = await fetch('/api/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2204,7 +2273,7 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     function legAttach(m) {
       legDestroy();
       return leg = Legendas.attach({ video: vd, host: $('#stage'), button: $('#cc'), baseFontPx: 22,
-        movie: { id: m.source === 'drive' ? m.driveId : m.id, name: m.n }, getToken: m.source === 'drive' ? legToken : null });
+        movie: { id: m.source === 'drive' ? m.driveId : m.id, name: m.n }, getToken: m.source === 'drive' && !PUBLIC_MODE ? legToken : null });
     }
 
     function resetPlayerUI() {
@@ -2224,6 +2293,15 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     async function renewDrive() {
       if (cur?.source !== 'drive') return;
       const t = vd.currentTime;
+      if (PUBLIC_MODE) {
+        const id = cur.id;
+        try {
+          await loadPublicCatalog();
+          cur = byId.get(id) || cur;
+          resumeAt = t; vd.src = driveUrl(cur); spin(true); vd.play().catch(() => {});
+          return;
+        } catch (e) { return toast(e.message || 'Não foi possível renovar o acesso público.'); }
+      }
       try { driveToken = null; await ensureDriveToken(); await prepareDrivePlayback() } catch (e) { return toast(e.message || 'Não foi possível renovar a sessão.') }
       $('#drive-renew').hidden = true; $('#pe').hidden = true; driveWarned = false;
       resumeAt = t; vd.src = driveUrl(cur); spin(true); vd.play().catch(() => { })
@@ -2318,6 +2396,16 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     };
     vd.onloadedmetadata = () => { $('#td').textContent = fmt(vd.duration); if (resumeAt != null) { vd.currentTime = resumeAt; resumeAt = null; return } const p = pos[cur?.id]; if (p > 15 && p < vd.duration - 30) vd.currentTime = p };
     vd.onerror = async () => {
+      if (PUBLIC_MODE && cur?.source === 'drive' && vd.getAttribute('src')) {
+        if (!autoRetried) {
+          autoRetried = true; const t = vd.currentTime;
+          try {
+            await loadPublicCatalog(); cur = byId.get(cur.id) || cur;
+            resumeAt = t; vd.src = driveUrl(cur); spin(true); vd.play().catch(() => {}); return;
+          } catch {}
+        }
+        $('#pe').textContent = PE_DRIVE; $('#pe').hidden = false; $('#drive-renew').hidden = false; return;
+      }
       if (cur?.source === 'drive' && vd.getAttribute('src')) { if (!autoRetried && SERVER_OK === true) { autoRetried = true; lastRenew = 0; const t = vd.currentTime; if (await silentRenew()) { resumeAt = t; vd.src = driveUrl(cur); spin(true); vd.play().catch(() => { }); return } } $('#pe').textContent = Date.now() > driveExp - 30000 ? PE_EXP : PE_DRIVE; $('#pe').hidden = false; $('#drive-renew').hidden = false; return }
       if (vd.getAttribute('src')) { $('#pe').hidden = false; $('#media-help').hidden=false; if(cur) $('#convert-cmd').textContent=conversionCommand(cur.n); } };
     const seekTo = v => { if (isFinite(vd.duration)) vd.currentTime = v / 10000 * vd.duration };
@@ -2397,11 +2485,26 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
     (async () => {
       lib = (await loadLib()).filter(m => m.source === 'drive'); render(); idAll(); renderFolders();
       const a = new URLSearchParams(location.search).get('auth'); if (a) history.replaceState(null, '', location.pathname);
-      const ok = await serverRefresh();
-      if (ok) driveStatus('Conta conectada' + (driveEmail ? ': ' + driveEmail : '') + '.');
-      if (a === 'ok' && ok) openDrive(); else if (a) toast('Não foi possível conectar ao Google. Tente de novo.');
+      const publicStatus = await fetch('/api/public/status', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null);
+      if (publicStatus?.public) {
+        PUBLIC_MODE = true;
+        if (Array.isArray(publicStatus.folders)) saveFolders(publicStatus.folders);
+        driveStatus('Carregando o acervo público…');
+        try { await loadPublicCatalog(); }
+        catch (e) { st('Não foi possível carregar o catálogo público.'); toast(e.message || 'Confira a configuração das pastas e da Google Drive API.'); }
+        $('#drive2').textContent = 'Explorar acervo';
+      } else {
+        $('.intro').textContent = 'Um acervo compartilhado de filmes. Entre com sua conta Google autorizada e descubra o catálogo, sem precisar escolher pastas.';
+        $('#drive2').textContent = 'Entrar para ver o acervo';
+        $('#dv-lead').textContent = 'Entre com sua conta Google para consultar o acervo. As pastas são definidas pelo responsável e aparecem automaticamente quando ele compartilha o acesso com você no Google Drive.';
+        $('#dv-folder-copy').textContent = 'Você não precisa escolher pastas. Após entrar, o site busca as pastas configuradas pelo responsável e que sua conta Google pode acessar.';
+        $('#dv-note').textContent = 'Acesso somente de leitura. Cada visitante entra com sua própria conta; o Google Drive continua controlando quem pode abrir cada pasta. O acervo pode ser atualizado por este painel.';
+        const ok = await serverRefresh();
+        if (ok) driveStatus('Conta conectada' + (driveEmail ? ': ' + driveEmail : '') + '.');
+        if (a === 'ok' && ok) openDrive(); else if (a) toast('Não foi possível conectar ao Google. Tente de novo.');
+        if (ok) autoSync();
+      }
       handleShortcut();
-      if (ok && a === 'ok') syncAll(); else if (ok) autoSync()
     })();
   </script>
   <script>

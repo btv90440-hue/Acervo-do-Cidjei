@@ -2494,6 +2494,11 @@ ${rows.length ? `<h4 class="lbl">Ficha técnica</h4><div class="fx">${rows.map((
         catch (e) { st('Não foi possível carregar o catálogo público.'); toast(e.message || 'Confira a configuração das pastas e da Google Drive API.'); }
         $('#drive2').textContent = 'Explorar acervo';
       } else {
+        $('.intro').textContent = 'Um acervo compartilhado de filmes. Entre com sua conta Google autorizada e descubra o catálogo, sem precisar escolher pastas.';
+        $('#drive2').textContent = 'Entrar para ver o acervo';
+        $('#dv-lead').textContent = 'Entre com sua conta Google para consultar o acervo. As pastas são definidas pelo responsável e aparecem automaticamente quando ele compartilha o acesso com você no Google Drive.';
+        $('#dv-folder-copy').textContent = 'Você não precisa escolher pastas. Após entrar, o site busca as pastas configuradas pelo responsável e que sua conta Google pode acessar.';
+        $('#dv-note').textContent = 'Acesso somente de leitura. Cada visitante entra com sua própria conta; o Google Drive continua controlando quem pode abrir cada pasta. O acervo pode ser atualizado por este painel.';
         const ok = await serverRefresh();
         if (ok) driveStatus('Conta conectada' + (driveEmail ? ': ' + driveEmail : '') + '.');
         if (a === 'ok' && ok) openDrive(); else if (a) toast('Não foi possível conectar ao Google. Tente de novo.');

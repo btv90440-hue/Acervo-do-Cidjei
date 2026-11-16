@@ -7,6 +7,9 @@ const FOLDER_MIME = 'application/vnd.google-apps.folder';
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 const TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+let catalogCache = null;
+let catalogCacheUntil = 0;
+let catalogBuild = null;
 
 function b64url(bytes) {
   let raw = '';
@@ -175,7 +178,20 @@ export async function onRequest({ request, env }) {
     return new Response('Método não permitido', { status: 405, headers: { Allow: 'GET' } });
   }
   try {
-    const catalog = await buildPublicCatalog(env);
+    if (catalogCache && Date.now() < catalogCacheUntil) {
+      return new Response(JSON.stringify(catalogCache), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=120, s-maxage=300', 'X-Content-Type-Options': 'nosniff' },
+      });
+    }
+    if (!catalogBuild) {
+      catalogBuild = buildPublicCatalog(env).then(data => {
+        catalogCache = data;
+        catalogCacheUntil = Date.now() + 120000;
+        return data;
+      }).finally(() => { catalogBuild = null; });
+    }
+    const catalog = await catalogBuild;
     return new Response(JSON.stringify(catalog), {
       status: 200,
       headers: {
@@ -198,7 +214,7 @@ export async function onStatus({ request, env }) {
     return new Response('Método não permitido', { status: 405, headers: { Allow: 'GET' } });
   }
   const folders = String(env.PUBLIC_DRIVE_FOLDER_IDS || '').split(',')
-    .map(id => id.trim()).filter(id => /^[\\w-]{10,200}$/.test(id))
+    .map(id => id.trim()).filter(id => /^[\w-]{10,200}$/.test(id))
     .map((id, i) => ({ id, name: 'Pasta pública ' + (i + 1) }));
   return new Response(JSON.stringify({
     public: Boolean(env.GOOGLE_DRIVE_API_KEY) && folders.length > 0,

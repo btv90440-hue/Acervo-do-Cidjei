@@ -89,7 +89,6 @@ export async function buildPublicCatalog(env) {
   const folders = [];
   const files = [];
   const seenFiles = new Set();
-  const allResourceKeys = [];
 
   for (const rootId of rootIds) {
     const root = await driveJson('files/' + encodeURIComponent(rootId), {
@@ -178,11 +177,20 @@ export async function onRequest({ request, env }) {
     return new Response('Método não permitido', { status: 405, headers: { Allow: 'GET' } });
   }
   try {
+    const ids = String(env.PUBLIC_DRIVE_FOLDER_IDS || '').split(',').map(v => v.trim()).filter(Boolean).join(',');
+    const cacheKey = new Request(new URL('/__cache/public-catalog?folders=' + encodeURIComponent(ids), request.url).toString());
+    const edgeCache = typeof caches !== 'undefined' ? caches.default : null;
+    if (edgeCache) {
+      const edgeHit = await edgeCache.match(cacheKey);
+      if (edgeHit) return edgeHit;
+    }
     if (catalogCache && Date.now() < catalogCacheUntil) {
-      return new Response(JSON.stringify(catalogCache), {
+      const cachedResponse = new Response(JSON.stringify(catalogCache), {
         status: 200,
         headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=120, s-maxage=300', 'X-Content-Type-Options': 'nosniff' },
       });
+      if (edgeCache) await edgeCache.put(cacheKey, cachedResponse.clone());
+      return cachedResponse;
     }
     if (!catalogBuild) {
       catalogBuild = buildPublicCatalog(env).then(data => {
@@ -192,7 +200,7 @@ export async function onRequest({ request, env }) {
       }).finally(() => { catalogBuild = null; });
     }
     const catalog = await catalogBuild;
-    return new Response(JSON.stringify(catalog), {
+    const response = new Response(JSON.stringify(catalog), {
       status: 200,
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
@@ -200,6 +208,8 @@ export async function onRequest({ request, env }) {
         'X-Content-Type-Options': 'nosniff',
       },
     });
+    if (edgeCache) await edgeCache.put(cacheKey, response.clone());
+    return response;
   } catch (error) {
     console.error('Catálogo público:', error);
     return new Response(JSON.stringify({ public: false, error: error.message || 'Falha ao carregar o catálogo público.' }), {

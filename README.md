@@ -36,7 +36,9 @@ O modo público permite que qualquer visitante navegue e reproduza os vídeos se
    - `PUBLIC_STREAM_SECRET` — **Secret** — segredo aleatório com pelo menos 32 caracteres. No PowerShell, gere um valor com:
      ```powershell
      $bytes = New-Object byte[] 48
-     [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+     $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+     $rng.GetBytes($bytes)
+     $rng.Dispose()
      [Convert]::ToBase64String($bytes)
      ```
      Guarde o resultado diretamente como Secret no Cloudflare; não o coloque no GitHub nem no chat.

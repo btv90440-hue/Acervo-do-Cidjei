@@ -29,16 +29,22 @@ O modo público permite que qualquer visitante navegue e reproduza os vídeos se
 
 ### Configuração
 
-1. No Google Cloud Console, selecione o projeto usado pela API do Drive e confirme que a **Google Drive API** está ativada.
-2. Em **APIs e serviços → Credenciais**, crie uma **chave de API**. Em Restrições da API, limite-a somente à **Google Drive API**. Como as chamadas são feitas pelo Cloudflare Worker, não use restrição por domínio HTTP (referenciador) nessa chave.
+1. No Google Cloud Console, selecione o projeto usado pelo Acervo e confirme que a **Google Drive API** está ativada.
+2. Em **APIs e serviços → Credenciais**, crie uma **chave de API**. Em Restrições da API, limite-a somente à **Google Drive API**. Como as chamadas são feitas pelo Cloudflare Worker, não restrinja por domínio HTTP (referenciador).
 3. No Cloudflare, abra **Workers & Pages → acervo-do-cidjei → Settings → Variables and Secrets** e adicione:
-   - Nome: `GOOGLE_DRIVE_API_KEY`
-   - Tipo: **Secret**
-   - Valor: a chave de API criada no Google Cloud
+   - `GOOGLE_DRIVE_API_KEY` — **Secret** — chave de API criada no Google Cloud.
+   - `PUBLIC_STREAM_SECRET` — **Secret** — segredo aleatório com pelo menos 32 caracteres. No PowerShell, gere um valor com:
+     ```powershell
+     $bytes = New-Object byte[] 48
+     [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+     [Convert]::ToBase64String($bytes)
+     ```
+     Guarde o resultado diretamente como Secret no Cloudflare; não o coloque no GitHub nem no chat.
 4. No Google Drive, compartilhe cada pasta cadastrada em `PUBLIC_DRIVE_FOLDER_IDS` como **Qualquer pessoa com o link — Leitor**.
-5. Salve e publique uma nova versão do Worker pelo fluxo **Workers Builds** conectado ao GitHub.
+5. Se algum link da pasta contiver o parâmetro `resourcekey=`, configure também `PUBLIC_DRIVE_FOLDER_RESOURCE_KEYS` como **Secret**, no formato `ID_DA_PASTA/RESOURCE_KEY,OUTRO_ID/OUTRA_RESOURCE_KEY`. Use a chave que aparece no próprio link de compartilhamento; não invente uma.
+6. Salve as variáveis e publique uma nova versão do Worker pelo fluxo **Workers Builds** conectado ao GitHub.
 
-A chave de API fica no servidor e não é enviada ao navegador. O endpoint `/api/public/catalog` lista recursivamente os vídeos das pastas públicas. O endpoint `/api/stream/:id` valida um token assinado, emitido junto do catálogo, e repassa o conteúdo ao player com suporte a requisições `Range`.
+A chave de API e o segredo de assinatura ficam no servidor e não são enviados ao navegador. O endpoint `/api/public/catalog` lista recursivamente os vídeos das pastas públicas. O endpoint `/api/stream/:id` valida um token HMAC assinado, emitido junto do catálogo, e repassa o conteúdo ao player com suporte a requisições `Range`. O catálogo fica em cache por um curto período para reduzir chamadas à API do Google.
 
 ### Verificação
 

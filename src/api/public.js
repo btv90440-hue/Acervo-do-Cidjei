@@ -32,7 +32,7 @@ async function makeStreamToken(id, details, secret) {
 }
 
 export async function verifyPublicStreamToken(id, token, env) {
-  const secret = String(env.GOOGLE_DRIVE_API_KEY || '');
+  const secret = String(env.PUBLIC_STREAM_SECRET || '');
   if (!secret || !token) return null;
   try {
     const [payload, signature, extra] = String(token).split('.');
@@ -91,15 +91,16 @@ export async function buildPublicCatalog(env) {
   const seenFiles = new Set();
 
   for (const rootId of rootIds) {
+    const configuredRootKey = rootResourceKeys.get(rootId);
     const root = await driveJson('files/' + encodeURIComponent(rootId), {
       fields: 'id,name,mimeType,resourceKey',
       supportsAllDrives: 'true',
-    }, apiKey);
+    }, apiKey, configuredRootKey ? [rootId + '/' + configuredRootKey] : []);
     if (root.mimeType !== FOLDER_MIME) {
       throw new Error('O ID ' + rootId + ' não corresponde a uma pasta do Google Drive.');
     }
 
-    const rootKeys = root.resourceKey ? [rootId + '/' + root.resourceKey] : [];
+    const rootKeys = root.resourceKey ? [rootId + '/' + root.resourceKey] : configuredRootKey ? [rootId + '/' + configuredRootKey] : [];
     const folderSummary = { id: root.id, name: root.name || 'Pasta do acervo', count: 0 };
     folders.push(folderSummary);
     const queue = [{ id: root.id, name: '', resourceKeys: rootKeys, depth: 0 }];
@@ -142,7 +143,7 @@ export async function buildPublicCatalog(env) {
           const token = await makeStreamToken(item.id, {
             resourceKeys,
             link: item.webContentLink || '',
-          }, apiKey);
+          }, String(env.PUBLIC_STREAM_SECRET));
           files.push({
             id: item.id,
             name: item.name,
@@ -178,7 +179,8 @@ export async function onRequest({ request, env }) {
   }
   try {
     const ids = String(env.PUBLIC_DRIVE_FOLDER_IDS || '').split(',').map(v => v.trim()).filter(Boolean).join(',');
-    const cacheKey = new Request(new URL('/__cache/public-catalog?folders=' + encodeURIComponent(ids), request.url).toString());
+    const keys = String(env.PUBLIC_DRIVE_FOLDER_RESOURCE_KEYS || '');
+    const cacheKey = new Request(new URL('/__cache/public-catalog?folders=' + encodeURIComponent(ids) + '&keys=' + encodeURIComponent(keys), request.url).toString());
     const edgeCache = typeof caches !== 'undefined' ? caches.default : null;
     if (edgeCache) {
       const edgeHit = await edgeCache.match(cacheKey);
@@ -227,7 +229,7 @@ export async function onStatus({ request, env }) {
     .map(id => id.trim()).filter(id => /^[\w-]{10,200}$/.test(id))
     .map((id, i) => ({ id, name: 'Pasta pública ' + (i + 1) }));
   return new Response(JSON.stringify({
-    public: Boolean(env.GOOGLE_DRIVE_API_KEY) && folders.length > 0,
+    public: Boolean(env.GOOGLE_DRIVE_API_KEY && env.PUBLIC_STREAM_SECRET) && folders.length > 0,
     folders,
   }), {
     status: 200,

@@ -191,15 +191,17 @@ export async function onRequest({ request, env }) {
     const cacheKey = new Request(new URL('/__cache/public-catalog?folders=' + encodeURIComponent(ids) + '&keys=' + encodeURIComponent(keys), request.url).toString());
     const edgeCache = typeof caches !== 'undefined' ? caches.default : null;
     if (edgeCache) {
-      const edgeHit = await edgeCache.match(cacheKey);
-      if (edgeHit) return edgeHit;
+      try {
+        const edgeHit = await edgeCache.match(cacheKey);
+        if (edgeHit) return edgeHit;
+      } catch { /* Cache API indisponível neste ambiente; usa o cache em memória. */ }
     }
     if (catalogCache && Date.now() < catalogCacheUntil) {
       const cachedResponse = new Response(JSON.stringify(catalogCache), {
         status: 200,
         headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=120, s-maxage=300', 'X-Content-Type-Options': 'nosniff' },
       });
-      if (edgeCache) await edgeCache.put(cacheKey, cachedResponse.clone());
+      if (edgeCache) { try { await edgeCache.put(cacheKey, cachedResponse.clone()); } catch { /* cache é opcional */ } }
       return cachedResponse;
     }
     if (!catalogBuild) {
@@ -218,7 +220,7 @@ export async function onRequest({ request, env }) {
         'X-Content-Type-Options': 'nosniff',
       },
     });
-    if (edgeCache) await edgeCache.put(cacheKey, response.clone());
+    if (edgeCache) { try { await edgeCache.put(cacheKey, response.clone()); } catch { /* cache é opcional */ } }
     return response;
   } catch (error) {
     console.error('Catálogo público:', error);
@@ -237,7 +239,7 @@ export async function onStatus({ request, env }) {
     .map(id => id.trim()).filter(id => /^[\w-]{10,200}$/.test(id))
     .map((id, i) => ({ id, name: 'Pasta pública ' + (i + 1) }));
   return new Response(JSON.stringify({
-    public: Boolean(env.GOOGLE_DRIVE_API_KEY && env.PUBLIC_STREAM_SECRET) && folders.length > 0,
+    public: Boolean(env.GOOGLE_DRIVE_API_KEY && String(env.PUBLIC_STREAM_SECRET || '').length >= 32) && folders.length > 0,
     folders,
   }), {
     status: 200,

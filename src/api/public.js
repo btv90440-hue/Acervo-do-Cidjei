@@ -192,3 +192,19 @@ export async function onRequest({ request, env }) {
     });
   }
 }
+
+export async function onStatus({ request, env }) {
+  if (request.method !== 'GET') {
+    return new Response('Método não permitido', { status: 405, headers: { Allow: 'GET' } });
+  }
+  const folders = String(env.PUBLIC_DRIVE_FOLDER_IDS || '').split(',')
+    .map(id => id.trim()).filter(id => /^[\\w-]{10,200}$/.test(id))
+    .map((id, i) => ({ id, name: 'Pasta pública ' + (i + 1) }));
+  return new Response(JSON.stringify({
+    public: Boolean(env.GOOGLE_DRIVE_API_KEY) && folders.length > 0,
+    folders,
+  }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+  });
+}

@@ -3,7 +3,7 @@
 import { onRequest as session } from './api/session.js';
 import { onRequest as stream } from './api/stream.js';
 import { onRequest as auth } from './api/auth.js';
-import { onRequest as publicCatalog } from './api/public.js';
+import { onRequest as publicCatalog, onStatus as publicStatus } from './api/public.js';
 
 const plain = (status, msg) =>
   new Response(msg, { status, headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
@@ -13,7 +13,7 @@ export default {
     const { pathname } = new URL(request.url);
 
     if (pathname === '/api/session') return session({ request, env, params: {} });
-    if (pathname === '/api/public/catalog') return publicCatalog({ request, env, params: {} });
+    if (pathname === '/api/public/status') return publicStatus({ request, env, params: {} });\n    if (pathname === '/api/public/catalog') return publicCatalog({ request, env, params: {} });
 
     let m = pathname.match(/^\/api\/stream\/([^/]+)$/);
     if (m) {

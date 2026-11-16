@@ -83,7 +83,15 @@ export async function buildPublicCatalog(env) {
   const apiKey = String(env.GOOGLE_DRIVE_API_KEY || '');
   const rootIds = String(env.PUBLIC_DRIVE_FOLDER_IDS || '')
     .split(',').map(v => v.trim()).filter(v => /^[\w-]{10,200}$/.test(v));
+  const rootResourceKeys = new Map(String(env.PUBLIC_DRIVE_FOLDER_RESOURCE_KEYS || '')
+    .split(',').map(v => v.trim()).filter(Boolean).map(pair => {
+      const slash = pair.indexOf('/');
+      return slash > 0 ? [pair.slice(0, slash), pair.slice(slash + 1)] : ['', ''];
+    }).filter(([id, key]) => id && key));
   if (!apiKey) throw new Error('GOOGLE_DRIVE_API_KEY não configurada no Worker.');
+  if (String(env.PUBLIC_STREAM_SECRET || '').length < 32) {
+    throw new Error('PUBLIC_STREAM_SECRET não configurado ou tem menos de 32 caracteres.');
+  }
   if (!rootIds.length) throw new Error('PUBLIC_DRIVE_FOLDER_IDS não contém IDs válidos.');
 
   const folders = [];

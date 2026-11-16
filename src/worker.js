@@ -13,7 +13,8 @@ export default {
     const { pathname } = new URL(request.url);
 
     if (pathname === '/api/session') return session({ request, env, params: {} });
-    if (pathname === '/api/public/status') return publicStatus({ request, env, params: {} });\n    if (pathname === '/api/public/catalog') return publicCatalog({ request, env, params: {} });
+    if (pathname === '/api/public/status') return publicStatus({ request, env, params: {} });
+    if (pathname === '/api/public/catalog') return publicCatalog({ request, env, params: {} });
 
     let m = pathname.match(/^\/api\/stream\/([^/]+)$/);
     if (m) {
